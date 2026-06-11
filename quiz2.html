@@ -1,1 +1,374 @@
 
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SIRI Quiz</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --teal:       #1a5f6e;
+    --teal-mid:   #1e7a8f;
+    --teal-light: #d4eef4;
+    --blue-pale:  #eaf3fa;
+    --blue-mid:   #b8d0e8;
+    --text:       #1a2b35;
+    --muted:      #5a7280;
+    --white:      #ffffff;
+    --ok:         #1d6b48; --ok-bg: #d2f0e2;
+    --ng:         #b72b1f; --ng-bg: #fde8e6;
+    --shadow:     0 3px 12px rgba(0,0,0,.1);
+    --r:          8px;
+  }
+  body { font-family:'Inter',sans-serif; background:#eef4f8; color:var(--text); min-height:100vh; padding:0; }
+
+  nav { background:var(--teal); padding:14px 24px; display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+  nav .brand { color:#fff; font-weight:700; font-size:.95rem; margin-right:8px; }
+  nav button {
+    color:#fff; background:transparent; border:1.5px solid rgba(255,255,255,.35);
+    font-size:.82rem; font-weight:600; padding:6px 14px; border-radius:20px;
+    cursor:pointer; transition:.15s; font-family:inherit;
+  }
+  nav button:hover, nav button.active { background:rgba(255,255,255,.2); }
+  nav .spacer { margin-left:auto; }
+
+  .wrap { max-width: 760px; margin: 0 auto; padding: 28px 16px 64px; }
+
+  .quiz-header { text-align:center; margin-bottom:28px; }
+  .quiz-header h1 { font-size:1.5rem; font-weight:700; color:var(--teal); }
+  .quiz-header p  { font-size:.88rem; color:var(--muted); margin-top:6px; }
+
+  .progress-wrap { margin-bottom:22px; }
+  .progress-bar-bg { background:var(--blue-mid); border-radius:20px; height:8px; }
+  .progress-bar    { background:var(--teal-mid); border-radius:20px; height:8px; transition:width .4s; }
+  .progress-text   { display:flex; justify-content:space-between; font-size:.78rem; color:var(--muted); margin-bottom:5px; }
+
+  .question-card {
+    background:var(--white); border-radius:12px; padding:26px 24px 22px;
+    box-shadow:var(--shadow); margin-bottom:16px; animation: fadein .3s ease;
+  }
+  @keyframes fadein { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:none} }
+  .q-badge { font-size:.72rem; font-weight:700; text-transform:uppercase; letter-spacing:.8px; color:var(--teal-mid); margin-bottom:10px; }
+  .q-text  { font-size:1rem; font-weight:500; line-height:1.65; color:var(--text); }
+
+  .options { margin-top:18px; display:flex; flex-direction:column; gap:10px; }
+  .opt {
+    display:flex; align-items:flex-start; gap:12px;
+    background:var(--blue-pale); border:1.5px solid var(--blue-mid);
+    border-radius:var(--r); padding:12px 14px;
+    cursor:pointer; transition:.15s; font-size:.9rem; line-height:1.5;
+  }
+  .opt:hover:not(.disabled) { border-color:var(--teal-mid); background:var(--teal-light); }
+  .opt.selected-ok  { background:var(--ok-bg);  border-color:var(--ok);  color:var(--ok);  font-weight:600; }
+  .opt.selected-ng  { background:var(--ng-bg);  border-color:var(--ng);  color:var(--ng);  }
+  .opt.show-correct { background:var(--ok-bg);  border-color:var(--ok);  color:var(--ok);  }
+  .opt.disabled { cursor:default; }
+  .opt-letter {
+    min-width:26px; height:26px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+    font-size:.75rem; font-weight:700; background:var(--blue-mid); color:var(--teal); flex-shrink:0; margin-top:1px;
+  }
+  .opt.selected-ok .opt-letter, .opt.show-correct .opt-letter { background:var(--ok);  color:#fff; }
+  .opt.selected-ng .opt-letter { background:var(--ng);  color:#fff; }
+
+  .feedback {
+    border-radius:var(--r); padding:13px 16px; font-size:.875rem; margin-top:14px;
+    display:none; line-height:1.55;
+  }
+  .feedback.ok { background:var(--ok-bg); color:var(--ok); border-left:4px solid var(--ok); display:block; }
+  .feedback.ng { background:var(--ng-bg); color:var(--ng); border-left:4px solid var(--ng); display:block; }
+
+  .actions { display:flex; justify-content:flex-end; margin-top:16px; gap:10px; }
+  .btn { padding:10px 24px; border:none; border-radius:var(--r); font-size:.88rem; font-weight:600; cursor:pointer; transition:.15s; font-family:inherit; }
+  .btn-primary   { background:var(--teal); color:#fff; }
+  .btn-primary:hover { background:var(--teal-mid); }
+  .btn-secondary { background:transparent; border:1.5px solid var(--blue-mid); color:var(--muted); }
+  .btn-secondary:hover { background:var(--blue-pale); }
+  .btn:disabled { opacity:.45; cursor:default; }
+
+  #score-screen { display:none; }
+  .score-card { background:var(--white); border-radius:14px; padding:36px 28px; box-shadow:var(--shadow); text-align:center; }
+  .score-emoji { font-size:3.5rem; line-height:1; }
+  .score-num  { font-size:3rem; font-weight:700; color:var(--teal); margin:10px 0 4px; }
+  .score-sub  { font-size:.95rem; color:var(--muted); }
+  .score-breakdown { display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; margin:24px 0; }
+  .sb-item { background:var(--blue-pale); border-radius:var(--r); padding:14px 8px; }
+  .sb-val  { font-size:1.5rem; font-weight:700; }
+  .sb-lbl  { font-size:.75rem; color:var(--muted); margin-top:3px; }
+  .ok-val  { color:var(--ok); }
+  .ng-val  { color:var(--ng); }
+  .score-actions { display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:8px; }
+
+  .review-item { background:var(--white); border-radius:var(--r); padding:16px; margin-bottom:12px; box-shadow:0 1px 4px rgba(0,0,0,.07); }
+  .review-q    { font-size:.88rem; font-weight:600; margin-bottom:8px; }
+  .review-ans  { font-size:.83rem; }
+  .review-ans.ok { color:var(--ok); } .review-ans.ng { color:var(--ng); }
+  .review-correct { font-size:.8rem; color:var(--ok); margin-top:4px; }
+  .review-exp { font-size:.8rem; color:var(--muted); margin-top:6px; font-style:italic; }
+
+  @media(max-width:480px){
+    .question-card{padding:18px 14px}
+    .score-breakdown{grid-template-columns:1fr 1fr}
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <span class="brand">SIRI Quiz</span>
+  <button id="nav-atividade2" class="active" onclick="loadQuiz('atividade2')">Atividade 2 – Indústria 4.0 e SIRI</button>
+  <button id="nav-atividade6" onclick="loadQuiz('atividade6')">Atividade 6 – Matriz de Avaliação SIRI</button>
+  <span class="spacer"></span>
+  <button onclick="window.location.href='Quiz1.html'">🎮 Arrasta e Solta</button>
+</nav>
+
+<div class="wrap">
+  <div class="quiz-header">
+    <h1 id="quiz-title"></h1>
+    <p id="quiz-meta"></p>
+  </div>
+
+  <div id="quiz-screen">
+    <div class="progress-wrap">
+      <div class="progress-text">
+        <span id="prog-lbl"></span>
+        <span id="prog-pct">0%</span>
+      </div>
+      <div class="progress-bar-bg"><div class="progress-bar" id="prog-bar" style="width:0%"></div></div>
+    </div>
+
+    <div class="question-card" id="q-card">
+      <div class="q-badge" id="q-badge"></div>
+      <div class="q-text"  id="q-text"></div>
+      <div class="options" id="q-opts"></div>
+      <div class="feedback" id="q-feedback"></div>
+    </div>
+
+    <div class="actions">
+      <button class="btn btn-secondary" id="btn-skip" onclick="skipQuestion()">Pular</button>
+      <button class="btn btn-primary"   id="btn-next" onclick="nextQuestion()" disabled>Próxima →</button>
+    </div>
+  </div>
+
+  <div id="score-screen">
+    <div class="score-card">
+      <div class="score-emoji" id="sc-emoji"></div>
+      <div class="score-num"   id="sc-num"></div>
+      <div class="score-sub"   id="sc-sub"></div>
+      <div class="score-breakdown">
+        <div class="sb-item"><div class="sb-val ok-val" id="sc-ok"></div><div class="sb-lbl">Corretas</div></div>
+        <div class="sb-item"><div class="sb-val ng-val" id="sc-ng"></div><div class="sb-lbl">Erradas</div></div>
+        <div class="sb-item"><div class="sb-val"        id="sc-sk"></div><div class="sb-lbl">Puladas</div></div>
+      </div>
+      <div class="score-actions">
+        <button class="btn btn-primary"   onclick="restartQuiz()">↺ Refazer</button>
+        <button class="btn btn-secondary" onclick="showReview()">📋 Revisão</button>
+      </div>
+    </div>
+    <div id="review-section" style="display:none;margin-top:24px">
+      <h3 style="font-size:1rem;color:var(--teal);margin-bottom:14px">Revisão das Respostas</h3>
+      <div id="review-items"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const QUIZZES = {
+  atividade2: {
+    title: 'Atividade 2 – Indústria 4.0 e SIRI',
+    tempo: '20 min',
+    perguntas: [
+      { q: 'O que a SIRI pretende estabelecer entre os stakeholders?', op: ['Uma linguagem comum','Uma tecnologia comum','Um objetivo comum','Uma fonte de financiamento comum'], r: 0 },
+      { q: 'Qual é o foco da etapa "Avaliar" no framework LEAD?', op: ['Aprender os conceitos chave','Avaliações abrangentes','Estratégia e roadmap','Implementação'], r: 1 },
+      { q: 'Qual é o foco principal da SIRI?', op: ['Processos, Tecnologia, Organização','Automação, Conectividade, Inteligência','Prontidão de Talentos, Estrutura e Gestão','Todas as opções acima'], r: 3 },
+      { q: 'Quais são os princípios-chave da Indústria 4.0?', op: ['Centralização, Isolamento, Controle Manual, Terceirização, Especialização','Automação, Eficiência, Velocidade, Escala, Complexidade, Flexibilidade','Interoperabilidade, Virtualização, Descentralização, Capacidade em Tempo Real, Orientação a Serviços, Modularidade','Nenhuma das opções acima'], r: 2 },
+      { q: 'Principalmente, para que é usado um Digital Twin?', op: ['Armazenamento de dados','Simulação e análise','Automação','Rede'], r: 1 },
+      { q: 'Qual das alternativas a seguir é um desafio na implementação da Indústria 4.0?', op: ['Riscos de segurança cibernética','Sobrecarga de dados','Lacunas de habilidades','Todas as opções acima'], r: 3 },
+      { q: 'Qual das alternativas a seguir NÃO é uma aplicação típica de IA na manufatura?', op: ['Automação de controle de qualidade','Manutenção Preditiva','Gestão de Recursos Humanos','Gestão da cadeia de suprimentos'], r: 2 },
+      { q: 'O que o framework LEAD representa no contexto da SIRI?', op: ['Liderar, Envolver, Agir, Desenvolver','Aprender, Avaliar, Arquitetar, Entregar','Ouvir, Envolver, Adaptar, Conduzir','Aprender, Envolver, Adaptar, Entregar'], r: 1 },
+      { q: 'Qual é o principal benefício da integração vertical na Indústria 4.0?', op: ['Ganho de eficiência; transferência clara de informações entre o planejamento de negócios e os processos de produção','Melhorar a qualidade e a flexibilidade das operações de fabricação','Agilidade; insights e análises de fábrica em tempo real','Todas as opções acima'], r: 3 },
+      { q: 'Qual é o principal benefício da integração horizontal na Indústria 4.0?', op: ['Respostas ágeis e em tempo real','Maior integração de dados em toda a cadeia de suprimentos','Capacidade aprimorada de ajustar operações internas simultaneamente','Todas as opções acima'], r: 3 },
+      { q: 'Qual é o modelo de referência da SIRI?', op: ['RAMI 4.0','LEAD Framework','Índice de Maturidade da Indústria 4.0','Nenhuma das opções acima'], r: 0 },
+      { q: 'Qual dos itens a seguir NÃO é um componente de uma Fábrica Inteligente?', op: ['Sistemas Ciber-Físicos','Computação em nuvem','Análise de Big Data','Computação Quântica'], r: 3 },
+      { q: 'O que a SIRI pretende oferecer às empresas?', op: ['Um checklist para transformação','Um roadmap para a Indústria 4.0','Um framework para melhoria contínua','Todas as opções acima'], r: 3 },
+      { q: 'Qual é o principal benefício da integração do ciclo de vida do produto na Indústria 4.0?', op: ['Permite uma tomada de decisão mais rápida com base em dados em tempo real','Melhora a coordenação da produção entre departamentos','Redução de custos devido a menos erros e discrepâncias','Todas as opções acima'], r: 3 },
+      { q: 'Quem desenvolveu o Smart Industry Readiness Index (SIRI)?', op: ['Fórum Econômico Mundial','Conselho de Desenvolvimento Econômico de Cingapura','McKinsey & Company','Accenture'], r: 1 },
+      { q: 'Qual é considerado o principal desafio que impede a adoção da Indústria 4.0?', op: ['Falta de tecnologia','Falta de visão e estratégia','Falta de financiamento','Falta de mão de obra qualificada'], r: 1 },
+      { q: 'O que a SIRI oferece além de servir como um checklist?', op: ['Uma plataforma tecnológica','Uma fonte de financiamento','Um guia de melhoria passo a passo','Um programa de certificação'], r: 2 },
+      { q: 'Qual é o foco principal da Indústria 4.0?', op: ['Automação','Digitalização e Interconectividade','Fabricação just-in-time','Terceirização'], r: 1 },
+      { q: 'Quais são as três dimensões do modelo RAMI 4.0 que constituem a base para a discussão das inter-relações e detalhes da Indústria 4.0?', op: ['Ciclo de vida do produto, Níveis de hierarquia, IEC 62264','Tempo, Custo, Qualidade','Integração Vertical, Integração Horizontal, Ciclo de Vida do Produto','Camadas de arquitetura, Níveis de hierarquia, Ciclo de vida e Fluxo de valor'], r: 3 },
+      { q: 'Qual tecnologia NÃO é comumente associada à Indústria 4.0?', op: ['Internet das Coisas (IoT)','Inteligência Artificial Generativa','Computação de borda','Sistemas SCADA'], r: 1 },
+    ],
+  },
+
+  atividade6: {
+    title: 'Atividade 6 – Matriz de Avaliação SIRI',
+    tempo: '45 min',
+    perguntas: [
+      { q: 'O Building Management System (BMS) é usado para gerenciar os serviços da instalação (compressores de ar, iluminação e alarmes de incêndio). Porém, os operadores são obrigados a monitorar e intervir em caso de eventos não planejados. Qual é o nível de maturidade correto?', op: ['Automação nas Instalações: Banda 1 Básica','Automação nas Instalações: Banda 2 Avançado','Automação nas Instalações: Banda 3 Completo','Automação nas Instalações: Banda 4 Flexível'], r: 1, exp: 'O BMS gerencia automaticamente serviços da instalação, mas ainda exige intervenção humana em eventos não planejados — característica da Banda 2 Avançado.' },
+      { q: 'Todos os equipamentos e máquinas no chão de fábrica são controlados pelo CLP e equipados com Digital Andon. Se algo sair dos parâmetros, um alerta é emitido. A manutenção é realizada principalmente de forma reativa. Qual classificação está correta?', op: ['Inteligência no Chão de Fábrica: Banda 2 Visível','Automação no Chão de Fábrica: Banda 2 Avançado','Integração Vertical: Banda 2 Digital','Inteligência nas Instalações: Banda 2 Visível'], r: 0, exp: 'O sistema monitora e alerta sobre desvios (visibilidade dos dados), mas a manutenção ainda é reativa — Inteligência no Chão de Fábrica Banda 2 Visível.' },
+      { q: 'O BMS pode controlar os ativos das instalações com base em parâmetros predefinidos e é modernizado com monitoramento de condições para detectar problemas e fornecer possíveis causas raízes. Qual é a classificação correta?', op: ['Automação nas Instalações: Banda 2 Avançada','Automação nas Instalações: Banda 3 Completa','Inteligência nas Instalações: Banda 2 Visível','Inteligência nas Instalações: Banda 3 Diagnóstico'], r: 3, exp: 'O sistema não apenas detecta problemas mas fornece análise de causa raiz — capacidade de diagnóstico, característica da Banda 3 Diagnóstico.' },
+      { q: 'Pedidos dos clientes e previsões de demanda são comunicados por e-mail e telefone. Sistemas baseados em computador são usados para projeção do planejamento da demanda, mas os planos de produção são distribuídos manualmente. POPs são impressos no chão de fábrica. Qual classificação é correta?', op: ['Integração Vertical: Banda 1 Definida','Inteligência na Empresa: Banda 1 Informatizada','Integração Horizontal: Banda 1 Definida','Inteligência na Empresa: Banda 2 Visível'], r: 0, exp: 'Há uso de computadores para planejamento, mas a distribuição dos planos ainda é manual e os POPs são em papel — característica da Integração Vertical Banda 1 Definida.' },
+      { q: 'As informações administrativas dos departamentos estão interconectadas com o ERP. Os dados são registrados e sincronizados em intervalos de tempo específicos. Os sistemas estão protegidos por uma estrutura de segurança vigilante e resiliente. Qual é a classificação?', op: ['Automação na Empresa: Banda 3 Completa','Automação na Empresa: Banda 4 Flexível','Conectividade na Empresa: Banda 3 Interoperável e Segura','Conectividade na Empresa: Banda 4 Tempo Real'], r: 2, exp: 'Sistemas interconectados via ERP com sincronização periódica e segurança robusta descrevem a Conectividade na Empresa Banda 3 Interoperável e Segura.' },
+      { q: 'As operações de fabricação são realizadas por TI e TO conectados por protocolo de comunicação padrão. As ordens de serviço geradas de um pedido de compra são gerenciadas e transferidas diretamente para o chão de fábrica para produção autônoma. Qual classificação está correta?', op: ['Conectividade no Chão de Fábrica: Banda 3 Interoperável e Segura','Automação no Chão de Fábrica: Banda 3 Completa','Integração Vertical: Banda 4 Automatizada','Integração Vertical: Banda 3 Integrada'], r: 2, exp: 'A integração total entre TI e TO com produção autônoma a partir de ordens de compra representa a Integração Vertical Banda 4 Automatizada.' },
+      { q: 'O chão de fábrica está equipado com máquinas CNC e os processos são executados com limitada intervenção humana. Porém, a movimentação de produtos é realizada manualmente por empilhadeiras. Qual é a classificação?', op: ['Automação no Chão de Fábrica: Banda 1 Básica','Automação no Chão de Fábrica: Banda 2 Avançada','Inteligência no Chão de Fábrica: Banda 1 Informatizada','Inteligência no Chão de Fábrica: Banda 2 Visível'], r: 1, exp: 'CNC com pouca intervenção humana no processo produtivo, mas movimentação ainda manual — Automação no Chão de Fábrica Banda 2 Avançada.' },
+      { q: 'Os ativos da instalação (caldeira, gerador, compressores) são interconectados e gerenciados pelo BMS. No entanto, o nível de segurança do sistema é mínimo e vulnerável a ameaças externas. Qual classificação está correta?', op: ['Automação nas Instalações: Banda 2 Avançada','Automação nas Instalações: Banda 3 Completa','Conectividade nas Instalações: Banda 2 Interoperável','Conectividade nas Instalações: Banda 3 Interoperável e Segura'], r: 2, exp: 'Os ativos estão interconectados e gerenciados, mas sem segurança adequada — Conectividade nas Instalações Banda 2 Interoperável (sem o componente "Segura").' },
+      { q: 'Os processos de produção são gerenciados pelo MES e executados por robôs. O MES é modernizado com IA e pode prever falhas e identificar causa raiz. Qual é a classificação correta?', op: ['Automação no Chão de Fábrica: Banda 3 Completa','Automação no Chão de Fábrica: Banda 4 Flexível','Inteligência no Chão de Fábrica: Banda 3 Diagnóstico','Inteligência no Chão de Fábrica: Banda 4 Preditiva'], r: 3, exp: 'A capacidade de prever falhas antes que ocorram, usando IA, é característica da Inteligência no Chão de Fábrica Banda 4 Preditiva.' },
+      { q: 'Os processos de design e desenvolvimento de produto são executados com ferramentas analógicas. As especificações são comunicadas via desenhos em papel e e-mail. O feedback do cliente é recebido por e-mail e telefone. Qual é a classificação?', op: ['Integração do Ciclo de Vida do Produto: Banda 0 Indefinida','Integração do Ciclo de Vida do Produto: Banda 1 Definida','Integração do Ciclo de Vida do Produto: Banda 2 Digital','Integração do Ciclo de Vida do Produto: Banda 4 Automatizado'], r: 0, exp: 'Processos completamente analógicos, sem ferramentas digitais de gestão do ciclo de vida do produto — Banda 0 Indefinida.' },
+      { q: 'Todos os ativos das instalações estão conectados a uma sala de controle central pelo BMS. As informações são monitoradas em tempo real por protocolo de comunicação resiliente e de alta velocidade. Uma estrutura de segurança vigilante é implementada. Qual classificação está correta?', op: ['Automação nas Instalações: Banda 3 Completa','Automação nas Instalações: Banda 4 Flexível','Conectividade nas Instalações: Banda 3 Interoperável e Segura','Conectividade nas Instalações: Banda 4 Tempo Real'], r: 3, exp: 'Monitoramento em tempo real com protocolo de alta velocidade e segurança robusta — Conectividade nas Instalações Banda 4 Tempo Real.' },
+      { q: 'Os processos de produção são gerenciados com sistemas integrados (ERP, PLM, MES e WMS). Os humanos gerenciam predominantemente a troca de dados e informações entre diferentes funções. Qual classificação é correta?', op: ['Integração Vertical: Banda 4 Automatizada','Integração Horizontal: Banda 3 Integrada','Integração Vertical: Banda 3 Integrada','Integração Horizontal: Banda 4 Automatizada'], r: 2, exp: 'Sistemas integrados (ERP, PLM, MES, WMS) com troca de dados ainda dependente de intervenção humana — Integração Vertical Banda 3 Integrada.' },
+      { q: 'O sistema de chão de fábrica monitora e alerta sobre paradas de máquinas, fornece código de erro, realiza análise de causa raiz e gera conjunto de falhas potenciais. As informações podem ser transferidas automaticamente para o OEM. Qual é a classificação?', op: ['Automação no Chão de Fábrica: Banda 2 Avançada','Automação no Chão de Fábrica: Banda 3 Completa','Conectividade no Chão de Fábrica: Banda 1 Conectada','Inteligência no Chão de Fábrica: Banda 3 Diagnóstico'], r: 3, exp: 'O sistema detecta, analisa a causa raiz e gera conjunto de falhas potenciais — capacidade de diagnóstico completa, Banda 3 Diagnóstico.' },
+      { q: 'As máquinas do chão de fábrica são operadas automaticamente pelo DCS (Sistema de Controle Distribuído) sem envolvimento humano. A intervenção humana é necessária apenas para verificações de segurança e mau funcionamento. Qual é a classificação?', op: ['Inteligência no Chão de Fábrica: Banda 2 Visível','Automação no Chão de Fábrica: Banda 2 Avançada','Inteligência no Chão de Fábrica: Banda 3 Diagnóstico','Automação no Chão de Fábrica: Banda 3 Completa'], r: 3, exp: 'Operação automaticamente pelo DCS com mínima intervenção humana (apenas segurança e falhas) — Automação no Chão de Fábrica Banda 3 Completa.' },
+      { q: 'A maioria das atividades empresariais é gerenciada pelo ERP. Planejamento, Compras e RH estão integrados, permitindo execução automática de tarefas (relatórios financeiros e de estoque gerados diretamente). Porém, a execução ainda exige certo nível de intervenção humana. Qual é a classificação?', op: ['Automação na Empresa: Banda 2 Avançada','Integração Vertical: Banda 3 Integrada','Inteligência na Empresa: Banda 2 Visível','Integração Horizontal: Banda 3 Integrada'], r: 0, exp: 'ERP integrando vários departamentos com geração automática de relatórios, mas ainda com intervenção humana — Automação na Empresa Banda 2 Avançada.' },
+      { q: 'Os equipamentos e sistemas no chão de fábrica estão ligados através de rede de TI segura com transferência de informações em tempo real. A arquitetura pode ser reconfigurada e ajustada por componentes plug-and-play (TSN, IIoT, nuvem, dispositivos móveis). Qual é a classificação?', op: ['Conectividade no Chão de Fábrica: Banda 4 Tempo Real','Automação no Chão de Fábrica: Banda 4 Flexível','Inteligência no Chão de Fábrica: Banda 5 Adaptável','Conectividade no Chão de Fábrica: Banda 5 Escalável'], r: 3, exp: 'Rede segura em tempo real E arquitetura reconfigurável via plug-and-play — esta escalabilidade dinâmica é a Conectividade no Chão de Fábrica Banda 5 Escalável.' },
+      { q: 'Os sistemas CRM e ERP podem trocar informações em tempo real através de rede segura. Os sistemas integrados podem ser ligados a diferentes entidades legais no mundo, e a infraestrutura de rede pode ser reconfigurada rapidamente. Qual é a classificação?', op: ['Conectividade no Chão de Fábrica: Banda 4 Tempo Real','Inteligência na Empresa: Banda 5 Adaptável','Integração Vertical: Banda 4 Automatizada','Conectividade na Empresa: Banda 5 Escalável'], r: 3, exp: 'CRM e ERP em tempo real com capacidade de reconfiguração global e rápida — Conectividade na Empresa Banda 5 Escalável.' },
+      { q: 'O sistema de gestão de estoque pode processar e analisar o saldo de matérias-primas. Os sistemas de TI de RH e Financeiro podem gerar um alerta quando há desvio de parâmetro predefinido (ex: valor incorreto na fatura). Qual é a classificação?', op: ['Automação na Empresa: Banda 2 Avançada','Integração Horizontal: Banda 4 Automatizada','Inteligência na Empresa: Banda 2 Visível','Inteligência no Chão de Fábrica: Banda 3 Diagnóstico'], r: 2, exp: 'Sistemas de TI que monitoram dados e geram alertas sobre desvios de parâmetros — capacidade de visibilidade, Inteligência na Empresa Banda 2 Visível.' },
+      { q: 'As informações entre clientes e fornecedores são gerenciadas pelo ERP. Os dados ao longo da cadeia de abastecimento são transferidos através de ferramentas digitais. Porém, o sistema ainda requer alguma intervenção humana. Qual é a classificação?', op: ['Integração Vertical: Banda 2 Digital','Integração Vertical: Banda 3 Integrada','Integração Horizontal: Banda 2 Digital','Integração Horizontal: Banda 3 Integrada'], r: 2, exp: 'Dados digitalizados ao longo da cadeia de abastecimento (clientes e fornecedores), mas ainda com intervenção humana — Integração Horizontal Banda 2 Digital.' },
+      { q: 'A maioria dos processos de produção é executada automaticamente pelo CLP. Porém, os operadores são obrigados a monitorar o estado de saúde das máquinas e resolver quaisquer problemas. Qual é a classificação?', op: ['Automação no Chão de Fábrica: Banda 1 Básica','Automação no Chão de Fábrica: Banda 2 Avançada','Inteligência no Chão de Fábrica: Banda 1 Informatizada/Computadorizada','Inteligência no Chão de Fábrica: Banda 2 Visível'], r: 1, exp: 'Automação pela maioria dos processos via CLP, mas com monitoramento humano necessário — Automação no Chão de Fábrica Banda 2 Avançada.' },
+    ],
+  },
+};
+
+const LETTERS = ['A','B','C','D'];
+let currentQuizId = 'atividade2';
+let QUESTIONS = [];
+let idx=0, score=0, wrongs=0, skips=0;
+let answered = false;
+const results = [];
+
+function loadQuiz(id) {
+  currentQuizId = id;
+  document.querySelectorAll('nav button[id^="nav-"]').forEach(b => b.classList.remove('active'));
+  const navBtn = document.getElementById('nav-' + id);
+  if (navBtn) navBtn.classList.add('active');
+
+  const quiz = QUIZZES[id];
+  QUESTIONS = quiz.perguntas;
+  document.getElementById('quiz-title').textContent = quiz.title;
+  document.getElementById('quiz-meta').textContent = QUESTIONS.length + ' perguntas · Tempo sugerido: ' + quiz.tempo;
+  restartQuiz();
+}
+
+function renderQuestion() {
+  const q = QUESTIONS[idx];
+  answered = false;
+  document.getElementById('q-badge').textContent = 'Pergunta ' + (idx+1) + ' de ' + QUESTIONS.length;
+  document.getElementById('q-text').textContent = q.q;
+  document.getElementById('q-feedback').className = 'feedback';
+  document.getElementById('btn-next').disabled = true;
+  document.getElementById('btn-skip').disabled = false;
+
+  const opts = document.getElementById('q-opts');
+  opts.innerHTML = '';
+  q.op.forEach((op, i) => {
+    const d = document.createElement('div');
+    d.className = 'opt';
+    d.dataset.idx = i;
+    d.innerHTML = `<span class="opt-letter">${LETTERS[i]}</span><span>${op}</span>`;
+    d.addEventListener('click', () => selectOption(i));
+    opts.appendChild(d);
+  });
+
+  const pct = Math.round(idx / QUESTIONS.length * 100);
+  document.getElementById('prog-lbl').textContent = 'Pergunta ' + (idx+1) + ' de ' + QUESTIONS.length;
+  document.getElementById('prog-pct').textContent = pct + '%';
+  document.getElementById('prog-bar').style.width = pct + '%';
+
+  const card = document.getElementById('q-card');
+  card.style.animation = 'none';
+  requestAnimationFrame(() => { card.style.animation = ''; });
+}
+
+function selectOption(chosen) {
+  if (answered) return;
+  answered = true;
+  const q = QUESTIONS[idx];
+  const ok = chosen === q.r;
+  const opts = document.querySelectorAll('.opt');
+  opts.forEach((el, i) => {
+    el.classList.add('disabled');
+    if (i === q.r)            el.classList.add('show-correct');
+    if (i === chosen && !ok)  el.classList.add('selected-ng');
+    if (i === chosen && ok)   el.classList.add('selected-ok');
+  });
+  const fb = document.getElementById('q-feedback');
+  if (ok) {
+    fb.className = 'feedback ok';
+    fb.textContent = '✓ Correto!' + (q.exp ? ' – ' + q.exp : '');
+    score++;
+  } else {
+    fb.className = 'feedback ng';
+    fb.textContent = '✗ Incorreto. Resposta correta: ' + LETTERS[q.r] + ') ' + q.op[q.r] + (q.exp ? ' — ' + q.exp : '');
+    wrongs++;
+  }
+  results.push({ q, chosen, ok, skipped: false });
+  document.getElementById('btn-next').disabled = false;
+  document.getElementById('btn-skip').disabled = true;
+}
+
+function skipQuestion() {
+  if (answered) return;
+  const q = QUESTIONS[idx];
+  results.push({ q, chosen: -1, ok: false, skipped: true });
+  skips++;
+  nextQuestion();
+}
+
+function nextQuestion() {
+  idx++;
+  if (idx >= QUESTIONS.length) { showScore(); return; }
+  renderQuestion();
+}
+
+function showScore() {
+  document.getElementById('quiz-screen').style.display = 'none';
+  document.getElementById('score-screen').style.display = '';
+  const pct = Math.round(score / QUESTIONS.length * 100);
+  document.getElementById('sc-emoji').textContent = pct >= 80 ? '🎉' : pct >= 60 ? '👍' : '📚';
+  document.getElementById('sc-num').textContent = pct + '%';
+  document.getElementById('sc-sub').textContent = score + ' de ' + QUESTIONS.length + ' corretas';
+  document.getElementById('sc-ok').textContent = score;
+  document.getElementById('sc-ng').textContent = wrongs;
+  document.getElementById('sc-sk').textContent = skips;
+  document.getElementById('prog-bar').style.width = '100%';
+  document.getElementById('prog-pct').textContent = '100%';
+}
+
+function showReview() {
+  const sec = document.getElementById('review-section');
+  sec.style.display = sec.style.display === 'none' ? '' : 'none';
+  if (sec.style.display === 'none') return;
+  const container = document.getElementById('review-items');
+  container.innerHTML = '';
+  results.forEach((r, i) => {
+    const d = document.createElement('div');
+    d.className = 'review-item';
+    let html = `<div class="review-q">${i+1}. ${r.q.q}</div>`;
+    if (r.skipped) {
+      html += `<div class="review-ans" style="color:var(--muted)">Pulada — resposta correta: ${LETTERS[r.q.r]}) ${r.q.op[r.q.r]}</div>`;
+    } else if (r.ok) {
+      html += `<div class="review-ans ok">✓ ${LETTERS[r.chosen]}) ${r.q.op[r.chosen]}</div>`;
+    } else {
+      html += `<div class="review-ans ng">✗ Sua resposta: ${LETTERS[r.chosen]}) ${r.q.op[r.chosen]}</div>`;
+      html += `<div class="review-correct">✓ Correta: ${LETTERS[r.q.r]}) ${r.q.op[r.q.r]}</div>`;
+    }
+    if (r.q.exp) html += `<div class="review-exp">${r.q.exp}</div>`;
+    d.innerHTML = html;
+    container.appendChild(d);
+  });
+}
+
+function restartQuiz() {
+  idx = 0; score = 0; wrongs = 0; skips = 0; results.length = 0;
+  document.getElementById('score-screen').style.display = 'none';
+  document.getElementById('review-section').style.display = 'none';
+  document.getElementById('quiz-screen').style.display = '';
+  renderQuestion();
+}
+
+// Init
+loadQuiz('atividade2');
+</script>
+</body>
+</html>
