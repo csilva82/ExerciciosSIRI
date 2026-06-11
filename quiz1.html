@@ -417,9 +417,15 @@ function setMode(n) {
 
 // ── Drag handlers
 function onDragStart(e, type) {
-  dragKey  = e.currentTarget.dataset.key;
+  dragKey = e.target.dataset.key;
   dragType = type;
-  setTimeout(() => e.currentTarget.classList.add('dragging'), 0);
+
+  e.dataTransfer.setData("text/plain", dragKey);
+  e.dataTransfer.effectAllowed = "move";
+
+  setTimeout(() => {
+    e.target.classList.add('dragging');
+  }, 0);
 }
 function onDragEnd(e) {
   e.currentTarget.classList.remove('dragging');
@@ -427,6 +433,7 @@ function onDragEnd(e) {
 
 // ── MODE 1: drop dimension on pillar slot
 function onDropDim(e, pillarKey) {
+  dragKey = e.dataTransfer.getData("text/plain");
   e.preventDefault();
   const slot = document.getElementById('slot_' + pillarKey);
   slot.classList.remove('drag-over');
@@ -463,6 +470,7 @@ function checkComplete1() {
 
 // ── MODE 2: drop pillar on block
 function onDropPillar(e, blockKey) {
+  dragKey = e.dataTransfer.getData("text/plain");
   e.preventDefault();
   const block = document.getElementById('block_' + blockKey);
   block.classList.remove('drag-over');
@@ -531,17 +539,6 @@ buildMode1();
 buildMode2();
 buildMode3();
 checkComplete1();
-
-onDragStart()
-onDragEnd()
-onDropDim()
-onDropPillar()
-updateScore()
-showToast()
-resetGame()
-setMode()
-checkComplete1()
-checkComplete2()
 </script>
 </body>
 </html>
