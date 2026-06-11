@@ -6,160 +6,87 @@
 <title>SIRI – Jogo de Treinamento</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
   :root {
-    --teal-dark:  #1a5f6e;
-    --teal:       #1e7a8f;
-    --teal-light: #d6eef3;
-    --blue-pale:  #dce8f5;
-    --blue-mid:   #b8d0e8;
-    --text-dark:  #1a2b35;
-    --text-mid:   #3a5060;
-    --text-light: #637a88;
-    --white:      #ffffff;
-    --success:    #2e7d52;
-    --success-bg: #d4f0e2;
-    --error:      #c0392b;
-    --error-bg:   #fde8e6;
-    --warn:       #7a5a00;
-    --warn-bg:    #fff3cd;
-    --shadow:     0 2px 8px rgba(0,0,0,.12);
-    --radius:     6px;
+    --teal-dark:#1a5f6e; --teal:#1e7a8f; --teal-light:#d6eef3;
+    --blue-pale:#dce8f5; --blue-mid:#b8d0e8;
+    --text-dark:#1a2b35; --text-mid:#3a5060; --text-light:#637a88;
+    --white:#ffffff; --success:#2e7d52; --success-bg:#d4f0e2;
+    --error:#c0392b; --error-bg:#fde8e6;
+    --shadow:0 2px 8px rgba(0,0,0,.12); --radius:6px;
   }
+  body { font-family:'Inter',sans-serif; background:#f0f6fa; color:var(--text-dark); min-height:100vh; padding:24px 16px 48px; }
 
-  body {
-    font-family: 'Inter', sans-serif;
-    background: #f0f6fa;
-    color: var(--text-dark);
-    min-height: 100vh;
-    padding: 24px 16px 48px;
-  }
+  .page-header { text-align:center; margin-bottom:32px; }
+  .page-header h1 { font-size:1.75rem; font-weight:700; color:var(--teal-dark); letter-spacing:-.5px; }
+  .page-header p  { margin-top:6px; color:var(--text-light); font-size:.95rem; }
 
-  .page-header { text-align: center; margin-bottom: 32px; }
-  .page-header h1 { font-size: 1.75rem; font-weight: 700; color: var(--teal-dark); letter-spacing: -.5px; }
-  .page-header p  { margin-top: 6px; color: var(--text-light); font-size: .95rem; }
+  .mode-tabs { display:flex; gap:8px; justify-content:center; margin-bottom:28px; flex-wrap:wrap; }
+  .mode-btn { padding:8px 20px; border-radius:20px; border:2px solid var(--teal); background:transparent; color:var(--teal); font-weight:600; font-size:.875rem; cursor:pointer; transition:all .2s; }
+  .mode-btn.active,.mode-btn:hover { background:var(--teal); color:var(--white); }
 
-  .mode-tabs { display: flex; gap: 8px; justify-content: center; margin-bottom: 28px; flex-wrap: wrap; }
-  .mode-btn {
-    padding: 8px 20px; border-radius: 20px; border: 2px solid var(--teal);
-    background: transparent; color: var(--teal); font-weight: 600; font-size: .875rem;
-    cursor: pointer; transition: all .2s;
-  }
-  .mode-btn.active, .mode-btn:hover { background: var(--teal); color: var(--white); }
+  .game-wrap { max-width:1100px; margin:0 auto; }
 
-  .game-wrap { max-width: 1100px; margin: 0 auto; }
+  .score-bar { display:flex; justify-content:space-between; align-items:center; background:var(--white); border-radius:var(--radius); padding:12px 20px; margin-bottom:20px; box-shadow:var(--shadow); flex-wrap:wrap; gap:8px; }
+  .score-bar span { font-size:.9rem; color:var(--text-mid); }
+  .score-bar strong { color:var(--teal-dark); }
+  .btn-reset { padding:7px 16px; background:var(--teal); color:var(--white); border:none; border-radius:var(--radius); cursor:pointer; font-size:.85rem; font-weight:600; transition:background .2s; }
+  .btn-reset:hover { background:var(--teal-dark); }
 
-  .score-bar {
-    display: flex; justify-content: space-between; align-items: center;
-    background: var(--white); border-radius: var(--radius); padding: 12px 20px;
-    margin-bottom: 20px; box-shadow: var(--shadow); flex-wrap: wrap; gap: 8px;
-  }
-  .score-bar span { font-size: .9rem; color: var(--text-mid); }
-  .score-bar strong { color: var(--teal-dark); }
-  .btn-reset {
-    padding: 7px 16px; background: var(--teal); color: var(--white);
-    border: none; border-radius: var(--radius); cursor: pointer;
-    font-size: .85rem; font-weight: 600; transition: background .2s;
-  }
-  .btn-reset:hover { background: var(--teal-dark); }
+  /* visibility via class — avoids display:none on build */
+  .mode-panel { }
+  .mode-panel.hidden { display:none; }
 
-  #toast {
-    position: fixed; top: 20px; right: 20px; padding: 12px 20px;
-    border-radius: var(--radius); font-weight: 600; font-size: .9rem;
-    box-shadow: var(--shadow); opacity: 0; transition: opacity .3s;
-    pointer-events: none; z-index: 999;
-  }
-  #toast.show { opacity: 1; }
-  #toast.correct { background: var(--success-bg); color: var(--success); border-left: 4px solid var(--success); }
-  #toast.wrong   { background: var(--error-bg);   color: var(--error);   border-left: 4px solid var(--error); }
+  #toast { position:fixed; top:20px; right:20px; padding:12px 20px; border-radius:var(--radius); font-weight:600; font-size:.9rem; box-shadow:var(--shadow); opacity:0; transition:opacity .3s; pointer-events:none; z-index:999; }
+  #toast.show { opacity:1; }
+  #toast.correct { background:var(--success-bg); color:var(--success); border-left:4px solid var(--success); }
+  #toast.wrong   { background:var(--error-bg); color:var(--error); border-left:4px solid var(--error); }
 
   /* MODE 1 */
-  .m1-layout { display: grid; grid-template-columns: 1fr 2fr; gap: 20px; align-items: start; }
-
-  .dim-pool { background: var(--white); border-radius: var(--radius); padding: 16px; box-shadow: var(--shadow); }
-  .dim-pool h3 { font-size: .8rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-light); margin-bottom: 12px; }
-  .dim-chip {
-    background: var(--blue-pale); border: 2px solid var(--blue-mid); border-radius: var(--radius);
-    padding: 9px 12px; margin-bottom: 8px; font-size: .85rem; font-weight: 500;
-    cursor: grab; transition: transform .15s, box-shadow .15s, opacity .2s; user-select: none;
-  }
-  .dim-chip:active { cursor: grabbing; }
-  .dim-chip.dragging { opacity: .4; transform: scale(.97); }
-  .dim-chip.placed { opacity: .35; cursor: default; pointer-events: none; }
-  .dim-chip.correct-placed { background: var(--success-bg); border-color: var(--success); color: var(--success); opacity: 1; pointer-events: none; cursor: default; }
-
-  .pillars-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
-  .pillar-slot {
-    background: var(--white); border: 2px dashed var(--blue-mid);
-    border-radius: var(--radius); padding: 10px; min-height: 100px;
-    transition: border-color .2s, background .2s;
-  }
-  .pillar-slot.drag-over { border-color: var(--teal); background: var(--teal-light); }
-  .pillar-slot h4 { font-size: .82rem; font-weight: 700; color: var(--teal-dark); margin-bottom: 8px; padding-bottom: 6px; border-bottom: 1px solid var(--blue-mid); pointer-events: none; }
-  .pillar-slot .slot-items { min-height: 40px; pointer-events: none; }
-  .dropped-chip {
-    border-radius: 4px; padding: 6px 10px; font-size: .8rem; font-weight: 500;
-    margin-bottom: 5px; display: flex; justify-content: space-between; align-items: center;
-    pointer-events: none;
-  }
-  .dropped-chip.correct { background: var(--success-bg); color: var(--success); }
-  .dropped-chip.wrong   { background: var(--error-bg);   color: var(--error); }
+  .m1-layout { display:grid; grid-template-columns:1fr 2fr; gap:20px; align-items:start; }
+  .dim-pool { background:var(--white); border-radius:var(--radius); padding:16px; box-shadow:var(--shadow); }
+  .dim-pool h3 { font-size:.8rem; text-transform:uppercase; letter-spacing:1px; color:var(--text-light); margin-bottom:12px; }
+  .dim-chip { background:var(--blue-pale); border:2px solid var(--blue-mid); border-radius:var(--radius); padding:9px 12px; margin-bottom:8px; font-size:.85rem; font-weight:500; cursor:grab; transition:transform .15s,opacity .2s; user-select:none; }
+  .dim-chip.dragging { opacity:.4; transform:scale(.97); }
+  .dim-chip.placed { opacity:.35; cursor:default; pointer-events:none; background:var(--success-bg); border-color:var(--success); color:var(--success); opacity:1; }
+  .pillars-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:12px; }
+  .pillar-slot { background:var(--white); border:2px dashed var(--blue-mid); border-radius:var(--radius); padding:10px; min-height:100px; transition:border-color .2s,background .2s; }
+  .pillar-slot.drag-over { border-color:var(--teal); background:var(--teal-light); }
+  .pillar-slot h4 { font-size:.82rem; font-weight:700; color:var(--teal-dark); margin-bottom:8px; padding-bottom:6px; border-bottom:1px solid var(--blue-mid); pointer-events:none; }
+  .pillar-slot .slot-items { min-height:40px; pointer-events:none; }
 
   /* MODE 2 */
-  #mode2 { display: none; }
-  .blocks-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px; }
-  .block-drop {
-    background: var(--white); border: 2px dashed var(--blue-mid);
-    border-radius: var(--radius); padding: 12px; min-height: 120px;
-    transition: border-color .2s, background .2s;
-  }
-  .block-drop.drag-over { border-color: var(--teal); background: var(--teal-light); }
-  /* FIX: filhos não podem interceptar eventos de drag */
-  .block-drop h3 {
-    font-size: .85rem; font-weight: 700; color: var(--white);
-    background: var(--teal-dark); margin: -12px -12px 10px;
-    padding: 8px 12px; border-radius: var(--radius) var(--radius) 0 0;
-    pointer-events: none; /* ← FIX PRINCIPAL */
-  }
-  .block-drop > div {
-    pointer-events: none; /* ← FIX PRINCIPAL */
-  }
-  .pillar-chips-pool { background: var(--white); border-radius: var(--radius); padding: 16px; box-shadow: var(--shadow); }
-  .pillar-chips-pool h3 { font-size: .8rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-light); margin-bottom: 12px; }
-  .pillar-chips-wrap { display: flex; flex-wrap: wrap; gap: 8px; }
-  .pillar-chip {
-    background: var(--blue-pale); border: 2px solid var(--blue-mid); border-radius: var(--radius);
-    padding: 8px 14px; font-size: .85rem; font-weight: 500; cursor: grab;
-    transition: transform .15s, opacity .2s; user-select: none;
-  }
-  .pillar-chip:active { cursor: grabbing; }
-  .pillar-chip.dragging { opacity: .4; }
-  .pillar-chip.placed { opacity: .3; pointer-events: none; cursor: default; }
+  .blocks-row { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-bottom:24px; }
+  .block-drop { background:var(--white); border:2px dashed var(--blue-mid); border-radius:var(--radius); padding:12px; min-height:150px; transition:border-color .2s,background .2s; }
+  .block-drop.drag-over { border-color:var(--teal); background:var(--teal-light); }
+  .block-drop h3 { font-size:.85rem; font-weight:700; color:var(--white); background:var(--teal-dark); margin:-12px -12px 10px; padding:8px 12px; border-radius:var(--radius) var(--radius) 0 0; pointer-events:none; }
+  .block-drop > div { pointer-events:none; }
+  .pillar-chips-pool { background:var(--white); border-radius:var(--radius); padding:16px; box-shadow:var(--shadow); }
+  .pillar-chips-pool h3 { font-size:.8rem; text-transform:uppercase; letter-spacing:1px; color:var(--text-light); margin-bottom:12px; }
+  .pillar-chips-wrap { display:flex; flex-wrap:wrap; gap:8px; }
+  .pillar-chip { background:var(--blue-pale); border:2px solid var(--blue-mid); border-radius:var(--radius); padding:8px 14px; font-size:.85rem; font-weight:500; cursor:grab; transition:transform .15s,opacity .2s; user-select:none; }
+  .pillar-chip.dragging { opacity:.4; }
+  .pillar-chip.placed { opacity:.3; pointer-events:none; cursor:default; }
+
+  .dropped-chip { border-radius:4px; padding:6px 10px; font-size:.8rem; font-weight:500; margin-bottom:5px; pointer-events:none; }
+  .dropped-chip.correct { background:var(--success-bg); color:var(--success); }
 
   /* MODE 3 */
-  #mode3 { display: none; }
-  .ref-blocks { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
-  .ref-block { background: var(--white); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); }
-  .ref-block-header { background: var(--teal-dark); color: var(--white); font-weight: 700; font-size: .9rem; padding: 10px 14px; text-align: center; }
-  .ref-pillar { border-bottom: 1px solid var(--blue-pale); padding: 10px 14px; }
-  .ref-pillar:last-child { border-bottom: none; }
-  .ref-pillar-name { font-weight: 600; font-size: .85rem; color: var(--teal); margin-bottom: 5px; }
-  .ref-dim { font-size: .8rem; color: var(--text-mid); padding: 2px 0 2px 10px; border-left: 2px solid var(--blue-mid); margin-bottom: 3px; }
+  .ref-blocks { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; }
+  .ref-block { background:var(--white); border-radius:var(--radius); overflow:hidden; box-shadow:var(--shadow); }
+  .ref-block-header { background:var(--teal-dark); color:var(--white); font-weight:700; font-size:.9rem; padding:10px 14px; text-align:center; }
+  .ref-pillar { border-bottom:1px solid var(--blue-pale); padding:10px 14px; }
+  .ref-pillar:last-child { border-bottom:none; }
+  .ref-pillar-name { font-weight:600; font-size:.85rem; color:var(--teal); margin-bottom:5px; }
+  .ref-dim { font-size:.8rem; color:var(--text-mid); padding:2px 0 2px 10px; border-left:2px solid var(--blue-mid); margin-bottom:3px; }
 
-  @media (max-width: 700px) {
-    .m1-layout { grid-template-columns: 1fr; }
-    .blocks-row { grid-template-columns: 1fr; }
-    .ref-blocks { grid-template-columns: 1fr; }
+  @media (max-width:700px) {
+    .m1-layout { grid-template-columns:1fr; }
+    .blocks-row { grid-template-columns:1fr; }
+    .ref-blocks { grid-template-columns:1fr; }
   }
-
-  @keyframes shake {
-    0%,100%{ transform:translateX(0) }
-    25%    { transform:translateX(-6px) }
-    75%    { transform:translateX(6px) }
-  }
-  .shake { animation: shake .35s ease; border-color: var(--error) !important; }
+  @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-6px)} 75%{transform:translateX(6px)} }
+  .shake { animation:shake .35s ease; border-color:var(--error) !important; }
 </style>
 </head>
 <body>
@@ -176,7 +103,6 @@
 </div>
 
 <div class="game-wrap">
-
   <div class="score-bar" id="scorebar">
     <span>Acertos: <strong id="scoreVal">0</strong></span>
     <span>Erros: <strong id="errVal">0</strong></span>
@@ -184,8 +110,7 @@
     <button class="btn-reset" onclick="resetGame()">↺ Reiniciar</button>
   </div>
 
-  <!-- MODE 1 -->
-  <div id="mode1">
+  <div id="mode1" class="mode-panel">
     <div class="m1-layout">
       <div class="dim-pool">
         <h3>Dimensões (arraste)</h3>
@@ -195,8 +120,7 @@
     </div>
   </div>
 
-  <!-- MODE 2 -->
-  <div id="mode2">
+  <div id="mode2" class="mode-panel hidden">
     <div class="blocks-row" id="blocks-row"></div>
     <div class="pillar-chips-pool">
       <h3>Pilares (arraste para o Bloco correto)</h3>
@@ -204,278 +128,207 @@
     </div>
   </div>
 
-  <!-- MODE 3 -->
-  <div id="mode3">
+  <div id="mode3" class="mode-panel hidden">
     <div class="ref-blocks" id="ref-blocks"></div>
   </div>
-
 </div>
 
 <div id="toast"></div>
 
 <script>
-// ── Data
 const BUILDING_BLOCKS = {
-  processo:    'Processo',
-  tecnologia:  'Tecnologia',
-  organizacao: 'Organização',
+  processo:'Processo', tecnologia:'Tecnologia', organizacao:'Organização'
 };
-
 const PILLARS = {
-  operacoes:         { label: 'Operações',               block: 'processo' },
-  cadeia:            { label: 'Cadeia de Abastecimento',  block: 'processo' },
-  ciclo_vida:        { label: 'Ciclo de Vida do Produto', block: 'processo' },
-  automacao:         { label: 'Automação',                block: 'tecnologia' },
-  conectividade:     { label: 'Conectividade',            block: 'tecnologia' },
-  inteligencia:      { label: 'Inteligência',             block: 'tecnologia' },
-  prontidao_talento: { label: 'Prontidão do Talento',     block: 'organizacao' },
-  estrutura_gestao:  { label: 'Estrutura e Gestão',       block: 'organizacao' },
+  operacoes:         { label:'Operações',               block:'processo' },
+  cadeia:            { label:'Cadeia de Abastecimento',  block:'processo' },
+  ciclo_vida:        { label:'Ciclo de Vida do Produto', block:'processo' },
+  automacao:         { label:'Automação',                block:'tecnologia' },
+  conectividade:     { label:'Conectividade',            block:'tecnologia' },
+  inteligencia:      { label:'Inteligência',             block:'tecnologia' },
+  prontidao_talento: { label:'Prontidão do Talento',     block:'organizacao' },
+  estrutura_gestao:  { label:'Estrutura e Gestão',       block:'organizacao' },
 };
-
 const DIMENSIONS = {
-  integracao_vertical:   { label: 'Integração Vertical',                              pillar: 'operacoes' },
-  integracao_horizontal: { label: 'Integração Horizontal',                            pillar: 'operacoes' },
-  ciclo_vida_produto:    { label: 'Ciclo de Vida Integrado do Produto',                pillar: 'ciclo_vida' },
-  chao_fabrica:          { label: 'Chão de Fábrica',                                   pillar: 'automacao' },
-  empresa:               { label: 'Empresa',                                            pillar: 'automacao' },
-  instalacao:            { label: 'Instalação',                                         pillar: 'automacao' },
-  aprendizagem:          { label: 'Aprendizagem e Desenvolvimento da Força de Trabalho',pillar: 'prontidao_talento' },
-  competencias:          { label: 'Competências de Liderança',                          pillar: 'prontidao_talento' },
-  colaboracao:           { label: 'Colaboração Inter e Intraempresarial',               pillar: 'estrutura_gestao' },
-  estrategia:            { label: 'Estratégia e Governança',                            pillar: 'estrutura_gestao' },
-  conectividade_dim:     { label: 'Conectividade',                                      pillar: 'conectividade' },
-  inteligencia_dim:      { label: 'Inteligência',                                       pillar: 'inteligencia' },
-  cadeia_dim:            { label: 'Cadeia de Abastecimento',                            pillar: 'cadeia' },
+  integracao_vertical:   { label:'Integração Vertical',                               pillar:'operacoes' },
+  integracao_horizontal: { label:'Integração Horizontal',                             pillar:'operacoes' },
+  ciclo_vida_produto:    { label:'Ciclo de Vida Integrado do Produto',                 pillar:'ciclo_vida' },
+  chao_fabrica:          { label:'Chão de Fábrica',                                    pillar:'automacao' },
+  empresa:               { label:'Empresa',                                             pillar:'automacao' },
+  instalacao:            { label:'Instalação',                                          pillar:'automacao' },
+  aprendizagem:          { label:'Aprendizagem e Desenvolvimento da Força de Trabalho', pillar:'prontidao_talento' },
+  competencias:          { label:'Competências de Liderança',                           pillar:'prontidao_talento' },
+  colaboracao:           { label:'Colaboração Inter e Intraempresarial',                pillar:'estrutura_gestao' },
+  estrategia:            { label:'Estratégia e Governança',                             pillar:'estrutura_gestao' },
+  conectividade_dim:     { label:'Conectividade',                                       pillar:'conectividade' },
+  inteligencia_dim:      { label:'Inteligência',                                        pillar:'inteligencia' },
+  cadeia_dim:            { label:'Cadeia de Abastecimento',                             pillar:'cadeia' },
 };
 
-// ── State
-let score = 0, errs = 0, currentMode = 1;
-let dragKey = '', dragType = '';
+let score=0, errs=0, currentMode=1, dragKey='', dragType='';
 
-// ── Build DOM
-function buildMode1() {
+function shuffle(arr){ return arr.sort(()=>Math.random()-.5); }
+
+// ── MODE 1
+function buildMode1(){
   const pool = document.getElementById('dim-chips-container');
   pool.innerHTML = '';
-  // Embaralha dimensões
-  const dimEntries = Object.entries(DIMENSIONS).sort(() => Math.random() - 0.5);
-  dimEntries.forEach(([key, dim]) => {
+  shuffle(Object.entries(DIMENSIONS)).forEach(([key,dim])=>{
     const el = document.createElement('div');
-    el.className = 'dim-chip';
-    el.id = 'dim_' + key;
-    el.draggable = true;
-    el.dataset.key = key;
-    el.dataset.pillar = dim.pillar;
-    el.textContent = dim.label;
-    el.addEventListener('dragstart', e => onDragStart(e, 'dim'));
-    el.addEventListener('dragend',   e => onDragEnd(e));
+    el.className='dim-chip'; el.id='dim_'+key; el.draggable=true;
+    el.dataset.key=key; el.textContent=dim.label;
+    el.addEventListener('dragstart', e=>{ dragKey=key; dragType='dim'; e.dataTransfer.setData('text/plain',key); setTimeout(()=>el.classList.add('dragging'),0); });
+    el.addEventListener('dragend',   ()=>el.classList.remove('dragging'));
     pool.appendChild(el);
   });
-
   const grid = document.getElementById('pillars-grid');
-  grid.innerHTML = '';
-  Object.entries(PILLARS).forEach(([pkey, pillar]) => {
-    const slot = document.createElement('div');
-    slot.className = 'pillar-slot';
-    slot.id = 'slot_' + pkey;
-    slot.dataset.pillar = pkey;
-    slot.innerHTML = `<h4>${pillar.label}</h4><div class="slot-items" id="items_${pkey}"></div>`;
-    slot.addEventListener('dragover',  e => { e.preventDefault(); slot.classList.add('drag-over'); });
-    slot.addEventListener('dragleave', () => slot.classList.remove('drag-over'));
-    slot.addEventListener('drop',      e => onDropDim(e, pkey));
+  grid.innerHTML='';
+  Object.entries(PILLARS).forEach(([pkey,pillar])=>{
+    const slot=document.createElement('div');
+    slot.className='pillar-slot'; slot.id='slot_'+pkey;
+    slot.innerHTML=`<h4>${pillar.label}</h4><div class="slot-items" id="items_${pkey}"></div>`;
+    slot.addEventListener('dragover', e=>{ e.preventDefault(); slot.classList.add('drag-over'); });
+    slot.addEventListener('dragleave', e=>{ if(!slot.contains(e.relatedTarget)) slot.classList.remove('drag-over'); });
+    slot.addEventListener('drop', e=>{ e.preventDefault(); slot.classList.remove('drag-over'); dropDim(pkey); });
     grid.appendChild(slot);
   });
 }
 
-function buildMode2() {
-  const row = document.getElementById('blocks-row');
-  row.innerHTML = '';
-  Object.entries(BUILDING_BLOCKS).forEach(([bkey, bname]) => {
-    const el = document.createElement('div');
-    el.className = 'block-drop';
-    el.id = 'block_' + bkey;
-    el.dataset.block = bkey;
-    el.innerHTML = `<h3>${bname}</h3><div id="bitems_${bkey}"></div>`;
-    // FIX: usar o elemento diretamente, filhos têm pointer-events:none no CSS
-    el.addEventListener('dragover',  e => { e.preventDefault(); el.classList.add('drag-over'); });
-    el.addEventListener('dragleave', e => {
-      // só remove se saiu para fora do bloco inteiro
-      if (!el.contains(e.relatedTarget)) el.classList.remove('drag-over');
-    });
-    el.addEventListener('drop', e => onDropPillar(e, bkey));
+function dropDim(pillarKey){
+  if(!dragKey||dragType!=='dim') return;
+  const chip=document.getElementById('dim_'+dragKey);
+  if(!chip||chip.classList.contains('placed')) return;
+  const correct = DIMENSIONS[dragKey].pillar===pillarKey;
+  updateScore(correct);
+  if(correct){
+    chip.classList.add('placed');
+    const el=document.createElement('div');
+    el.className='dropped-chip correct'; el.textContent=chip.textContent;
+    document.getElementById('items_'+pillarKey).appendChild(el);
+  } else {
+    chip.classList.add('shake'); setTimeout(()=>chip.classList.remove('shake'),400);
+  }
+  checkComplete1(); dragKey='';
+}
+
+function checkComplete1(){
+  const total=Object.keys(DIMENSIONS).length;
+  const placed=document.querySelectorAll('#mode1 .dim-chip.placed').length;
+  document.getElementById('progressTxt').textContent=`Dimensões colocadas: ${placed}/${total}`;
+  if(placed===total) showToast('🎉 Parabéns! Todas as dimensões colocadas!','correct');
+}
+
+// ── MODE 2
+function buildMode2(){
+  const row=document.getElementById('blocks-row');
+  row.innerHTML='';
+  Object.entries(BUILDING_BLOCKS).forEach(([bkey,bname])=>{
+    const el=document.createElement('div');
+    el.className='block-drop'; el.id='block_'+bkey;
+    el.innerHTML=`<h3>${bname}</h3><div id="bitems_${bkey}"></div>`;
+    el.addEventListener('dragover', e=>{ e.preventDefault(); el.classList.add('drag-over'); });
+    el.addEventListener('dragleave', e=>{ if(!el.contains(e.relatedTarget)) el.classList.remove('drag-over'); });
+    el.addEventListener('drop', e=>{ e.preventDefault(); el.classList.remove('drag-over'); dropPillar(bkey); });
     row.appendChild(el);
   });
-
-  const wrap = document.getElementById('pillar-chips-wrap');
-  wrap.innerHTML = '';
-  // Embaralha pilares
-  const pillarEntries = Object.entries(PILLARS).sort(() => Math.random() - 0.5);
-  pillarEntries.forEach(([pkey, pillar]) => {
-    const el = document.createElement('div');
-    el.className = 'pillar-chip';
-    el.id = 'pc_' + pkey;
-    el.draggable = true;
-    el.dataset.key = pkey;
-    el.dataset.block = pillar.block;
-    el.textContent = pillar.label;
-    el.addEventListener('dragstart', e => onDragStart(e, 'pc'));
-    el.addEventListener('dragend',   e => onDragEnd(e));
+  const wrap=document.getElementById('pillar-chips-wrap');
+  wrap.innerHTML='';
+  shuffle(Object.entries(PILLARS)).forEach(([pkey,pillar])=>{
+    const el=document.createElement('div');
+    el.className='pillar-chip'; el.id='pc_'+pkey; el.draggable=true;
+    el.dataset.key=pkey; el.textContent=pillar.label;
+    el.addEventListener('dragstart', e=>{ dragKey=pkey; dragType='pc'; e.dataTransfer.setData('text/plain',pkey); setTimeout(()=>el.classList.add('dragging'),0); });
+    el.addEventListener('dragend', ()=>el.classList.remove('dragging'));
     wrap.appendChild(el);
   });
 }
 
-function buildMode3() {
-  const container = document.getElementById('ref-blocks');
-  container.innerHTML = '';
-  Object.entries(BUILDING_BLOCKS).forEach(([bkey, bname]) => {
-    const block = document.createElement('div');
-    block.className = 'ref-block';
-    let html = `<div class="ref-block-header">${bname}</div>`;
-    Object.entries(PILLARS).filter(([,p]) => p.block === bkey).forEach(([pkey, pillar]) => {
-      html += `<div class="ref-pillar"><div class="ref-pillar-name">${pillar.label}</div>`;
-      Object.values(DIMENSIONS).filter(d => d.pillar === pkey).forEach(dim => {
-        html += `<div class="ref-dim">${dim.label}</div>`;
+function dropPillar(blockKey){
+  if(!dragKey||dragType!=='pc') return;
+  const chip=document.getElementById('pc_'+dragKey);
+  if(!chip||chip.classList.contains('placed')) return;
+  const correct = PILLARS[dragKey].block===blockKey;
+  updateScore(correct);
+  if(correct){
+    chip.classList.add('placed');
+    const el=document.createElement('div');
+    el.className='dropped-chip correct'; el.textContent=chip.textContent;
+    document.getElementById('bitems_'+blockKey).appendChild(el);
+  } else {
+    chip.classList.add('shake'); setTimeout(()=>chip.classList.remove('shake'),400);
+  }
+  checkComplete2(); dragKey='';
+}
+
+function checkComplete2(){
+  const total=Object.keys(PILLARS).length;
+  const placed=document.querySelectorAll('#mode2 .pillar-chip.placed').length;
+  document.getElementById('progressTxt').textContent=`Pilares colocados: ${placed}/${total}`;
+  if(placed===total) showToast('🎉 Excelente! Todos os pilares nos blocos corretos!','correct');
+}
+
+// ── MODE 3
+function buildMode3(){
+  const c=document.getElementById('ref-blocks');
+  c.innerHTML='';
+  Object.entries(BUILDING_BLOCKS).forEach(([bkey,bname])=>{
+    const block=document.createElement('div');
+    block.className='ref-block';
+    let html=`<div class="ref-block-header">${bname}</div>`;
+    Object.entries(PILLARS).filter(([,p])=>p.block===bkey).forEach(([pkey,pillar])=>{
+      html+=`<div class="ref-pillar"><div class="ref-pillar-name">${pillar.label}</div>`;
+      Object.values(DIMENSIONS).filter(d=>d.pillar===pkey).forEach(dim=>{
+        html+=`<div class="ref-dim">${dim.label}</div>`;
       });
-      html += `</div>`;
+      html+=`</div>`;
     });
-    block.innerHTML = html;
-    container.appendChild(block);
+    block.innerHTML=html;
+    c.appendChild(block);
   });
 }
 
-// ── Mode switching — only toggles visibility
-function setMode(n) {
-  currentMode = n;
-  document.querySelectorAll(".mode-btn").forEach((b,i) => b.classList.toggle("active", i === n-1));
-  document.getElementById("mode1").style.display = n===1 ? "" : "none";
-  document.getElementById("mode2").style.display = n===2 ? "" : "none";
-  document.getElementById("mode3").style.display = n===3 ? "" : "none";
-  document.getElementById("scorebar").style.display = n===3 ? "none" : "";
-  if (n === 1) checkComplete1();
-  if (n === 2) checkComplete2();
+// ── Switching: toggle .hidden class only
+function setMode(n){
+  currentMode=n;
+  document.querySelectorAll('.mode-btn').forEach((b,i)=>b.classList.toggle('active',i===n-1));
+  [1,2,3].forEach(i=>{
+    document.getElementById('mode'+i).classList.toggle('hidden', i!==n);
+  });
+  document.getElementById('scorebar').classList.toggle('hidden', n===3);
+  if(n===1) checkComplete1();
+  if(n===2) checkComplete2();
 }
 
-// ── Drag handlers
-function onDragStart(e, type) {
-  dragKey  = e.currentTarget.dataset.key;
-  dragType = type;
-  e.dataTransfer.effectAllowed = 'move';
-  e.dataTransfer.setData('text/plain', dragKey); // necessário para Firefox
-  setTimeout(() => e.currentTarget.classList.add('dragging'), 0);
+// ── Score & Toast
+function updateScore(correct){
+  if(correct){ score++; showToast('✓ Correto!','correct'); }
+  else        { errs++;  showToast('✗ Errado — tente novamente','wrong'); }
+  document.getElementById('scoreVal').textContent=score;
+  document.getElementById('errVal').textContent=errs;
 }
-function onDragEnd(e) {
-  e.currentTarget.classList.remove('dragging');
-}
-
-// ── MODE 1: drop dimension on pillar slot
-function onDropDim(e, pillarKey) {
-  e.preventDefault();
-  const slot = document.getElementById('slot_' + pillarKey);
-  slot.classList.remove('drag-over');
-  if (!dragKey || dragType !== 'dim') return;
-
-  const chip = document.getElementById('dim_' + dragKey);
-  if (!chip || chip.classList.contains('placed')) return;
-
-  const correct = DIMENSIONS[dragKey].pillar === pillarKey;
-  updateScore(correct);
-
-  if (correct) {
-    chip.classList.add('placed', 'correct-placed');
-    const el = document.createElement('div');
-    el.className = 'dropped-chip correct';
-    el.textContent = chip.textContent.trim();
-    document.getElementById('items_' + pillarKey).appendChild(el);
-  } else {
-    chip.classList.add('shake');
-    setTimeout(() => chip.classList.remove('shake'), 400);
-  }
-
-  checkComplete1();
-  dragKey = '';
-}
-
-function checkComplete1() {
-  const total  = Object.keys(DIMENSIONS).length;
-  const placed = document.querySelectorAll('#mode1 .dim-chip.placed').length;
-  document.getElementById('progressTxt').textContent = `Dimensões colocadas: ${placed}/${total}`;
-  if (placed === total) showToast('🎉 Parabéns! Todas as dimensões colocadas corretamente!', 'correct');
-}
-
-// ── MODE 2: drop pillar on block
-function onDropPillar(e, blockKey) {
-  e.preventDefault();
-  const block = document.getElementById('block_' + blockKey);
-  block.classList.remove('drag-over');
-  if (!dragKey || dragType !== 'pc') return;
-
-  const chip = document.getElementById('pc_' + dragKey);
-  if (!chip || chip.classList.contains('placed')) return;
-
-  const correct = PILLARS[dragKey].block === blockKey;
-  updateScore(correct);
-
-  if (correct) {
-    chip.classList.add('placed');
-    const el = document.createElement('div');
-    el.className = 'dropped-chip correct';
-    el.textContent = chip.textContent.trim();
-    document.getElementById('bitems_' + blockKey).appendChild(el);
-  } else {
-    chip.classList.add('shake');
-    setTimeout(() => chip.classList.remove('shake'), 400);
-  }
-
-  checkComplete2();
-  dragKey = '';
-}
-
-function checkComplete2() {
-  const total  = Object.keys(PILLARS).length;
-  const placed = document.querySelectorAll('#mode2 .pillar-chip.placed').length;
-  document.getElementById('progressTxt').textContent = `Pilares colocados: ${placed}/${total}`;
-  if (placed === total) showToast('🎉 Excelente! Todos os pilares nos blocos corretos!', 'correct');
-}
-
-// ── Scoring
-function updateScore(correct) {
-  if (correct) { score++; showToast('✓ Correto!', 'correct'); }
-  else         { errs++;  showToast('✗ Errado — tente novamente', 'wrong'); }
-  document.getElementById('scoreVal').textContent = score;
-  document.getElementById('errVal').textContent   = errs;
-}
-
-// ── Toast
 let toastTimer;
-function showToast(msg, type) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.className = 'show ' + type;
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => t.className = '', 2000);
+function showToast(msg,type){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.className='show '+type;
+  clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.className='',2000);
 }
 
 // ── Reset
-function resetGame() {
-  score = 0; errs = 0;
-  document.getElementById('scoreVal').textContent = '0';
-  document.getElementById('errVal').textContent   = '0';
-  document.getElementById('progressTxt').textContent = '';
-  if (currentMode === 1) { buildMode1(); checkComplete1(); }
-  if (currentMode === 2) { buildMode2(); checkComplete2(); }
-  if (currentMode === 3) { buildMode3(); }
+function resetGame(){
+  score=0; errs=0;
+  document.getElementById('scoreVal').textContent='0';
+  document.getElementById('errVal').textContent='0';
+  document.getElementById('progressTxt').textContent='';
+  if(currentMode===1){ buildMode1(); checkComplete1(); }
+  if(currentMode===2){ buildMode2(); checkComplete2(); }
+  if(currentMode===3){ buildMode3(); }
 }
 
-// ── Init: build all modes first, then show mode 1
+// ── Init: build everything while all panels are in the DOM
 buildMode1();
 buildMode2();
 buildMode3();
 checkComplete1();
-checkComplete2();
-// Apply initial visibility without rebuilding
-document.getElementById('mode1').style.display = '';
-document.getElementById('mode2').style.display = 'none';
-document.getElementById('mode3').style.display = 'none';
-document.getElementById('scorebar').style.display = '';
 </script>
 </body>
 </html>
