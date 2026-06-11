@@ -208,15 +208,6 @@
 <div id="toast"></div>
 
 <script>
-
-  let selectedPillar = null;
-  el.addEventListener('click', () => {
-  selectedPillar = pkey;
-  document.querySelectorAll('.pillar-chip').forEach(c => c.style.outline = '');
-  el.style.outline = '2px solid #1e7a8f';
-});
-
-  
 // ── Data
 const BUILDING_BLOCKS = {
   processo:    'Processo',
@@ -287,31 +278,20 @@ function buildMode1() {
   });
 }
 
-l.addEventListener('click', () => {
-  if (!selectedPillar) return;
-
-  const correct = PILLARS[selectedPillar].block === bkey;
-  updateScore(correct);
-
-  const chip = document.getElementById('pc_' + selectedPillar);
-  if (!chip || chip.classList.contains('placed')) return;
-
-  if (correct) {
-    chip.classList.add('placed');
-    const div = document.createElement('div');
-    div.className = 'dropped-chip correct';
-    div.textContent = chip.textContent.trim();
-    document.getElementById('bitems_' + bkey).appendChild(div);
-  } else {
-    chip.classList.add('shake');
-    setTimeout(() => chip.classList.remove('shake'), 400);
-  }
-
-  selectedPillar = null;
-  document.querySelectorAll('.pillar-chip').forEach(c => c.style.outline = '');
-
-  checkComplete2();
-});
+function buildMode2() {
+  const row = document.getElementById('blocks-row');
+  row.innerHTML = '';
+  Object.entries(BUILDING_BLOCKS).forEach(([bkey, bname]) => {
+    const el = document.createElement('div');
+    el.className = 'block-drop';
+    el.id = 'block_' + bkey;
+    el.dataset.block = bkey;
+    el.innerHTML = `<h3>${bname}</h3><div id="bitems_${bkey}"></div>`;
+    el.addEventListener('dragover',  e => { e.preventDefault(); el.classList.add('drag-over'); });
+    el.addEventListener('dragleave', () => el.classList.remove('drag-over'));
+    el.addEventListener('drop',      e => onDropPillar(e, bkey));
+    row.appendChild(el);
+  });
 
   const wrap = document.getElementById('pillar-chips-wrap');
   wrap.innerHTML = '';
