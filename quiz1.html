@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -209,18 +208,48 @@
 <div id="toast"></div>
 
 <script>
+// ── Data
+const BUILDING_BLOCKS = {
+  processo:    'Processo',
+  tecnologia:  'Tecnologia',
+  organizacao: 'Organização',
+};
+
+const PILLARS = {
+  operacoes:         { label: 'Operações',              block: 'processo' },
+  cadeia:            { label: 'Cadeia de Abastecimento', block: 'processo' },
+  ciclo_vida:        { label: 'Ciclo de Vida do Produto',block: 'processo' },
+  automacao:         { label: 'Automação',              block: 'tecnologia' },
+  conectividade:     { label: 'Conectividade',          block: 'tecnologia' },
+  inteligencia:      { label: 'Inteligência',           block: 'tecnologia' },
+  prontidao_talento: { label: 'Prontidão do Talento',   block: 'organizacao' },
+  estrutura_gestao:  { label: 'Estrutura e Gestão',     block: 'organizacao' },
+};
+
+const DIMENSIONS = {
+  integracao_vertical:   { label: 'Integração Vertical',                             pillar: 'operacoes' },
+  integracao_horizontal: { label: 'Integração Horizontal',                           pillar: 'operacoes' },
+  ciclo_vida_produto:    { label: 'Ciclo de Vida Integrado do Produto',               pillar: 'ciclo_vida' },
+  chao_fabrica:          { label: 'Chão de Fábrica',                                  pillar: 'automacao' },
+  empresa:               { label: 'Empresa',                                           pillar: 'automacao' },
+  instalacao:            { label: 'Instalação',                                        pillar: 'automacao' },
+  aprendizagem:          { label: 'Aprendizagem e Desenvolvimento da Força de Trabalho', pillar: 'prontidao_talento' },
+  competencias:          { label: 'Competências de Liderança',                         pillar: 'prontidao_talento' },
+  colaboracao:           { label: 'Colaboração Inter e Intraempresarial',              pillar: 'estrutura_gestao' },
+  estrategia:            { label: 'Estratégia e Governança',                           pillar: 'estrutura_gestao' },
+  conectividade_dim:     { label: 'Conectividade',                                     pillar: 'conectividade' },
+  inteligencia_dim:      { label: 'Inteligência',                                      pillar: 'inteligencia' },
+  cadeia_dim:            { label: 'Cadeia de Abastecimento',                           pillar: 'cadeia' },
+};
+
 // ── State
 let score = 0, errs = 0, currentMode = 1;
-
-// ── Drag state (corrigido)
-let dragKey = '';
-let dragType = '';
+let dragKey = '', dragType = '';
 
 // ── Build DOM
 function buildMode1() {
   const pool = document.getElementById('dim-chips-container');
   pool.innerHTML = '';
-
   Object.entries(DIMENSIONS).forEach(([key, dim]) => {
     const el = document.createElement('div');
     el.className = 'dim-chip';
@@ -229,35 +258,22 @@ function buildMode1() {
     el.dataset.key = key;
     el.dataset.pillar = dim.pillar;
     el.textContent = dim.label;
-
-    el.addEventListener('dragstart', e => onDragStart(e, 'dim', key));
-    el.addEventListener('dragend', onDragEnd);
-
+    el.addEventListener('dragstart', e => onDragStart(e, 'dim'));
+    el.addEventListener('dragend',   e => onDragEnd(e, 'dim'));
     pool.appendChild(el);
   });
 
   const grid = document.getElementById('pillars-grid');
   grid.innerHTML = '';
-
   Object.entries(PILLARS).forEach(([pkey, pillar]) => {
     const slot = document.createElement('div');
     slot.className = 'pillar-slot';
     slot.id = 'slot_' + pkey;
     slot.dataset.pillar = pkey;
-
-    slot.innerHTML = `
-      <h4>${pillar.label}</h4>
-      <div class="slot-items" id="items_${pkey}"></div>
-    `;
-
-    slot.addEventListener('dragover', e => {
-      e.preventDefault();
-      slot.classList.add('drag-over');
-    });
-
+    slot.innerHTML = `<h4>${pillar.label}</h4><div class="slot-items" id="items_${pkey}"></div>`;
+    slot.addEventListener('dragover',  e => { e.preventDefault(); slot.classList.add('drag-over'); });
     slot.addEventListener('dragleave', () => slot.classList.remove('drag-over'));
-    slot.addEventListener('drop', e => onDropDim(e, pkey));
-
+    slot.addEventListener('drop',      e => onDropDim(e, pkey));
     grid.appendChild(slot);
   });
 }
@@ -265,32 +281,20 @@ function buildMode1() {
 function buildMode2() {
   const row = document.getElementById('blocks-row');
   row.innerHTML = '';
-
   Object.entries(BUILDING_BLOCKS).forEach(([bkey, bname]) => {
     const el = document.createElement('div');
     el.className = 'block-drop';
     el.id = 'block_' + bkey;
     el.dataset.block = bkey;
-
-    el.innerHTML = `
-      <h3>${bname}</h3>
-      <div id="bitems_${bkey}"></div>
-    `;
-
-    el.addEventListener('dragover', e => {
-      e.preventDefault();
-      el.classList.add('drag-over');
-    });
-
+    el.innerHTML = `<h3>${bname}</h3><div id="bitems_${bkey}"></div>`;
+    el.addEventListener('dragover',  e => { e.preventDefault(); el.classList.add('drag-over'); });
     el.addEventListener('dragleave', () => el.classList.remove('drag-over'));
-    el.addEventListener('drop', e => onDropPillar(e, bkey));
-
+    el.addEventListener('drop',      e => onDropPillar(e, bkey));
     row.appendChild(el);
   });
 
   const wrap = document.getElementById('pillar-chips-wrap');
   wrap.innerHTML = '';
-
   Object.entries(PILLARS).forEach(([pkey, pillar]) => {
     const el = document.createElement('div');
     el.className = 'pillar-chip';
@@ -299,10 +303,8 @@ function buildMode2() {
     el.dataset.key = pkey;
     el.dataset.block = pillar.block;
     el.textContent = pillar.label;
-
-    el.addEventListener('dragstart', e => onDragStart(e, 'pc', pkey));
-    el.addEventListener('dragend', onDragEnd);
-
+    el.addEventListener('dragstart', e => onDragStart(e, 'pc'));
+    el.addEventListener('dragend',   e => onDragEnd(e, 'pc'));
     wrap.appendChild(el);
   });
 }
@@ -310,28 +312,17 @@ function buildMode2() {
 function buildMode3() {
   const container = document.getElementById('ref-blocks');
   container.innerHTML = '';
-
   Object.entries(BUILDING_BLOCKS).forEach(([bkey, bname]) => {
     const block = document.createElement('div');
     block.className = 'ref-block';
-
     let html = `<div class="ref-block-header">${bname}</div>`;
-
-    Object.entries(PILLARS)
-      .filter(([, p]) => p.block === bkey)
-      .forEach(([pkey, pillar]) => {
-        html += `<div class="ref-pillar">
-          <div class="ref-pillar-name">${pillar.label}</div>`;
-
-        Object.values(DIMENSIONS)
-          .filter(d => d.pillar === pkey)
-          .forEach(dim => {
-            html += `<div class="ref-dim">${dim.label}</div>`;
-          });
-
-        html += `</div>`;
+    Object.entries(PILLARS).filter(([,p]) => p.block === bkey).forEach(([pkey, pillar]) => {
+      html += `<div class="ref-pillar"><div class="ref-pillar-name">${pillar.label}</div>`;
+      Object.values(DIMENSIONS).filter(d => d.pillar === pkey).forEach(dim => {
+        html += `<div class="ref-dim">${dim.label}</div>`;
       });
-
+      html += `</div>`;
+    });
     block.innerHTML = html;
     container.appendChild(block);
   });
@@ -340,95 +331,78 @@ function buildMode3() {
 // ── Mode switching
 function setMode(n) {
   currentMode = n;
-
-  document.querySelectorAll('.mode-btn')
-    .forEach((b, i) => b.classList.toggle('active', i === n - 1));
-
-  document.getElementById('mode1').style.display = n === 1 ? '' : 'none';
-  document.getElementById('mode2').style.display = n === 2 ? '' : 'none';
-  document.getElementById('mode3').style.display = n === 3 ? '' : 'none';
-
-  document.getElementById('scorebar').style.display = n === 3 ? 'none' : '';
-
+  document.querySelectorAll('.mode-btn').forEach((b,i) => b.classList.toggle('active', i === n-1));
+  document.getElementById('mode1').style.display = n===1 ? '' : 'none';
+  document.getElementById('mode2').style.display = n===2 ? '' : 'none';
+  document.getElementById('mode3').style.display = n===3 ? '' : 'none';
+  document.getElementById('scorebar').style.display = n===3 ? 'none' : '';
   resetGame();
 }
 
-// ── Drag handlers (CORRIGIDO)
-function onDragStart(e, type, key) {
-  dragKey = key;
+// ── Drag handlers
+function onDragStart(e, type) {
+  dragKey  = e.currentTarget.dataset.key;
   dragType = type;
-
-  e.dataTransfer.setData('key', key);
-  e.dataTransfer.setData('type', type);
-
-  e.target.classList.add('dragging');
+  setTimeout(() => e.currentTarget.classList.add('dragging'), 0);
 }
-
 function onDragEnd(e) {
-  e.target.classList.remove('dragging');
-  dragKey = '';
-  dragType = '';
+  e.currentTarget.classList.remove('dragging');
 }
 
-// ── MODE 1 DROP
+// ── MODE 1: drop dimension on pillar slot
 function onDropDim(e, pillarKey) {
   e.preventDefault();
-
-  const key = e.dataTransfer.getData('key');
-  const type = e.dataTransfer.getData('type');
-
   const slot = document.getElementById('slot_' + pillarKey);
   slot.classList.remove('drag-over');
+  if (!dragKey || dragType !== 'dim') return;
 
-  if (!key || type !== 'dim') return;
-
-  const chip = document.getElementById('dim_' + key);
+  const chip = document.getElementById('dim_' + dragKey);
   if (!chip || chip.classList.contains('placed')) return;
 
-  const correct = DIMENSIONS[key].pillar === pillarKey;
+  const correct = DIMENSIONS[dragKey].pillar === pillarKey;
   updateScore(correct);
 
   if (correct) {
-    chip.classList.add('placed', 'correct-placed');
-
+    chip.classList.add('placed');
     const el = document.createElement('div');
     el.className = 'dropped-chip correct';
-    el.textContent = chip.textContent;
-
+    el.textContent = chip.textContent.trim();
     document.getElementById('items_' + pillarKey).appendChild(el);
+    chip.classList.add('correct-placed');
   } else {
     chip.classList.add('shake');
     setTimeout(() => chip.classList.remove('shake'), 400);
   }
 
   checkComplete1();
+  dragKey = '';
 }
 
-// ── MODE 2 DROP
+function checkComplete1() {
+  const total  = Object.keys(DIMENSIONS).length;
+  const placed = document.querySelectorAll('#mode1 .dim-chip.placed').length;
+  document.getElementById('progressTxt').textContent = `Dimensões colocadas: ${placed}/${total}`;
+  if (placed === total) showToast('🎉 Parabéns! Todas as dimensões colocadas corretamente!', 'correct');
+}
+
+// ── MODE 2: drop pillar on block
 function onDropPillar(e, blockKey) {
   e.preventDefault();
-
-  const key = e.dataTransfer.getData('key');
-  const type = e.dataTransfer.getData('type');
-
   const block = document.getElementById('block_' + blockKey);
   block.classList.remove('drag-over');
+  if (!dragKey || dragType !== 'pc') return;
 
-  if (!key || type !== 'pc') return;
-
-  const chip = document.getElementById('pc_' + key);
+  const chip = document.getElementById('pc_' + dragKey);
   if (!chip || chip.classList.contains('placed')) return;
 
-  const correct = PILLARS[key].block === blockKey;
+  const correct = PILLARS[dragKey].block === blockKey;
   updateScore(correct);
 
   if (correct) {
     chip.classList.add('placed');
-
     const el = document.createElement('div');
     el.className = 'dropped-chip correct';
-    el.textContent = chip.textContent;
-
+    el.textContent = chip.textContent.trim();
     document.getElementById('bitems_' + blockKey).appendChild(el);
   } else {
     chip.classList.add('shake');
@@ -436,45 +410,22 @@ function onDropPillar(e, blockKey) {
   }
 
   checkComplete2();
-}
-
-// ── Progress
-function checkComplete1() {
-  const total = Object.keys(DIMENSIONS).length;
-  const placed = document.querySelectorAll('#mode1 .dim-chip.placed').length;
-
-  document.getElementById('progressTxt').textContent =
-    `Dimensões colocadas: ${placed}/${total}`;
-
-  if (placed === total) {
-    showToast('🎉 Todas as dimensões concluídas!', 'correct');
-  }
+  dragKey = '';
 }
 
 function checkComplete2() {
-  const total = Object.keys(PILLARS).length;
+  const total  = Object.keys(PILLARS).length;
   const placed = document.querySelectorAll('#mode2 .pillar-chip.placed').length;
-
-  document.getElementById('progressTxt').textContent =
-    `Pilares colocados: ${placed}/${total}`;
-
-  if (placed === total) {
-    showToast('🎉 Todos os pilares concluídos!', 'correct');
-  }
+  document.getElementById('progressTxt').textContent = `Pilares colocados: ${placed}/${total}`;
+  if (placed === total) showToast('🎉 Excelente! Todos os pilares nos blocos corretos!', 'correct');
 }
 
-// ── Score
+// ── Scoring
 function updateScore(correct) {
-  if (correct) {
-    score++;
-    showToast('✓ Correto!', 'correct');
-  } else {
-    errs++;
-    showToast('✗ Errado', 'wrong');
-  }
-
+  if (correct) { score++; showToast('✓ Correto!', 'correct'); }
+  else         { errs++;  showToast('✗ Errado — tente novamente', 'wrong'); }
   document.getElementById('scoreVal').textContent = score;
-  document.getElementById('errVal').textContent = errs;
+  document.getElementById('errVal').textContent   = errs;
 }
 
 // ── Toast
@@ -483,23 +434,20 @@ function showToast(msg, type) {
   const t = document.getElementById('toast');
   t.textContent = msg;
   t.className = 'show ' + type;
-
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => t.className = '', 2000);
 }
 
 // ── Reset
 function resetGame() {
-  score = 0;
-  errs = 0;
-
+  score = 0; errs = 0;
   document.getElementById('scoreVal').textContent = '0';
-  document.getElementById('errVal').textContent = '0';
+  document.getElementById('errVal').textContent   = '0';
   document.getElementById('progressTxt').textContent = '';
 
-  if (currentMode === 1) buildMode1();
-  if (currentMode === 2) buildMode2();
-  if (currentMode === 3) buildMode3();
+  if (currentMode === 1) { buildMode1(); checkComplete1(); }
+  if (currentMode === 2) { buildMode2(); checkComplete2(); }
+  if (currentMode === 3) { buildMode3(); }
 }
 
 // ── Init
