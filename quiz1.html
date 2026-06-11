@@ -97,11 +97,12 @@
     transition: border-color .2s, background .2s;
   }
   .pillar-slot.drag-over { border-color: var(--teal); background: var(--teal-light); }
-  .pillar-slot h4 { font-size: .82rem; font-weight: 700; color: var(--teal-dark); margin-bottom: 8px; padding-bottom: 6px; border-bottom: 1px solid var(--blue-mid); }
-  .pillar-slot .slot-items { min-height: 40px; }
+  .pillar-slot h4 { font-size: .82rem; font-weight: 700; color: var(--teal-dark); margin-bottom: 8px; padding-bottom: 6px; border-bottom: 1px solid var(--blue-mid); pointer-events: none; }
+  .pillar-slot .slot-items { min-height: 40px; pointer-events: none; }
   .dropped-chip {
     border-radius: 4px; padding: 6px 10px; font-size: .8rem; font-weight: 500;
     margin-bottom: 5px; display: flex; justify-content: space-between; align-items: center;
+    pointer-events: none;
   }
   .dropped-chip.correct { background: var(--success-bg); color: var(--success); }
   .dropped-chip.wrong   { background: var(--error-bg);   color: var(--error); }
@@ -115,10 +116,15 @@
     transition: border-color .2s, background .2s;
   }
   .block-drop.drag-over { border-color: var(--teal); background: var(--teal-light); }
+  /* FIX: filhos não podem interceptar eventos de drag */
   .block-drop h3 {
     font-size: .85rem; font-weight: 700; color: var(--white);
     background: var(--teal-dark); margin: -12px -12px 10px;
     padding: 8px 12px; border-radius: var(--radius) var(--radius) 0 0;
+    pointer-events: none; /* ← FIX PRINCIPAL */
+  }
+  .block-drop > div {
+    pointer-events: none; /* ← FIX PRINCIPAL */
   }
   .pillar-chips-pool { background: var(--white); border-radius: var(--radius); padding: 16px; box-shadow: var(--shadow); }
   .pillar-chips-pool h3 { font-size: .8rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-light); margin-bottom: 12px; }
@@ -216,30 +222,30 @@ const BUILDING_BLOCKS = {
 };
 
 const PILLARS = {
-  operacoes:         { label: 'Operações',              block: 'processo' },
-  cadeia:            { label: 'Cadeia de Abastecimento', block: 'processo' },
-  ciclo_vida:        { label: 'Ciclo de Vida do Produto',block: 'processo' },
-  automacao:         { label: 'Automação',              block: 'tecnologia' },
-  conectividade:     { label: 'Conectividade',          block: 'tecnologia' },
-  inteligencia:      { label: 'Inteligência',           block: 'tecnologia' },
-  prontidao_talento: { label: 'Prontidão do Talento',   block: 'organizacao' },
-  estrutura_gestao:  { label: 'Estrutura e Gestão',     block: 'organizacao' },
+  operacoes:         { label: 'Operações',               block: 'processo' },
+  cadeia:            { label: 'Cadeia de Abastecimento',  block: 'processo' },
+  ciclo_vida:        { label: 'Ciclo de Vida do Produto', block: 'processo' },
+  automacao:         { label: 'Automação',                block: 'tecnologia' },
+  conectividade:     { label: 'Conectividade',            block: 'tecnologia' },
+  inteligencia:      { label: 'Inteligência',             block: 'tecnologia' },
+  prontidao_talento: { label: 'Prontidão do Talento',     block: 'organizacao' },
+  estrutura_gestao:  { label: 'Estrutura e Gestão',       block: 'organizacao' },
 };
 
 const DIMENSIONS = {
-  integracao_vertical:   { label: 'Integração Vertical',                             pillar: 'operacoes' },
-  integracao_horizontal: { label: 'Integração Horizontal',                           pillar: 'operacoes' },
-  ciclo_vida_produto:    { label: 'Ciclo de Vida Integrado do Produto',               pillar: 'ciclo_vida' },
-  chao_fabrica:          { label: 'Chão de Fábrica',                                  pillar: 'automacao' },
-  empresa:               { label: 'Empresa',                                           pillar: 'automacao' },
-  instalacao:            { label: 'Instalação',                                        pillar: 'automacao' },
-  aprendizagem:          { label: 'Aprendizagem e Desenvolvimento da Força de Trabalho', pillar: 'prontidao_talento' },
-  competencias:          { label: 'Competências de Liderança',                         pillar: 'prontidao_talento' },
-  colaboracao:           { label: 'Colaboração Inter e Intraempresarial',              pillar: 'estrutura_gestao' },
-  estrategia:            { label: 'Estratégia e Governança',                           pillar: 'estrutura_gestao' },
-  conectividade_dim:     { label: 'Conectividade',                                     pillar: 'conectividade' },
-  inteligencia_dim:      { label: 'Inteligência',                                      pillar: 'inteligencia' },
-  cadeia_dim:            { label: 'Cadeia de Abastecimento',                           pillar: 'cadeia' },
+  integracao_vertical:   { label: 'Integração Vertical',                              pillar: 'operacoes' },
+  integracao_horizontal: { label: 'Integração Horizontal',                            pillar: 'operacoes' },
+  ciclo_vida_produto:    { label: 'Ciclo de Vida Integrado do Produto',                pillar: 'ciclo_vida' },
+  chao_fabrica:          { label: 'Chão de Fábrica',                                   pillar: 'automacao' },
+  empresa:               { label: 'Empresa',                                            pillar: 'automacao' },
+  instalacao:            { label: 'Instalação',                                         pillar: 'automacao' },
+  aprendizagem:          { label: 'Aprendizagem e Desenvolvimento da Força de Trabalho',pillar: 'prontidao_talento' },
+  competencias:          { label: 'Competências de Liderança',                          pillar: 'prontidao_talento' },
+  colaboracao:           { label: 'Colaboração Inter e Intraempresarial',               pillar: 'estrutura_gestao' },
+  estrategia:            { label: 'Estratégia e Governança',                            pillar: 'estrutura_gestao' },
+  conectividade_dim:     { label: 'Conectividade',                                      pillar: 'conectividade' },
+  inteligencia_dim:      { label: 'Inteligência',                                       pillar: 'inteligencia' },
+  cadeia_dim:            { label: 'Cadeia de Abastecimento',                            pillar: 'cadeia' },
 };
 
 // ── State
@@ -250,7 +256,9 @@ let dragKey = '', dragType = '';
 function buildMode1() {
   const pool = document.getElementById('dim-chips-container');
   pool.innerHTML = '';
-  Object.entries(DIMENSIONS).forEach(([key, dim]) => {
+  // Embaralha dimensões
+  const dimEntries = Object.entries(DIMENSIONS).sort(() => Math.random() - 0.5);
+  dimEntries.forEach(([key, dim]) => {
     const el = document.createElement('div');
     el.className = 'dim-chip';
     el.id = 'dim_' + key;
@@ -259,7 +267,7 @@ function buildMode1() {
     el.dataset.pillar = dim.pillar;
     el.textContent = dim.label;
     el.addEventListener('dragstart', e => onDragStart(e, 'dim'));
-    el.addEventListener('dragend',   e => onDragEnd(e, 'dim'));
+    el.addEventListener('dragend',   e => onDragEnd(e));
     pool.appendChild(el);
   });
 
@@ -287,15 +295,21 @@ function buildMode2() {
     el.id = 'block_' + bkey;
     el.dataset.block = bkey;
     el.innerHTML = `<h3>${bname}</h3><div id="bitems_${bkey}"></div>`;
+    // FIX: usar o elemento diretamente, filhos têm pointer-events:none no CSS
     el.addEventListener('dragover',  e => { e.preventDefault(); el.classList.add('drag-over'); });
-    el.addEventListener('dragleave', () => el.classList.remove('drag-over'));
-    el.addEventListener('drop',      e => onDropPillar(e, bkey));
+    el.addEventListener('dragleave', e => {
+      // só remove se saiu para fora do bloco inteiro
+      if (!el.contains(e.relatedTarget)) el.classList.remove('drag-over');
+    });
+    el.addEventListener('drop', e => onDropPillar(e, bkey));
     row.appendChild(el);
   });
 
   const wrap = document.getElementById('pillar-chips-wrap');
   wrap.innerHTML = '';
-  Object.entries(PILLARS).forEach(([pkey, pillar]) => {
+  // Embaralha pilares
+  const pillarEntries = Object.entries(PILLARS).sort(() => Math.random() - 0.5);
+  pillarEntries.forEach(([pkey, pillar]) => {
     const el = document.createElement('div');
     el.className = 'pillar-chip';
     el.id = 'pc_' + pkey;
@@ -304,7 +318,7 @@ function buildMode2() {
     el.dataset.block = pillar.block;
     el.textContent = pillar.label;
     el.addEventListener('dragstart', e => onDragStart(e, 'pc'));
-    el.addEventListener('dragend',   e => onDragEnd(e, 'pc'));
+    el.addEventListener('dragend',   e => onDragEnd(e));
     wrap.appendChild(el);
   });
 }
@@ -328,21 +342,24 @@ function buildMode3() {
   });
 }
 
-// ── Mode switching
+// ── Mode switching — only toggles visibility
 function setMode(n) {
   currentMode = n;
-  document.querySelectorAll('.mode-btn').forEach((b,i) => b.classList.toggle('active', i === n-1));
-  document.getElementById('mode1').style.display = n===1 ? '' : 'none';
-  document.getElementById('mode2').style.display = n===2 ? '' : 'none';
-  document.getElementById('mode3').style.display = n===3 ? '' : 'none';
-  document.getElementById('scorebar').style.display = n===3 ? 'none' : '';
-  resetGame();
+  document.querySelectorAll(".mode-btn").forEach((b,i) => b.classList.toggle("active", i === n-1));
+  document.getElementById("mode1").style.display = n===1 ? "" : "none";
+  document.getElementById("mode2").style.display = n===2 ? "" : "none";
+  document.getElementById("mode3").style.display = n===3 ? "" : "none";
+  document.getElementById("scorebar").style.display = n===3 ? "none" : "";
+  if (n === 1) checkComplete1();
+  if (n === 2) checkComplete2();
 }
 
 // ── Drag handlers
 function onDragStart(e, type) {
   dragKey  = e.currentTarget.dataset.key;
   dragType = type;
+  e.dataTransfer.effectAllowed = 'move';
+  e.dataTransfer.setData('text/plain', dragKey); // necessário para Firefox
   setTimeout(() => e.currentTarget.classList.add('dragging'), 0);
 }
 function onDragEnd(e) {
@@ -363,12 +380,11 @@ function onDropDim(e, pillarKey) {
   updateScore(correct);
 
   if (correct) {
-    chip.classList.add('placed');
+    chip.classList.add('placed', 'correct-placed');
     const el = document.createElement('div');
     el.className = 'dropped-chip correct';
     el.textContent = chip.textContent.trim();
     document.getElementById('items_' + pillarKey).appendChild(el);
-    chip.classList.add('correct-placed');
   } else {
     chip.classList.add('shake');
     setTimeout(() => chip.classList.remove('shake'), 400);
@@ -444,17 +460,22 @@ function resetGame() {
   document.getElementById('scoreVal').textContent = '0';
   document.getElementById('errVal').textContent   = '0';
   document.getElementById('progressTxt').textContent = '';
-
   if (currentMode === 1) { buildMode1(); checkComplete1(); }
   if (currentMode === 2) { buildMode2(); checkComplete2(); }
   if (currentMode === 3) { buildMode3(); }
 }
 
-// ── Init
+// ── Init: build all modes first, then show mode 1
 buildMode1();
 buildMode2();
 buildMode3();
 checkComplete1();
+checkComplete2();
+// Apply initial visibility without rebuilding
+document.getElementById('mode1').style.display = '';
+document.getElementById('mode2').style.display = 'none';
+document.getElementById('mode3').style.display = 'none';
+document.getElementById('scorebar').style.display = '';
 </script>
 </body>
 </html>
