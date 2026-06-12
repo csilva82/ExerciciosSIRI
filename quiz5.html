@@ -1,1 +1,614 @@
 
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SIRI Quiz – Atividade 5</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --teal:#1a5f6e;--teal2:#1e7a8f;--teal-light:#d4eef4;
+  --bp:#eaf3fa;--bm:#b8d0e8;
+  --txt:#1a2b35;--muted:#5a7280;--white:#fff;
+  --ok:#1d6b48;--ok-bg:#d2f0e2;
+  --ng:#b72b1f;--ng-bg:#fde8e6;
+  --shadow:0 3px 14px rgba(0,0,0,.10);--r:8px;
+}
+body{font-family:'Inter',sans-serif;background:#eef4f8;color:var(--txt);min-height:100vh}
+nav{background:var(--teal);padding:13px 24px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+nav .brand{color:#fff;font-weight:700;font-size:.95rem;margin-right:6px}
+nav a{color:#fff;text-decoration:none;font-size:.82rem;font-weight:600;padding:6px 14px;border-radius:20px;border:1.5px solid rgba(255,255,255,.35);transition:.15s}
+nav a:hover,nav a.active{background:rgba(255,255,255,.2)}
+.wrap{max-width:780px;margin:0 auto;padding:28px 16px 64px}
+.quiz-header{text-align:center;margin-bottom:22px}
+.quiz-header h1{font-size:1.4rem;font-weight:700;color:var(--teal)}
+.quiz-header p{font-size:.87rem;color:var(--muted);margin-top:5px}
+.scorebar{display:flex;justify-content:space-between;align-items:center;background:var(--white);border:0.5px solid var(--bm);border-radius:var(--r);padding:9px 16px;margin-bottom:16px;font-size:.85rem;gap:8px;flex-wrap:wrap;box-shadow:var(--shadow)}
+.scorebar strong{color:var(--teal)}
+.btn-reset{padding:6px 14px;background:transparent;border:1.5px solid var(--bm);border-radius:var(--r);font-size:.8rem;cursor:pointer;color:var(--muted)}
+.btn-reset:hover{background:var(--bp)}
+.prog-wrap{margin-bottom:16px}
+.prog-info{display:flex;justify-content:space-between;font-size:.77rem;color:var(--muted);margin-bottom:5px}
+.prog-bg{background:var(--bm);border-radius:20px;height:7px}
+.prog-bar{background:var(--teal2);border-radius:20px;height:7px;transition:width .4s}
+.q-card{background:var(--white);border-radius:12px;padding:24px 22px 20px;box-shadow:var(--shadow);margin-bottom:14px;animation:fadein .28s ease}
+@keyframes fadein{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.q-badge{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--teal2);margin-bottom:9px}
+.q-text{font-size:.97rem;font-weight:500;line-height:1.65}
+.options{margin-top:16px;display:flex;flex-direction:column;gap:9px}
+.opt{display:flex;align-items:flex-start;gap:11px;background:var(--bp);border:1.5px solid var(--bm);border-radius:var(--r);padding:11px 13px;cursor:pointer;transition:.15s;font-size:.88rem;line-height:1.5;text-align:left;width:100%}
+.opt:hover:not(.disabled){border-color:var(--teal2);background:var(--teal-light)}
+.opt.ok{background:var(--ok-bg);border-color:var(--ok);color:var(--ok);font-weight:600}
+.opt.ng{background:var(--ng-bg);border-color:var(--ng);color:var(--ng)}
+.opt.show-ok{background:var(--ok-bg);border-color:var(--ok);color:var(--ok)}
+.opt.disabled{cursor:default}
+.opt-l{min-width:25px;height:25px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.73rem;font-weight:700;background:var(--bm);color:var(--teal);flex-shrink:0;margin-top:1px}
+.opt.ok .opt-l,.opt.show-ok .opt-l{background:var(--ok);color:#fff}
+.opt.ng .opt-l{background:var(--ng);color:#fff}
+.feedback{border-radius:var(--r);padding:12px 15px;font-size:.855rem;margin-top:12px;display:none;line-height:1.6}
+.feedback.ok{background:var(--ok-bg);color:var(--ok);border-left:4px solid var(--ok);display:block;border-radius:0 var(--r) var(--r) 0}
+.feedback.ng{background:var(--ng-bg);color:var(--ng);border-left:4px solid var(--ng);display:block;border-radius:0 var(--r) var(--r) 0}
+.actions{display:flex;justify-content:flex-end;gap:10px;margin-top:14px}
+.btn{padding:9px 22px;border:none;border-radius:var(--r);font-size:.87rem;font-weight:600;cursor:pointer;transition:.15s}
+.btn-primary{background:var(--teal);color:#fff}
+.btn-primary:hover{background:var(--teal2)}
+.btn-secondary{background:transparent;border:1.5px solid var(--bm);color:var(--muted)}
+.btn-secondary:hover{background:var(--bp)}
+.btn:disabled{opacity:.4;cursor:default}
+#score-screen{display:none}
+.score-card{background:var(--white);border-radius:14px;padding:34px 26px;box-shadow:var(--shadow);text-align:center}
+.sc-emoji{font-size:3.2rem;line-height:1}
+.sc-num{font-size:2.8rem;font-weight:700;color:var(--teal);margin:8px 0 3px}
+.sc-sub{font-size:.92rem;color:var(--muted)}
+.sc-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:22px 0}
+.sc-item{background:var(--bp);border-radius:var(--r);padding:12px 8px}
+.sc-val{font-size:1.4rem;font-weight:700}
+.sc-lbl{font-size:.73rem;color:var(--muted);margin-top:2px}
+.ok-c{color:var(--ok)}.ng-c{color:var(--ng)}
+.sc-acts{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:8px}
+.rev-item{background:var(--white);border-radius:var(--r);padding:14px;margin-bottom:10px;box-shadow:0 1px 4px rgba(0,0,0,.07)}
+.rev-q{font-size:.86rem;font-weight:600;margin-bottom:7px}
+.rev-a{font-size:.81rem}
+.rev-a.ok{color:var(--ok)}.rev-a.ng{color:var(--ng)}
+.rev-c{font-size:.78rem;color:var(--ok);margin-top:3px}
+.rev-exp{font-size:.78rem;color:var(--muted);margin-top:5px;font-style:italic}
+.study-nav{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.study-nav button{padding:7px 16px;border:1.5px solid var(--bm);border-radius:var(--r);background:transparent;color:var(--muted);font-size:.83rem;cursor:pointer}
+.study-nav button:hover{background:var(--bp)}
+.study-nav .sn-num{font-size:.85rem;color:var(--teal);font-weight:600}
+.reveal-btn{margin-top:14px;padding:8px 18px;background:var(--teal);color:#fff;border:none;border-radius:var(--r);font-size:.85rem;cursor:pointer}
+.answer-box{background:var(--ok-bg);color:var(--ok);border-left:4px solid var(--ok);border-radius:0 var(--r) var(--r) 0;padding:12px 15px;font-size:.87rem;margin-top:12px;display:none;line-height:1.6}
+.mode-row{display:flex;gap:8px;justify-content:center;margin-top:14px;flex-wrap:wrap}
+.mode-btn{padding:6px 18px;border-radius:20px;border:1.5px solid var(--teal);background:transparent;color:var(--teal);font-size:.82rem;font-weight:600;cursor:pointer;transition:.15s}
+.mode-btn.active{background:var(--teal);color:#fff}
+@media(max-width:480px){.sc-grid{grid-template-columns:1fr 1fr}.q-card{padding:16px 12px}}
+</style>
+</head>
+<body>
+
+<nav>
+  <span class="brand">SIRI Quiz</span>
+  <a href="index.html" style="margin-left:auto">⬅ Voltar</a>
+</nav>
+
+<div class="wrap">
+  <div class="quiz-header">
+    <h1>Atividade 5 – Questões da Prova SIRI</h1>
+    <div class="mode-row">
+      <button class="mode-btn active" onclick="setMode('quiz')">🎯 Quiz</button>
+      <button class="mode-btn" onclick="setMode('study')">📖 Estudo</button>
+    </div>
+  </div>
+
+  <div class="scorebar" id="scorebar">
+    <span>Acertos: <strong id="sv">0</strong></span>
+    <span>Erros: <strong id="ev">0</strong></span>
+    <span id="prog-txt" style="color:var(--muted);font-size:.8rem"></span>
+    <button class="btn-reset" onclick="resetAll()">↺ Reiniciar</button>
+  </div>
+
+  <!-- QUIZ -->
+  <div id="quiz-mode">
+    <div class="prog-wrap">
+      <div class="prog-info"><span id="prog-lbl"></span><span id="prog-pct"></span></div>
+      <div class="prog-bg"><div class="prog-bar" id="prog-bar" style="width:0%"></div></div>
+    </div>
+    <div class="q-card" id="q-card">
+      <div class="q-badge" id="q-badge"></div>
+      <div class="q-text"  id="q-text"></div>
+      <div class="options" id="q-opts"></div>
+      <div class="feedback" id="q-fb"></div>
+    </div>
+    <div class="actions">
+      <button class="btn btn-secondary" id="btn-skip" onclick="skip()">Pular</button>
+      <button class="btn btn-primary"   id="btn-next" onclick="next()" disabled>Próxima →</button>
+    </div>
+  </div>
+
+  <!-- STUDY -->
+  <div id="study-mode" style="display:none">
+    <div class="study-nav">
+      <button onclick="studyPrev()">← Anterior</button>
+      <span class="sn-num" id="sn-num"></span>
+      <button onclick="studyNext()">Próxima →</button>
+    </div>
+    <div class="q-card">
+      <div class="q-badge" id="sn-badge"></div>
+      <div class="q-text"  id="sn-text"></div>
+      <div class="options" id="sn-opts" style="pointer-events:none"></div>
+      <button class="reveal-btn" onclick="revealAnswer()">Revelar Resposta</button>
+      <div class="answer-box" id="sn-ans"></div>
+    </div>
+  </div>
+
+  <!-- SCORE -->
+  <div id="score-screen">
+    <div class="score-card">
+      <div class="sc-emoji" id="sc-emoji"></div>
+      <div class="sc-num"   id="sc-num"></div>
+      <div class="sc-sub"   id="sc-sub"></div>
+      <div class="sc-grid">
+        <div class="sc-item"><div class="sc-val ok-c" id="sc-ok"></div><div class="sc-lbl">Corretas</div></div>
+        <div class="sc-item"><div class="sc-val ng-c" id="sc-ng"></div><div class="sc-lbl">Erradas</div></div>
+        <div class="sc-item"><div class="sc-val"      id="sc-sk"></div><div class="sc-lbl">Puladas</div></div>
+      </div>
+      <div class="sc-acts">
+        <button class="btn btn-primary"   onclick="resetAll()">↺ Refazer</button>
+        <button class="btn btn-secondary" onclick="toggleReview()">📋 Revisão</button>
+      </div>
+    </div>
+    <div id="rev-section" style="display:none;margin-top:22px">
+      <h3 style="font-size:.98rem;color:var(--teal);margin-bottom:12px">Revisão das Respostas</h3>
+      <div id="rev-items"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const L=['A','B','C','D'];
+const QS=[
+  // Q1
+  {q:'O CSA deve colocar os interesses de seus clientes como prioridade máxima e recomendar estritamente uma solução com base nos níveis de maturidade SIRI e interesses organizacionais do cliente. Eles devem se abster de buscar benefícios profissionais para seu próprio empregador. Este é um dos exemplos de:',
+   op:['Lealdade, Prudência e Cuidado','Preservação da Confidencialidade','Negociação Justa','Nenhuma das opções acima'],
+   r:0,
+   exp:'Este é um exemplo de Lealdade, Prudência e Cuidado — o CSA deve priorizar os interesses do cliente e evitar conflitos com os interesses do seu empregador.'},
+  // Q2
+  {q:'O CSA precisa armazenar documentos, relatórios e outras entregas durante a avaliação SIRI para referência futura. Eles devem arquivar os documentos do cliente e qualquer material sensível de uma maneira que proteja a confidencialidade do cliente. Este exemplo é parte de:',
+   op:['Diligência e base razoável','Comunicação com clientes atuais e clientes potenciais','Retenção de registros','Nenhuma das opções acima'],
+   r:2,
+   exp:'Arquivar documentos e materiais sensíveis protegendo a confidencialidade é um exemplo de Retenção de Registros, uma obrigação profissional do CSA.'},
+  // Q3
+  {q:'O CSA deverá preparar e compartilhar a agenda da reunião com antecedência:',
+   op:['Para orientar os participantes da reunião de volta ao caminho caso alguém desvie do assunto','Para ter uma discussão difícil','Respeitar o horário do CSA','Nenhuma das opções acima'],
+   r:0,
+   exp:'A agenda é compartilhada previamente para orientar os participantes e manter o foco, evitando desvios do assunto principal durante a reunião.'},
+  // Q4
+  {q:'A etiqueta empresarial é importante porque cria:',
+   op:['Atmosfera competitiva','Conflitos e mal-entendidos','Atmosfera de respeito mútuo','Nenhuma das opções acima'],
+   r:2,
+   exp:'A etiqueta empresarial cria uma atmosfera de respeito mútuo, facilitando relações profissionais saudáveis e colaborativas.'},
+  // Q5
+  {q:'Qual é o principal benefício da integração vertical na Indústria 4.0?',
+   op:['Ganho de eficiência; transferência clara de informações entre o planejamento de negócios e os processos de produção','Melhorar a qualidade e a flexibilidade das operações de fabricação','Agilidade; insights e análises de fábrica em tempo real','Todas as opções acima'],
+   r:3,
+   exp:'A integração vertical oferece todos esses benefícios: eficiência, melhoria de qualidade e flexibilidade, além de agilidade com análises em tempo real.'},
+  // Q6
+  {q:'Quais são as três dimensões do modelo RAMI 4.0 que constituem a base para a discussão das inter-relações e detalhes da Indústria 4.0?',
+   op:['Ciclo de vida do produto, Níveis de hierarquia, IEC 62264','Tempo, Custo, Qualidade','Integração Vertical, Integração Horizontal, Ciclo de Vida do Produto','Camadas de arquitetura, Níveis de hierarquia, Ciclo de vida e Fluxo de valor'],
+   r:3,
+   exp:'As três dimensões do RAMI 4.0 são: Camadas de Arquitetura, Níveis de Hierarquia e Ciclo de Vida e Fluxo de Valor.'},
+  // Q7
+  {q:'Existem padrões específicos de conduta profissional para o CSA demonstrar suas responsabilidades para com seus empregadores individuais. Estes incluem:',
+   op:['Negociação Justa','Lealdade / Fidelidade','Apresentação de desempenho','Todas as opções acima'],
+   r:3,
+   exp:'As responsabilidades do CSA para com seus empregadores incluem Negociação Justa, Lealdade/Fidelidade e Apresentação de Desempenho — todas as opções.'},
+  // Q8
+  {q:'Os processos de design e desenvolvimento de um produto são executados utilizando ferramentas analógicas. As especificações do produto são então comunicadas à equipe de chão de fábrica por meio de desenhos em papel e emails. O feedback do cliente é recebido por meio de vários canais, como e-mail e telefone.',
+   op:['Integração do Ciclo de Vida do Produto: Banda 0 Indefinida','Integração do Ciclo de Vida do Produto: Banda 1 Definida','Integração do Ciclo de Vida do Produto: Banda 2 Digital','Integração do Ciclo de Vida do Produto: Banda 4 Automatizado'],
+   r:1,
+   exp:'O uso de ferramentas analógicas com processos básicos definidos indica Integração do Ciclo de Vida do Produto: Banda 1 Definida.'},
+  // Q9
+  {q:'O sistema de chão de fábrica pode monitorar e gerar um alerta quando houver paradas de máquinas. O sistema também pode fornecer o código de erro, realizar análise de causa raiz e gerar um conjunto de falhas potenciais. As informações podem ser recuperadas e transferidas automaticamente para o fabricante original do equipamento (OEM) para análise posterior.',
+   op:['Automação no Chão de Fábrica: Banda 2 Avançada','Automação no Chão de Fábrica: Banda 3 Completa','Conectividade no Chão de Fábrica: Banda 1 Conectada','Inteligência no Chão de Fábrica: Banda 3 Diagnóstico'],
+   r:3,
+   exp:'A capacidade de análise de causa raiz, geração de alertas e transferência automática para o OEM caracteriza Inteligência no Chão de Fábrica: Banda 3 Diagnóstico.'},
+  // Q10
+  {q:'Um CSA pode aceitar presentes, benefícios ou compensações de um cliente:',
+   op:['Se o Conselho de Administração do cliente aceitar os acordos','Se obtiverem consentimento por escrito de todas as partes envolvidas','Se a administração do cliente concordar com o acordo','Nenhuma das opções acima'],
+   r:3,
+   exp:'O CSA não deve aceitar presentes, benefícios ou compensações de clientes em nenhuma circunstância, pois isso compromete sua independência e objetividade.'},
+  // Q11
+  {q:'Qual é o foco principal da Indústria 4.0?',
+   op:['Automação','Digitalização e Interconectividade','Fabricação just-in-time','Terceirização'],
+   r:1,
+   exp:'O foco principal da Indústria 4.0 é a Digitalização e Interconectividade — integrar sistemas digitais, máquinas e pessoas de forma conectada e inteligente.'},
+  // Q12
+  {q:'O sistema de gestão de estoque da empresa pode processar e analisar o saldo de matérias-primas e consumíveis de acordo com a necessidade pré-definida. Os sistemas de TI dos departamentos de RH e Financeiro podem gerar um alerta e informar a pessoa responsável quando há um desvio de um parâmetro predefinido.',
+   op:['Automação na Empresa: Banda 2 Avançada','Integração Horizontal: Banda 4 Automatizada','Inteligência na Empresa: Banda 2 Visível','Inteligência no Chão de Fábrica: Banda 3 Diagnóstico'],
+   r:1,
+   exp:'A integração automatizada entre departamentos (estoque, RH, Financeiro) com alertas automáticos indica Integração Horizontal: Banda 4 Automatizada.'},
+  // Q13
+  {q:'O chão de fábrica está equipado com diversos tipos de máquinas de Controle Numérico Computadorizado (CNC) e os processos produtivos são executados com limitada intervenção humana. Porém, a movimentação de produtos ou peças é realizada manualmente por equipamentos como empilhadeiras.',
+   op:['Automação no Chão de Fábrica: Banda 2 Avançada','Automação no Chão de Fábrica: Banda 3 Completa','Inteligência no Chão de Fábrica: Banda 1 Informatizada','Inteligência no Chão de Fábrica: Banda 2 Visível'],
+   r:0,
+   exp:'Máquinas CNC com limitada intervenção humana, mas movimentação ainda manual, caracteriza Automação no Chão de Fábrica: Banda 2 Avançada.'},
+  // Q14
+  {q:'Os processos de produção são gerenciados com sistemas integrados baseados em computador, como ERP, PLM, MES e WMS. Os humanos gerenciam predominantemente a troca de dados e informações entre diferentes funções.',
+   op:['Integração Vertical: Banda 4 Automatizada','Integração Horizontal: Banda 3 Integrada','Integração Vertical: Banda 3 Integrada','Integração Horizontal: Banda 4 Automatizada'],
+   r:2,
+   exp:'Sistemas integrados (ERP, PLM, MES, WMS) com intervenção humana na troca de dados indica Integração Vertical: Banda 3 Integrada.'},
+  // Q15
+  {q:'Qual é o modelo de referência da SIRI?',
+   op:['RAMI 4.0','LEAD Framework','Índice de Maturidade da Indústria 4.0','Nenhuma das opções acima'],
+   r:0,
+   exp:'O modelo de referência da SIRI é o RAMI 4.0 (Reference Architecture Model Industrie 4.0), que fornece a estrutura para discutir a Indústria 4.0.'},
+  // Q16
+  {q:'O Building Management System (BMS) pode controlar os ativos das instalações com base em parâmetros predefinidos. O sistema é modernizado com monitoramento de condições para detectar os problemas e fornecer as possíveis causas raízes.',
+   op:['Automação nas Instalações: Banda 3 Completa','Automação nas Instalações: Banda 4 Flexível','Inteligência nas Instalações: Banda 3 Diagnóstico','Inteligência nas Instalações: Banda 4 Preditiva'],
+   r:2,
+   exp:'Monitoramento de condições com detecção de problemas e análise de causas raízes caracteriza Inteligência nas Instalações: Banda 3 Diagnóstico.'},
+  // Q17
+  {q:'Todos os equipamentos e sistemas no chão de fábrica são controlados pelo CLP e equipados com Andon conectado através do sistema Digital Andon. Se o equipamento não estiver operando conforme os parâmetros, o sistema produzirá um alerta. A manutenção é realizada principalmente em reação a problemas.',
+   op:['Inteligência no Chão de Fábrica: Banda 2 Visível','Inteligência nas Instalações: Banda 2 Visível','Automação no Chão de Fábrica: Banda 2 Avançado','Integração Vertical: Banda 2 Digital'],
+   r:0,
+   exp:'Monitoramento via sistema Digital Andon com alertas visuais, mas manutenção reativa, caracteriza Inteligência no Chão de Fábrica: Banda 2 Visível.'},
+  // Q18
+  {q:'As informações dos ativos da instalação (caldeira, gerador e compressores de ar) são interconectadas e gerenciadas pelo BMS. No entanto, o nível de segurança do sistema é mínimo e é vulnerável a ameaças externas.',
+   op:['Automação nas Instalações: Banda 2 Avançada','Automação nas Instalações: Banda 3 Completa','Conectividade nas instalações: Banda 2 Interoperável','Conectividade nas Instalações: Banda 3 Interoperável e Segura'],
+   r:2,
+   exp:'Ativos interconectados via BMS, porém com segurança mínima e vulnerável, indica Conectividade nas Instalações: Banda 2 Interoperável (sem segurança robusta).'},
+  // Q19
+  {q:'Os sistemas de CRM e ERP podem trocar informações em tempo real através de uma rede segura. Os sistemas integrados podem ser ligados a diferentes entidades legais em todo o mundo, e a infraestrutura de rede pode ser reconfigurada rapidamente para acomodar novos requisitos.',
+   op:['Conectividade no Chão de Fábrica: Banda 4 Tempo Real','Inteligência na Empresa: Banda 5 Adaptável','Integração Vertical: Banda 4 Automatizada','Conectividade na Empresa: Banda 5 Escalável'],
+   r:3,
+   exp:'Troca de informações em tempo real com rede segura e infraestrutura reconfiguravelglobalmente indica Conectividade na Empresa: Banda 5 Escalável.'},
+  // Q20
+  {q:'Como Avaliador Certificado SIRI (CSA), em quais das seguintes áreas você tem o dever de defender para seus clientes?',
+   op:['Negociação Justa','Preservação da Confidencialidade','Lealdade, Prudência e Cuidado','Todas as opções acima'],
+   r:3,
+   exp:'O CSA tem dever de defender seus clientes em todas essas áreas: Negociação Justa, Preservação da Confidencialidade, e Lealdade, Prudência e Cuidado.'},
+  // Q21
+  {q:'Os processos de produção são gerenciados pelo MES e executados por robôs. Se houver algum erro ou falha nos robôs, os dados relevantes são recuperados automaticamente pelos sensores para análise. O MES é modernizado com Inteligência Artificial (IA) e pode prever a possibilidade de falha e identificar a causa raiz.',
+   op:['Automação no Chão de Fábrica: Banda 3 Completa','Automação no Chão de Fábrica: Banda 4 Flexível','Inteligência no Chão de Fábrica: Banda 3 Diagnóstico','Inteligência no Chão de Fábrica: Banda 4 Preditiva'],
+   r:3,
+   exp:'IA integrada ao MES com capacidade preditiva de falhas caracteriza Inteligência no Chão de Fábrica: Banda 4 Preditiva.'},
+  // Q22
+  {q:'Qual das alternativas a seguir NÃO é uma aplicação típica de IA na manufatura?',
+   op:['Automação de controle de qualidade','Manutenção Preditiva','Gestão de Recursos Humanos','Gestão da cadeia de suprimentos'],
+   r:2,
+   exp:'Gestão de Recursos Humanos não é uma aplicação típica de IA na manufatura. As aplicações típicas incluem controle de qualidade, manutenção preditiva e gestão da cadeia de suprimentos.'},
+  // Q23
+  {q:'Muitas empresas estão presentes nas redes sociais (Facebook, Twitter e outras plataformas). Como CSA, você pode postar informações nas redes sociais sobre:',
+   op:['Insights de vários setores','Informações relacionadas ao cliente','Caso de negócios do seu projeto atual','Nenhuma das opções acima'],
+   r:0,
+   exp:'O CSA pode compartilhar insights gerais de vários setores nas redes sociais, mas nunca informações sobre clientes ou projetos em andamento, que são confidenciais.'},
+  // Q24
+  {q:'As informações administrativas dos departamentos da empresa (Vendas, Finanças, RH, Compras e Planejamento de Demanda) estão interconectadas com o ERP. Os dados são registrados e sincronizados em intervalos de tempo específicos. Os sistemas estão bem protegidos por uma estrutura de segurança vigilante e resiliente.',
+   op:['Automação na Empresa: Banda 3 Completa','Automação na Empresa: Banda 4 Flexível','Conectividade na Empresa: Banda 3 Interoperável e Segura','Conectividade na Empresa: Banda 4 Tempo Real'],
+   r:2,
+   exp:'Departamentos interconectados via ERP com sincronização periódica e segurança robusta indica Conectividade na Empresa: Banda 3 Interoperável e Segura.'},
+  // Q25
+  {q:'Qual dos seguintes fatores molda o comportamento ético dos membros de uma organização?',
+   op:['O comportamento do supervisor','Cultura organizacional','Código de ética','Todas as opções acima'],
+   r:3,
+   exp:'O comportamento ético é moldado por todos esses fatores: o comportamento do supervisor, a cultura organizacional e o código de ética da empresa.'},
+  // Q26
+  {q:'O que o framework LEAD representa no contexto da SIRI?',
+   op:['Liderar, Envolver, Agir, Desenvolver','Aprender, Avaliar, Arquitetar, Entregar','Ouvir, Envolver, Adaptar, Conduzir','Aprender, Envolver, Adaptar, Entregar'],
+   r:3,
+   exp:'LEAD significa: Learn (Aprender), Engage (Envolver), Act (Adaptar/Agir) e Develop (Entregar/Desenvolver) — um framework para a transformação da manufatura.'},
+  // Q27
+  {q:'As operações de fabricação são realizadas por meio de sistemas de TI e TO, conectados por meio de um protocolo de comunicação padrão. As ordens de serviço geradas a partir de um pedido de compra são gerenciadas, verificadas, planejadas e transferidas diretamente para o chão de fábrica para produção autônoma.',
+   op:['Conectividade no Chão de Fábrica: Banda 3 Interoperável e Segura','Automação no Chão de Fábrica: Banda 3 Completa','Integração Vertical: Banda 4 Automatizada','Integração Vertical: Banda 3 Integrada'],
+   r:2,
+   exp:'Ordens de serviço transferidas automaticamente do pedido de compra ao chão de fábrica para produção autônoma indica Integração Vertical: Banda 4 Automatizada.'},
+  // Q28
+  {q:'Qual é o foco da etapa "Avaliar" no framework LEAD?',
+   op:['Aprender os conceitos chave','Avaliações abrangentes','Estratégia e roadmap','Implementação'],
+   r:1,
+   exp:'A etapa "Avaliar" do framework LEAD foca em realizar avaliações abrangentes da maturidade da organização em relação à Indústria 4.0.'},
+  // Q29
+  {q:'Qual das seguintes situações resultaria na não independência de um CSA no que diz respeito para conduzir a avaliação do cliente?',
+   op:['Um CSA é um diretor honorário de uma organização sem fins lucrativos','O CSA é membro do Conselho de Administração do cliente','O CSA cobra do cliente uma taxa para realizar a avaliação','Nenhuma das opções acima'],
+   r:1,
+   exp:'Ser membro do Conselho de Administração do cliente compromete diretamente a independência do CSA, pois cria um conflito de interesses que impede uma avaliação imparcial.'},
+  // Q30
+  {q:'Durante a comunicação com clientes atuais e potenciais, o CSA deve:',
+   op:['Divulgar aos clientes os benefícios e riscos associados à avaliação SIRI','Distinguir entre fato e opinião na apresentação dos resultados e recomendações','Gerenciar as expectativas do cliente, manter o foco nas entregas gerais, concordando e aplicando os termos contratuais','Todas as opções acima'],
+   r:3,
+   exp:'O CSA deve adotar todas essas práticas na comunicação: divulgar riscos e benefícios, distinguir fatos de opiniões e gerenciar expectativas dos clientes.'},
+  // Q31
+  {q:'O que a SIRI pretende estabelecer entre os stakeholders?',
+   op:['Uma linguagem comum','Uma tecnologia comum','Um objetivo comum','Uma fonte de financiamento comum'],
+   r:0,
+   exp:'A SIRI pretende estabelecer uma linguagem comum entre todos os stakeholders para facilitar a discussão e a colaboração na transformação da manufatura.'},
+  // Q32
+  {q:'Qual é o foco principal da SIRI?',
+   op:['Processos, Tecnologia, Organização','Automação, Conectividade, Inteligência','Prontidão de Talentos, Estrutura e Gestão','Todas as opções acima'],
+   r:0,
+   exp:'O foco principal da SIRI é avaliar as três dimensões fundamentais: Processos, Tecnologia e Organização — os três blocos de construção da avaliação.'},
+  // Q33
+  {q:'Qual dos itens a seguir NÃO é um componente de uma Fábrica Inteligente?',
+   op:['Sistemas Ciber-Físicos','Computação em nuvem','Análise de Big Data','Computação Quântica'],
+   r:3,
+   exp:'Computação Quântica não é um componente padrão de uma Fábrica Inteligente. Os componentes típicos incluem Sistemas Ciber-Físicos, Computação em Nuvem e Análise de Big Data.'},
+  // Q34
+  {q:'Quem desenvolveu o Índice de Prontidão da Indústria Inteligente – Smart Industry Readiness Index (SIRI)?',
+   op:['Fórum Econômico Mundial','Conselho de Desenvolvimento Econômico de Cingapura','McKinsey & Company','Accenture'],
+   r:1,
+   exp:'O SIRI foi desenvolvido pelo Conselho de Desenvolvimento Econômico de Cingapura (EDB – Economic Development Board of Singapore).'},
+  // Q35
+  {q:'As máquinas do chão de fábrica são operadas automaticamente pelo Sistema de Controle Distribuído (DCS) sem envolvimento humano. A intervenção humana é necessária apenas para verificações de segurança, mau funcionamento do equipamento, etc.',
+   op:['Inteligência no Chão de Fábrica: Banda 2 Visível','Automação no Chão de Fábrica: Banda 2 Avançada','Inteligência no Chão de Fábrica: Banda 3 Diagnóstico','Automação no Chão de Fábrica: Banda 3 Completa'],
+   r:3,
+   exp:'Operação automática via DCS com intervenção humana mínima (apenas segurança e mau funcionamento) indica Automação no Chão de Fábrica: Banda 3 Completa.'},
+  // Q36
+  {q:'As informações entre clientes e fornecedores são gerenciadas por sistemas informatizados como o ERP. Os dados ao longo dos processos da cadeia de abastecimento são transferidos e trocados através de ferramentas digitais. No entanto, o sistema ainda requer alguma intervenção humana.',
+   op:['Integração Vertical: Banda 2 Digital','Integração Vertical: Banda 3 Integrada','Integração Horizontal: Banda 2 Digital','Integração Horizontal: Banda 3 Integrada'],
+   r:2,
+   exp:'Transferência de dados via ferramentas digitais na cadeia de suprimentos com alguma intervenção humana indica Integração Horizontal: Banda 2 Digital.'},
+  // Q37
+  {q:'Qual é considerado o principal desafio que impede a adoção da Indústria 4.0?',
+   op:['Falta de tecnologia','Falta de visão e estratégia','Falta de financiamento','Falta de mão de obra qualificada'],
+   r:1,
+   exp:'A falta de visão e estratégia é considerada o principal desafio para a adoção da Indústria 4.0, pois sem direcionamento claro as iniciativas não avançam.'},
+  // Q38
+  {q:'O que a SIRI pretende oferecer às empresas?',
+   op:['Um checklist para transformação','Um roadmap para a Indústria 4.0','Um framework para melhoria contínua','Todas as opções acima'],
+   r:3,
+   exp:'A SIRI oferece tudo isso: um checklist para transformação, um roadmap para a Indústria 4.0 e um framework para melhoria contínua.'},
+  // Q39
+  {q:'Principalmente, para que é usado um Digital Twin?',
+   op:['Armazenamento de dados','Simulação e análise','Automação','Rede'],
+   r:1,
+   exp:'Um Digital Twin é usado principalmente para simulação e análise — criar uma réplica digital de um ativo físico para testar cenários e otimizar operações.'},
+  // Q40
+  {q:'Qual das alternativas a seguir geralmente não é o objetivo de um código de ética?',
+   op:['Criar um local de trabalho ético','Avaliar os componentes éticos das ações propostas dos colaboradores','Aumentar continuamente os lucros do negócio','Melhorar a imagem pública da empresa'],
+   r:2,
+   exp:'Aumentar continuamente os lucros do negócio não é um objetivo de um código de ética. Os objetivos éticos visam conduta, integridade e ambiente de trabalho saudável.'},
+  // Q41
+  {q:'Ao fornecer uma recomendação de solução ao cliente atual, o CSA deve:',
+   op:['Revelar como os insumos foram selecionados e as possíveis restrições e riscos associados a essas decisões','Explicar que é necessária uma análise mais aprofundada antes de investir em tais soluções','Declarar explicitamente as limitações das descobertas','Todas as opções acima'],
+   r:3,
+   exp:'O CSA deve adotar todas essas práticas ao fornecer recomendações: revelar critérios de seleção, indicar necessidade de análise adicional e declarar limitações.'},
+  // Q42
+  {q:'Qual é o principal benefício da integração do ciclo de vida do produto na Indústria 4.0?',
+   op:['Permite uma tomada de decisão mais rápida com base em dados em tempo real','Melhora a coordenação da produção entre departamentos','Redução de custos devido a menos erros e discrepâncias','Todas as opções acima'],
+   r:3,
+   exp:'A integração do ciclo de vida do produto traz todos esses benefícios: decisões mais rápidas, melhor coordenação e redução de custos.'},
+  // Q43
+  {q:'Qual é o principal benefício da integração horizontal na Indústria 4.0?',
+   op:['Respostas ágeis e em tempo real','Maior integração de dados em toda a cadeia de suprimentos','Capacidade aprimorada de ajustar operações internas simultaneamente','Todas as opções acima'],
+   r:3,
+   exp:'A integração horizontal oferece todos esses benefícios: agilidade, maior integração da cadeia de suprimentos e capacidade de ajuste simultâneo das operações.'},
+  // Q44
+  {q:'Conhecer e praticar uma boa etiqueta empresarial pode ajudar o CSA a:',
+   op:['Construir relacionamentos mais fortes com os clientes','Mostrar confiança','Promover uma atmosfera positiva e uma cultura de trabalho','Todas as opções acima'],
+   r:3,
+   exp:'Uma boa etiqueta empresarial contribui para todos esses aspectos: relações mais fortes, demonstração de confiança e promoção de cultura positiva.'},
+  // Q45
+  {q:'O Building Management System (BMS) é usado para gerenciar os serviços da instalação (compressores de ar, iluminação e alarmes de incêndio). No entanto, os operadores são obrigados a monitorar e intervir em caso de eventos não planejados.',
+   op:['Automação nas Instalações: Banda 2 Avançado','Automação nas Instalações: Banda 3 Completo','Inteligência nas Instalações: Banda 2 Visível','Inteligência nas Instalações: Banda 3 Diagnóstico'],
+   r:0,
+   exp:'BMS gerenciando serviços das instalações mas ainda requerendo intervenção humana para eventos não planejados indica Automação nas Instalações: Banda 2 Avançada.'},
+  // Q46
+  {q:'A maioria das atividades empresariais é gerenciada por meio de um ERP. Os departamentos de Planejamento, Compras e RH estão integrados ao ERP, permitindo que tarefas sejam executadas automaticamente. No entanto, a execução de processos exige um certo nível de intervenção humana no fluxo de trabalho.',
+   op:['Automação na Empresa: Banda 2 Avançada','Integração Vertical: Banda 3 Integrada','Inteligência na Empresa: Banda 2 Visível','Integração Horizontal: Banda 3 Integrada'],
+   r:1,
+   exp:'ERP integrando múltiplos departamentos com execução automática mas ainda com alguma intervenção humana indica Integração Vertical: Banda 3 Integrada.'},
+  // Q47
+  {q:'O CSA não deve oferecer, solicitar ou aceitar qualquer presente, benefício ou compensação que possa comprometer seu próprio pensamento independente. Além disso, devem abster-se de indicar quaisquer benefícios a curto prazo em detrimento do bem-estar do cliente a longo prazo. Este é um exemplo de:',
+   op:['Má conduta','Deturpação','Independência e Objetividade','Nenhuma das opções acima'],
+   r:2,
+   exp:'Manter o pensamento independente e priorizar o bem-estar de longo prazo do cliente é um exemplo do princípio de Independência e Objetividade do CSA.'},
+  // Q48
+  {q:'Os CSAs não devem interromper durante as discussões com os clientes. Na situação em que a interrupção é inevitável, o CSA precisa:',
+   op:['Garantir uma discussão produtiva e demonstrar respeito','Escolher as palavras com cuidado e evitar tons ásperos e palavrões','Orientar os participantes da reunião de volta ao caminho, caso alguém discorde','Todas as opções acima'],
+   r:3,
+   exp:'Quando a interrupção for inevitável, o CSA deve adotar todas essas práticas: garantir produtividade, usar palavras adequadas e reorientar a discussão.'},
+  // Q49
+  {q:'Quais são os princípios-chave da Indústria 4.0?',
+   op:['Centralização, Isolamento, Controle Manual, Terceirização, Especialização','Automação, Eficiência, Velocidade, Escala, Complexidade, Flexibilidade','Interoperabilidade, Virtualização, Descentralização, Capacidade em Tempo Real, Orientação a Serviços, Modularidade','Nenhuma das opções acima'],
+   r:2,
+   exp:'Os princípios-chave da Indústria 4.0 são: Interoperabilidade, Virtualização, Descentralização, Capacidade em Tempo Real, Orientação a Serviços e Modularidade.'},
+  // Q50
+  {q:'O que a SIRI oferece além de servir como um checklist?',
+   op:['Uma plataforma tecnológica','Uma fonte de financiamento','Um guia de melhoria passo a passo','Um programa de certificação'],
+   r:2,
+   exp:'Além de servir como checklist, a SIRI oferece um guia de melhoria passo a passo para apoiar as empresas na sua jornada de transformação para a Indústria 4.0.'},
+  // Q51
+  {q:'Se o CSA identificar um erro no relatório final em que a dimensão de foco incorreta é sugerida como uma área de melhoria, a falha em corrigir o erro e em informar o cliente é considerada como:',
+   op:['Má conduta','Deturpação','Independência e Objetividade','Nenhuma das opções acima'],
+   r:1,
+   exp:'Não corrigir um erro identificado no relatório e não informar o cliente é considerado Deturpação — uma violação grave dos padrões éticos do CSA.'},
+  // Q52
+  {q:'A maioria dos processos de produção é executada automaticamente por Controle Lógico Programável (CLP). No entanto, os operadores são obrigados a monitorar o estado de saúde das máquinas e resolver quaisquer problemas.',
+   op:['Automação no Chão de Fábrica: Banda 1 Básica','Automação no Chão de Fábrica: Banda 2 Avançada','Inteligência no Chão de Fábrica: Banda 1 Informatizada/Computadorizada','Inteligência no Chão de Fábrica: Banda 2 Visível'],
+   r:1,
+   exp:'Produção automática via CLP com monitoramento humano necessário para problemas indica Automação no Chão de Fábrica: Banda 2 Avançada.'},
+  // Q53
+  {q:'Os CSAs devem manter confidenciais as informações sobre clientes atuais, antigos e potenciais e aderir aos NDAs, a menos que:',
+   op:['O cliente ou potencial cliente permita a divulgação das informações','O relatório diz respeito a atividades ilegais por parte do cliente ou potencial cliente','A divulgação é exigida por lei','Todas as opções acima'],
+   r:3,
+   exp:'A confidencialidade pode ser quebrada em todas essas situações: com permissão do cliente, para reportar atividades ilegais ou quando exigida por lei.'},
+  // Q54
+  {q:'A ética é um conjunto de princípios morais ou regras de conduta baseadas nos seguintes princípios fundamentais:',
+   op:['Cuidado','Diligência','Honestidade','Todas as opções acima'],
+   r:3,
+   exp:'A ética baseia-se em todos esses princípios fundamentais: Cuidado, Diligência e Honestidade — formando a base para uma conduta profissional íntegra.'},
+  // Q55
+  {q:'Todos os ativos das instalações estão conectados a uma sala de controle central pelo BMS. As informações dos ativos são monitoradas em tempo real por meio de um protocolo de comunicação resiliente e de alta velocidade. Uma estrutura de segurança vigilante é implementada contra acesso ou interrupção não autorizados.',
+   op:['Automação nas Instalações: Banda 3 Completa','Automação nas Instalações: Banda 4 Flexível','Conectividade nas Instalações: Banda 3 Interoperável e Segura','Conectividade nas Instalações: Banda 4 Tempo Real'],
+   r:3,
+   exp:'Monitoramento em tempo real via protocolo de alta velocidade com segurança robusta indica Conectividade nas Instalações: Banda 4 Tempo Real.'},
+  // Q56
+  {q:'Os pedidos dos clientes e as previsões de demanda são comunicados através de ferramentas analógicas (e-mail e telefone). Sistemas baseados em computador são utilizados para a projeção do planejamento da demanda. Porém, os planos de produção são distribuídos manualmente. Os POPs são impressos e mantidos nas áreas de chão de fábrica.',
+   op:['Integração Vertical: Banda 1 Definida','Inteligência na Empresa: Banda 1 Informatizada','Integração Horizontal: Banda 1 Definida','Inteligência na Empresa: Banda 2 Visível'],
+   r:2,
+   exp:'Comunicação com clientes/fornecedores via ferramentas analógicas com processos básicos definidos indica Integração Horizontal: Banda 1 Definida.'},
+  // Q57
+  {q:'O CSA deve fornecer as melhores práticas e conhecimentos de mercado provenientes de recursos confiáveis, como o Fórum Econômico Mundial, a Platform Industry 4.0, o NIST, etc., e não deve citar diretamente fóruns de discussão gerais. Este é um dos exemplos de:',
+   op:['Diligência e base razoável','Comunicação com clientes atuais e clientes potenciais','Retenção de registros','Nenhuma das opções acima'],
+   r:0,
+   exp:'Utilizar fontes confiáveis e reconhecidas ao fornecer recomendações é um exemplo de Diligência e Base Razoável — garantindo qualidade e credibilidade das informações.'},
+  // Q58
+  {q:'Qual tecnologia NÃO é comumente associada à Indústria 4.0?',
+   op:['Internet das Coisas (IoT)','Inteligência Artificial Generativa','Computação de borda','Sistemas SCADA'],
+   r:1,
+   exp:'Inteligência Artificial Generativa não é comumente associada à Indústria 4.0. IoT, Computação de Borda e SCADA são tecnologias centrais do ecossistema da Indústria 4.0.'},
+  // Q59
+  {q:'Os equipamentos, máquinas e sistemas de informática no chão de fábrica estão ligados através de uma rede de TI segura, através da qual as informações podem ser transferidas em tempo real. A arquitetura de TI pode ser facilmente reconfigurada e ajustada por meio de componentes plug-and-play (TSN, IIoT, banco de dados em nuvem, dispositivos portáteis).',
+   op:['Conectividade no Chão de Fábrica: Banda 4 Tempo Real','Automação no Chão de Fábrica: Banda 4 Flexível','Inteligência no Chão de Fábrica: Banda 5 Adaptável','Conectividade no Chão de Fábrica: Banda 5 Escalável'],
+   r:3,
+   exp:'Rede TI segura com transferência em tempo real e arquitetura reconfigurávelvia plug-and-play indica Conectividade no Chão de Fábrica: Banda 5 Escalável.'},
+  // Q60
+  {q:'Qual das alternativas a seguir é um desafio na implementação da Indústria 4.0?',
+   op:['Riscos de segurança cibernética','Sobrecarga de dados','Lacunas de habilidades','Todas as opções acima'],
+   r:3,
+   exp:'Todos são desafios reais na implementação da Indústria 4.0: riscos de segurança cibernética, sobrecarga de dados e lacunas de habilidades na força de trabalho.'}
+];
+
+let mode='quiz',idx=0,score=0,errs=0,skips=0,answered=false,results=[],studyIdx=0;
+
+function renderQ(){
+  answered=false;
+  const q=QS[idx];
+  document.getElementById('q-badge').textContent='Questão '+(idx+1)+' de '+QS.length;
+  document.getElementById('q-text').textContent=q.q;
+  document.getElementById('q-fb').className='feedback';
+  document.getElementById('btn-next').disabled=true;
+  document.getElementById('btn-skip').disabled=false;
+  const opts=document.getElementById('q-opts');
+  opts.innerHTML='';
+  q.op.forEach((op,i)=>{
+    const b=document.createElement('button');
+    b.className='opt';b.dataset.i=i;
+    b.innerHTML=`<span class="opt-l">${L[i]}</span><span>${op}</span>`;
+    b.addEventListener('click',()=>pick(i));
+    opts.appendChild(b);
+  });
+  const pct=Math.round(idx/QS.length*100);
+  document.getElementById('prog-lbl').textContent='Questão '+(idx+1)+' de '+QS.length;
+  document.getElementById('prog-pct').textContent=pct+'%';
+  document.getElementById('prog-bar').style.width=pct+'%';
+  document.getElementById('prog-txt').textContent='Respondidas: '+idx+'/'+QS.length;
+  const c=document.getElementById('q-card');
+  c.style.animation='none';requestAnimationFrame(()=>{c.style.animation='';});
+}
+
+function pick(chosen){
+  if(answered)return;
+  answered=true;
+  const q=QS[idx];const ok=chosen===q.r;
+  document.querySelectorAll('#q-opts .opt').forEach((el,i)=>{
+    el.classList.add('disabled');
+    if(i===q.r)el.classList.add('show-ok');
+    if(i===chosen&&ok)el.classList.add('ok');
+    if(i===chosen&&!ok)el.classList.add('ng');
+  });
+  const fb=document.getElementById('q-fb');
+  if(ok){fb.className='feedback ok';fb.textContent='✓ Correto!'+(q.exp?' – '+q.exp:'');score++;}
+  else{fb.className='feedback ng';fb.textContent='✗ Incorreto. Resposta: '+L[q.r]+') '+q.op[q.r]+(q.exp?' — '+q.exp:'');errs++;}
+  results.push({q,chosen,ok,skipped:false});
+  document.getElementById('sv').textContent=score;
+  document.getElementById('ev').textContent=errs;
+  document.getElementById('btn-next').disabled=false;
+  document.getElementById('btn-skip').disabled=true;
+}
+
+function skip(){
+  if(answered)return;
+  results.push({q:QS[idx],chosen:-1,ok:false,skipped:true});
+  skips++;next();
+}
+
+function next(){
+  idx++;
+  if(idx>=QS.length){showScore();return;}
+  renderQ();
+}
+
+function showScore(){
+  document.getElementById('quiz-mode').style.display='none';
+  document.getElementById('score-screen').style.display='';
+  document.getElementById('scorebar').style.display='none';
+  const pct=Math.round(score/QS.length*100);
+  document.getElementById('sc-emoji').textContent=pct>=80?'🎉':pct>=60?'👍':'📚';
+  document.getElementById('sc-num').textContent=pct+'%';
+  document.getElementById('sc-sub').textContent=score+' de '+QS.length+' corretas';
+  document.getElementById('sc-ok').textContent=score;
+  document.getElementById('sc-ng').textContent=errs;
+  document.getElementById('sc-sk').textContent=skips;
+  document.getElementById('prog-bar').style.width='100%';
+  document.getElementById('prog-pct').textContent='100%';
+}
+
+function toggleReview(){
+  const sec=document.getElementById('rev-section');
+  if(sec.style.display!=='none'){sec.style.display='none';return;}
+  sec.style.display='';
+  const c=document.getElementById('rev-items');c.innerHTML='';
+  results.forEach((r,i)=>{
+    const d=document.createElement('div');d.className='rev-item';
+    let h=`<div class="rev-q">${i+1}. ${r.q.q}</div>`;
+    if(r.skipped)h+=`<div class="rev-a" style="color:var(--muted)">Pulada — correta: ${L[r.q.r]}) ${r.q.op[r.q.r]}</div>`;
+    else if(r.ok)h+=`<div class="rev-a ok">✓ ${L[r.chosen]}) ${r.q.op[r.chosen]}</div>`;
+    else{h+=`<div class="rev-a ng">✗ Sua: ${L[r.chosen]}) ${r.q.op[r.chosen]}</div>`;h+=`<div class="rev-c">✓ Correta: ${L[r.q.r]}) ${r.q.op[r.q.r]}</div>`;}
+    if(r.q.exp)h+=`<div class="rev-exp">${r.q.exp}</div>`;
+    d.innerHTML=h;c.appendChild(d);
+  });
+}
+
+function renderStudy(){
+  const q=QS[studyIdx];
+  document.getElementById('sn-badge').textContent='Questão '+(studyIdx+1)+' de '+QS.length;
+  document.getElementById('sn-text').textContent=q.q;
+  document.getElementById('sn-ans').style.display='none';
+  const opts=document.getElementById('sn-opts');opts.innerHTML='';
+  q.op.forEach((op,i)=>{
+    const b=document.createElement('button');b.className='opt disabled';
+    b.innerHTML=`<span class="opt-l">${L[i]}</span><span>${op}</span>`;
+    opts.appendChild(b);
+  });
+  document.getElementById('sn-num').textContent=(studyIdx+1)+' / '+QS.length;
+}
+
+function revealAnswer(){
+  const q=QS[studyIdx];
+  document.querySelectorAll('#sn-opts .opt').forEach((el,i)=>{if(i===q.r)el.classList.add('show-ok');});
+  const a=document.getElementById('sn-ans');
+  a.textContent='✓ '+L[q.r]+') '+q.op[q.r]+(q.exp?' — '+q.exp:'');
+  a.style.display='block';
+}
+
+function studyNext(){studyIdx=(studyIdx+1)%QS.length;renderStudy();}
+function studyPrev(){studyIdx=(studyIdx-1+QS.length)%QS.length;renderStudy();}
+
+function setMode(m){
+  mode=m;
+  document.querySelectorAll('.mode-btn').forEach((b,i)=>b.classList.toggle('active',['quiz','study'][i]===m));
+  document.getElementById('quiz-mode').style.display=m==='quiz'?'':'none';
+  document.getElementById('study-mode').style.display=m==='study'?'':'none';
+  document.getElementById('score-screen').style.display='none';
+  document.getElementById('scorebar').style.display=m==='quiz'?'':'none';
+  if(m==='study')renderStudy();
+}
+
+function resetAll(){
+  idx=0;score=0;errs=0;skips=0;results=[];
+  document.getElementById('sv').textContent='0';
+  document.getElementById('ev').textContent='0';
+  document.getElementById('score-screen').style.display='none';
+  document.getElementById('rev-section').style.display='none';
+  document.getElementById('scorebar').style.display=mode==='quiz'?'':'none';
+  if(mode==='quiz'){document.getElementById('quiz-mode').style.display='';renderQ();}
+  else renderStudy();
+}
+
+renderQ();
+</script>
+</body>
+</html>
