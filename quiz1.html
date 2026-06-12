@@ -221,17 +221,25 @@ function enableTouchDrag(selector, type){
 
     // MODE 1
     const pillarSlot = target?.closest(".pillar-slot");
-    if(pillarSlot){
-      const pillarKey = pillarSlot.id.replace("slot_","");
-      dropDim(pillarKey);
-    }
+   if(pillarSlot){
+  const pillarKey = pillarSlot.id.replace("slot_","");
+  dropDim(pillarKey);
 
-    // MODE 2
-    const blockDrop = target?.closest(".block-drop");
-    if(blockDrop){
-      const blockKey = blockDrop.id.replace("block_","");
-      dropPillar(blockKey);
-    }
+  // se acertou, some com o item original
+  if(DIMENSIONS[dragKey].pillar === pillarKey){
+      touchItem.style.display = "none";
+  }
+}
+
+if(blockDrop){
+  const blockKey = blockDrop.id.replace("block_","");
+  dropPillar(blockKey);
+
+  // se acertou, some com o item original
+  if(PILLARS[dragKey].block === blockKey){
+      touchItem.style.display = "none";
+  }
+}
 
     touchItem.style.position = "";
     touchItem.style.left = "";
@@ -277,6 +285,7 @@ function dropDim(pillarKey){
   updateScore(correct);
   if(correct){
     chip.classList.add('placed');
+    chip.style.display = 'none';
     const el=document.createElement('div');
     el.className='dropped-chip correct'; el.textContent=chip.textContent;
     document.getElementById('items_'+pillarKey).appendChild(el);
@@ -326,6 +335,7 @@ function dropPillar(blockKey){
   updateScore(correct);
   if(correct){
     chip.classList.add('placed');
+    chip.style.display = 'none';
     const el=document.createElement('div');
     el.className='dropped-chip correct'; el.textContent=chip.textContent;
     document.getElementById('bitems_'+blockKey).appendChild(el);
