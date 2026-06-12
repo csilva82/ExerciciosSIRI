@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -21,8 +20,6 @@ nav{background:var(--teal);padding:13px 24px;display:flex;gap:10px;align-items:c
 nav .brand{color:#fff;font-weight:700;font-size:.95rem;margin-right:6px}
 nav a{color:#fff;text-decoration:none;font-size:.82rem;font-weight:600;padding:6px 14px;border-radius:20px;border:1.5px solid rgba(255,255,255,.35);transition:.15s}
 nav a:hover,nav a.active{background:rgba(255,255,255,.2)}
-nav .spacer { margin-left:auto; }
-  
 .wrap{max-width:780px;margin:0 auto;padding:28px 16px 64px}
 .quiz-header{text-align:center;margin-bottom:22px}
 .quiz-header h1{font-size:1.4rem;font-weight:700;color:var(--teal)}
@@ -92,9 +89,9 @@ nav .spacer { margin-left:auto; }
 
 <nav>
   <span class="brand">SIRI Quiz</span>
-  
-  <span class="spacer"></span>
-  <button class="mode-btn" onclick="goHome()">⬅ Voltar</button>
+  <a href="siri_quiz.html">Atividades 2 e 6</a>
+  <a href="siri_quiz2.html" class="active">Questões para a Prova</a>
+  <a href="siri_drag_drop.html" style="margin-left:auto">🎮 Arrasta e Solta</a>
 </nav>
 
 <div class="wrap">
@@ -102,9 +99,8 @@ nav .spacer { margin-left:auto; }
     <h1>Questões para a Prova SIRI</h1>
     <p id="total-info">88 questões · Todos os módulos · 100% gabaritado</p>
     <div class="mode-row">
-      <!--<button class="mode-btn active" onclick="setMode('quiz')">🧠 Quiz</button>-->
-      <!-- <button class="mode-btn"        onclick="setMode('study')">📖 Estudo</button> -->
-     
+      <button class="mode-btn active" onclick="setMode('quiz')">🧠 Quiz</button>
+      <button class="mode-btn"        onclick="setMode('study')">📖 Estudo</button>
     </div>
   </div>
 
@@ -400,10 +396,6 @@ function resetAll(){
   document.getElementById('scorebar').style.display=mode==='quiz'?'':'none';
   if(mode==='quiz'){document.getElementById('quiz-mode').style.display='';renderQ();}
   else renderStudy();
-}
-
-  function goHome(){
-  window.location.href = "index.html";
 }
 
 renderQ();
