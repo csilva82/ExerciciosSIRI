@@ -1,1 +1,615 @@
 
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SIRI Quiz – Atividade 4</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --teal:#1a5f6e;--teal2:#1e7a8f;--teal-light:#d4eef4;
+  --bp:#eaf3fa;--bm:#b8d0e8;
+  --txt:#1a2b35;--muted:#5a7280;--white:#fff;
+  --ok:#1d6b48;--ok-bg:#d2f0e2;
+  --ng:#b72b1f;--ng-bg:#fde8e6;
+  --shadow:0 3px 14px rgba(0,0,0,.10);--r:8px;
+}
+body{font-family:'Inter',sans-serif;background:#eef4f8;color:var(--txt);min-height:100vh}
+nav{background:var(--teal);padding:13px 24px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+nav .brand{color:#fff;font-weight:700;font-size:.95rem;margin-right:6px}
+nav a{color:#fff;text-decoration:none;font-size:.82rem;font-weight:600;padding:6px 14px;border-radius:20px;border:1.5px solid rgba(255,255,255,.35);transition:.15s}
+nav a:hover,nav a.active{background:rgba(255,255,255,.2)}
+.wrap{max-width:780px;margin:0 auto;padding:28px 16px 64px}
+.quiz-header{text-align:center;margin-bottom:22px}
+.quiz-header h1{font-size:1.4rem;font-weight:700;color:var(--teal)}
+.quiz-header p{font-size:.87rem;color:var(--muted);margin-top:5px}
+.scorebar{display:flex;justify-content:space-between;align-items:center;background:var(--white);border:0.5px solid var(--bm);border-radius:var(--r);padding:9px 16px;margin-bottom:16px;font-size:.85rem;gap:8px;flex-wrap:wrap;box-shadow:var(--shadow)}
+.scorebar strong{color:var(--teal)}
+.btn-reset{padding:6px 14px;background:transparent;border:1.5px solid var(--bm);border-radius:var(--r);font-size:.8rem;cursor:pointer;color:var(--muted)}
+.btn-reset:hover{background:var(--bp)}
+.prog-wrap{margin-bottom:16px}
+.prog-info{display:flex;justify-content:space-between;font-size:.77rem;color:var(--muted);margin-bottom:5px}
+.prog-bg{background:var(--bm);border-radius:20px;height:7px}
+.prog-bar{background:var(--teal2);border-radius:20px;height:7px;transition:width .4s}
+.q-card{background:var(--white);border-radius:12px;padding:24px 22px 20px;box-shadow:var(--shadow);margin-bottom:14px;animation:fadein .28s ease}
+@keyframes fadein{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.q-badge{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--teal2);margin-bottom:9px}
+.q-text{font-size:.97rem;font-weight:500;line-height:1.65}
+.options{margin-top:16px;display:flex;flex-direction:column;gap:9px}
+.opt{display:flex;align-items:flex-start;gap:11px;background:var(--bp);border:1.5px solid var(--bm);border-radius:var(--r);padding:11px 13px;cursor:pointer;transition:.15s;font-size:.88rem;line-height:1.5;text-align:left;width:100%}
+.opt:hover:not(.disabled){border-color:var(--teal2);background:var(--teal-light)}
+.opt.ok{background:var(--ok-bg);border-color:var(--ok);color:var(--ok);font-weight:600}
+.opt.ng{background:var(--ng-bg);border-color:var(--ng);color:var(--ng)}
+.opt.show-ok{background:var(--ok-bg);border-color:var(--ok);color:var(--ok)}
+.opt.disabled{cursor:default}
+.opt-l{min-width:25px;height:25px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.73rem;font-weight:700;background:var(--bm);color:var(--teal);flex-shrink:0;margin-top:1px}
+.opt.ok .opt-l,.opt.show-ok .opt-l{background:var(--ok);color:#fff}
+.opt.ng .opt-l{background:var(--ng);color:#fff}
+.feedback{border-radius:var(--r);padding:12px 15px;font-size:.855rem;margin-top:12px;display:none;line-height:1.6}
+.feedback.ok{background:var(--ok-bg);color:var(--ok);border-left:4px solid var(--ok);display:block;border-radius:0 var(--r) var(--r) 0}
+.feedback.ng{background:var(--ng-bg);color:var(--ng);border-left:4px solid var(--ng);display:block;border-radius:0 var(--r) var(--r) 0}
+.actions{display:flex;justify-content:flex-end;gap:10px;margin-top:14px}
+.btn{padding:9px 22px;border:none;border-radius:var(--r);font-size:.87rem;font-weight:600;cursor:pointer;transition:.15s}
+.btn-primary{background:var(--teal);color:#fff}
+.btn-primary:hover{background:var(--teal2)}
+.btn-secondary{background:transparent;border:1.5px solid var(--bm);color:var(--muted)}
+.btn-secondary:hover{background:var(--bp)}
+.btn:disabled{opacity:.4;cursor:default}
+#score-screen{display:none}
+.score-card{background:var(--white);border-radius:14px;padding:34px 26px;box-shadow:var(--shadow);text-align:center}
+.sc-emoji{font-size:3.2rem;line-height:1}
+.sc-num{font-size:2.8rem;font-weight:700;color:var(--teal);margin:8px 0 3px}
+.sc-sub{font-size:.92rem;color:var(--muted)}
+.sc-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:22px 0}
+.sc-item{background:var(--bp);border-radius:var(--r);padding:12px 8px}
+.sc-val{font-size:1.4rem;font-weight:700}
+.sc-lbl{font-size:.73rem;color:var(--muted);margin-top:2px}
+.ok-c{color:var(--ok)}.ng-c{color:var(--ng)}
+.sc-acts{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:8px}
+.rev-item{background:var(--white);border-radius:var(--r);padding:14px;margin-bottom:10px;box-shadow:0 1px 4px rgba(0,0,0,.07)}
+.rev-q{font-size:.86rem;font-weight:600;margin-bottom:7px}
+.rev-a{font-size:.81rem}
+.rev-a.ok{color:var(--ok)}.rev-a.ng{color:var(--ng)}
+.rev-c{font-size:.78rem;color:var(--ok);margin-top:3px}
+.rev-exp{font-size:.78rem;color:var(--muted);margin-top:5px;font-style:italic}
+.study-nav{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.study-nav button{padding:7px 16px;border:1.5px solid var(--bm);border-radius:var(--r);background:transparent;color:var(--muted);font-size:.83rem;cursor:pointer}
+.study-nav button:hover{background:var(--bp)}
+.study-nav .sn-num{font-size:.85rem;color:var(--teal);font-weight:600}
+.reveal-btn{margin-top:14px;padding:8px 18px;background:var(--teal);color:#fff;border:none;border-radius:var(--r);font-size:.85rem;cursor:pointer}
+.answer-box{background:var(--ok-bg);color:var(--ok);border-left:4px solid var(--ok);border-radius:0 var(--r) var(--r) 0;padding:12px 15px;font-size:.87rem;margin-top:12px;display:none;line-height:1.6}
+.mode-row{display:flex;gap:8px;justify-content:center;margin-top:14px;flex-wrap:wrap}
+.mode-btn{padding:6px 18px;border-radius:20px;border:1.5px solid var(--teal);background:transparent;color:var(--teal);font-size:.82rem;font-weight:600;cursor:pointer;transition:.15s}
+.mode-btn.active{background:var(--teal);color:#fff}
+@media(max-width:480px){.sc-grid{grid-template-columns:1fr 1fr}.q-card{padding:16px 12px}}
+</style>
+</head>
+<body>
+
+<nav>
+  <span class="brand">SIRI Quiz</span>
+  <a href="index.html" style="margin-left:auto">⬅ Voltar</a>
+</nav>
+
+<div class="wrap">
+  <div class="quiz-header">
+    <h1>Atividade 4 – Questões da Prova SIRI</h1>
+    <p>60 questões · Gabarito oficial (60/60)</p>
+    <div class="mode-row">
+      <button class="mode-btn active" onclick="setMode('quiz')">🎯 Quiz</button>
+      <button class="mode-btn" onclick="setMode('study')">📖 Estudo</button>
+    </div>
+  </div>
+
+  <div class="scorebar" id="scorebar">
+    <span>Acertos: <strong id="sv">0</strong></span>
+    <span>Erros: <strong id="ev">0</strong></span>
+    <span id="prog-txt" style="color:var(--muted);font-size:.8rem"></span>
+    <button class="btn-reset" onclick="resetAll()">↺ Reiniciar</button>
+  </div>
+
+  <!-- QUIZ -->
+  <div id="quiz-mode">
+    <div class="prog-wrap">
+      <div class="prog-info"><span id="prog-lbl"></span><span id="prog-pct"></span></div>
+      <div class="prog-bg"><div class="prog-bar" id="prog-bar" style="width:0%"></div></div>
+    </div>
+    <div class="q-card" id="q-card">
+      <div class="q-badge" id="q-badge"></div>
+      <div class="q-text"  id="q-text"></div>
+      <div class="options" id="q-opts"></div>
+      <div class="feedback" id="q-fb"></div>
+    </div>
+    <div class="actions">
+      <button class="btn btn-secondary" id="btn-skip" onclick="skip()">Pular</button>
+      <button class="btn btn-primary"   id="btn-next" onclick="next()" disabled>Próxima →</button>
+    </div>
+  </div>
+
+  <!-- STUDY -->
+  <div id="study-mode" style="display:none">
+    <div class="study-nav">
+      <button onclick="studyPrev()">← Anterior</button>
+      <span class="sn-num" id="sn-num"></span>
+      <button onclick="studyNext()">Próxima →</button>
+    </div>
+    <div class="q-card">
+      <div class="q-badge" id="sn-badge"></div>
+      <div class="q-text"  id="sn-text"></div>
+      <div class="options" id="sn-opts" style="pointer-events:none"></div>
+      <button class="reveal-btn" onclick="revealAnswer()">Revelar Resposta</button>
+      <div class="answer-box" id="sn-ans"></div>
+    </div>
+  </div>
+
+  <!-- SCORE -->
+  <div id="score-screen">
+    <div class="score-card">
+      <div class="sc-emoji" id="sc-emoji"></div>
+      <div class="sc-num"   id="sc-num"></div>
+      <div class="sc-sub"   id="sc-sub"></div>
+      <div class="sc-grid">
+        <div class="sc-item"><div class="sc-val ok-c" id="sc-ok"></div><div class="sc-lbl">Corretas</div></div>
+        <div class="sc-item"><div class="sc-val ng-c" id="sc-ng"></div><div class="sc-lbl">Erradas</div></div>
+        <div class="sc-item"><div class="sc-val"      id="sc-sk"></div><div class="sc-lbl">Puladas</div></div>
+      </div>
+      <div class="sc-acts">
+        <button class="btn btn-primary"   onclick="resetAll()">↺ Refazer</button>
+        <button class="btn btn-secondary" onclick="toggleReview()">📋 Revisão</button>
+      </div>
+    </div>
+    <div id="rev-section" style="display:none;margin-top:22px">
+      <h3 style="font-size:.98rem;color:var(--teal);margin-bottom:12px">Revisão das Respostas</h3>
+      <div id="rev-items"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const L=['A','B','C','D'];
+const QS=[
+  // Q1
+  {q:'Qual das opções a seguir não é uma dimensão do bloco de construção da organização?',
+   op:['Liderando pelo exemplo','Estratégia e Governança','Desenvolvimento e aprendizagem da força de trabalho','Competência de Liderança'],
+   r:0,
+   exp:'"Liderando pelo exemplo" não é uma dimensão SIRI. As dimensões do Bloco da Organização são: Prontidão de Talentos, Estrutura e Gestão, Competência de Liderança, Estratégia e Governança, e Aprendizado e Desenvolvimento.'},
+  // Q2
+  {q:'Aproximadamente quantas avaliações foram usadas para criar o Relatório de Insights SIRI de 2022?',
+   op:['1600','30','200','600'],
+   r:3,
+   exp:'Aproximadamente 600 avaliações foram usadas como base para o Relatório de Insights SIRI de 2022.'},
+  // Q3
+  {q:'Quais são os três B\'s no 3B Benchmark de Maturidade, conforme descrito no Relatório de Insights de Transformação de Manufatura da SIRI?',
+   op:['Benchmark, Melhor, Abaixo','Largo, melhorar, Abaixo','Melhor, Melhorar, Básico','Melhor da classe, médio, Inferior'],
+   r:3,
+   exp:'Os "Três B\'s" são: Best-in-Class (Melhor da Classe), Broad Middle (Médio Amplo) e Bottom (Inferior).'},
+  // Q4
+  {q:'Qual é o primeiro fator na Matriz de Priorização?',
+   op:['KPI','Perfil de custos','Pontuação da Matriz de Avaliação','Benchmarking das top 10'],
+   r:2,
+   exp:'A Pontuação da Matriz de Avaliação (Assessment Matrix Score) é o primeiro fator na fórmula da Matriz de Priorização.'},
+  // Q5
+  {q:'O que visa a Colaboração Inter e Intraempresa?',
+   op:['Desenvolver habilidades','Colaboração interna e externa','Plano de ação','Liderança efetiva'],
+   r:1,
+   exp:'A dimensão Colaboração Inter e Intra Companhia visa promover tanto a colaboração interna quanto a externa entre parceiros e fornecedores.'},
+  // Q6
+  {q:'Qual é o nível mais alto de Formação e Desenvolvimento da Força de Trabalho?',
+   op:['Contínuo','Integrado','Adaptativo','Olhando para o futuro'],
+   r:2,
+   exp:'"Adaptativo" é o nível mais alto de classificação para a dimensão Aprendizado e Desenvolvimento da Força de Trabalho.'},
+  // Q7
+  {q:'Em que a Inteligência se concentra no nível empresarial?',
+   op:['Capturar dados do chão de fábrica','Utilidades','Equipamentos','Analisar dados'],
+   r:3,
+   exp:'No nível empresarial, o pilar Inteligência se concentra em Analisar Dados para suporte à tomada de decisão estratégica.'},
+  // Q8
+  {q:'Qual das opções a seguir não é uma dimensão no Bloco de Construção do Processo?',
+   op:['Integração Horizontal','Inter e Intra colaboração empresarial','Integração Vertical','Ciclo de vida integrado do produto'],
+   r:1,
+   exp:'"Inter e Intra Colaboração Empresarial" pertence ao Bloco da Organização. As dimensões do Processo são: Integração Vertical, Integração Horizontal e Ciclo de Vida Integrado do Produto.'},
+  // Q9
+  {q:'O que o arquétipo da Floresta Tropical descreve no contexto do Relatório SIRI Manufacturing Transformation Insights?',
+   op:['Indústrias que têm baixa variação SIRI','Setores com alta classificação em maturidade e variação do SIRI','Indústrias que são uniformemente avançadas','Indústrias que estão atrasadas na maturidade do SIRI'],
+   r:1,
+   exp:'A Floresta Tropical descreve setores que pontuam alto tanto em Maturidade SIRI quanto em Variância SIRI — empresas muito avançadas, mas com grandes diferenças entre si.'},
+  // Q10
+  {q:'Qual é o objetivo final do pilar de Operações?',
+   op:['Converter matérias-primas e mão de obra em bens e serviços ao menor custo','Focar na integração vertical','Focar no desenvolvimento de novos produtos','Integrar e compartilhar informações com fornecedores'],
+   r:0,
+   exp:'O objetivo final do pilar Operações é converter matéria-prima e mão de obra em bens e serviços ao menor custo possível.'},
+  // Q11
+  {q:'Qual pilar é aplicado no chão de fábrica?',
+   op:['Somente Automação','Somente Inteligência','Todos acima','Nenhum acima'],
+   r:2,
+   exp:'Todos os pilares do Bloco de Tecnologia (Automação, Conectividade e Inteligência) são aplicados ao chão de fábrica.'},
+  // Q12
+  {q:'Como o relatório SIRI final é gerado?',
+   op:['SIRI Portal','Email','PowerPoint','Word'],
+   r:0,
+   exp:'O relatório SIRI final é gerado automaticamente pelo SIRI Portal após a inserção dos dados da avaliação.'},
+  // Q13
+  {q:'Em que a Automação se concentra?',
+   op:['Análise de dados','Controle da produção','Compartilhamento de dados','Nenhuma acima'],
+   r:1,
+   exp:'O pilar Automação se concentra no Controle da Produção — automatizar o controle de máquinas, equipamentos e processos produtivos.'},
+  // Q14
+  {q:'Quem deve estar presente na sessão de esclarecimento?',
+   op:['SMEs','Patrocinador do projeto','Ponto de contato','Todas as opções acima'],
+   r:3,
+   exp:'Na sessão de esclarecimento devem estar presentes: SMEs (especialistas no assunto), o Patrocinador do projeto e o Ponto de Contato.'},
+  // Q15
+  {q:'O que a Conectividade pretende alcançar?',
+   op:['Análise de dados','Controle de produção','Coleta e compartilhamento de dados','Nenhuma das alternativas anteriores'],
+   r:2,
+   exp:'O pilar Conectividade visa alcançar a coleta e o compartilhamento de dados entre sistemas, máquinas e pessoas ao longo da operação.'},
+  // Q16
+  {q:'Qual horizonte de planejamento se concentra em metas de longo prazo?',
+   op:['Estratégico','Tático','Operacional','Nenhum das alternativas acima'],
+   r:0,
+   exp:'O horizonte Estratégico se concentra em metas de longo prazo da organização.'},
+  // Q17
+  {q:'No Bloco de Construção de Tecnologia, qual aspecto normalmente apresenta a menor lacuna entre as empresas em termos de adoção de tecnologia?',
+   op:['Automação','Inteligência','Eficiência da força de trabalho','Conectividade'],
+   r:0,
+   exp:'A Automação tende a apresentar a menor lacuna entre empresas globalmente, pois é a área de adoção mais madura e amplamente difundida.'},
+  // Q18
+  {q:'Qual área é focada pela Automação?',
+   op:['Equipamentos e processos','Análise de dados','Exibição de dados','Nenhuma das opções acima'],
+   r:0,
+   exp:'A Automação foca em Equipamentos e Processos — o controle automatizado de máquinas e operações no chão de fábrica e nas instalações.'},
+  // Q19
+  {q:'Qual é o foco do pilar Ciclo de Vida do Produto?',
+   op:['Supervisionar o produto desde o design até o fim da vida útil','Garantindo uma colaboração eficaz','Transformando o planejamento e a aquisição','Gerenciamento da cadeia de suprimentos e logística'],
+   r:0,
+   exp:'O pilar Ciclo de Vida do Produto supervisiona o produto desde o design e desenvolvimento até o fim de sua vida útil.'},
+  // Q20
+  {q:'Qual dos itens a seguir não é uma entrada na fórmula da Matriz de Priorização?',
+   op:['Perfil de custos','Indicadores-chave de performance','Pontuação da Matriz de Avaliação','Gerenciamento de tempo'],
+   r:3,
+   exp:'"Gerenciamento de Tempo" não é uma entrada na fórmula da Matriz de Priorização. As entradas são: Pontuação da Matriz de Avaliação, KPIs, Perfil de Custo e Referência da Melhor Empresa do Setor.'},
+  // Q21
+  {q:'Qual dimensão estaria preocupada com a Indústria 4.0 fazer parte do foco estratégico da empresa?',
+   op:['Estratégia e Governança','Integração Vertical','Desenvolvimento e aprendizagem da força de trabalho','Competência de Liderança'],
+   r:0,
+   exp:'A dimensão Estratégia e Governança trata do planejamento estratégico, incluindo a inserção da Indústria 4.0 na estratégia central da empresa.'},
+  // Q22
+  {q:'Quais faixas representam o nível mais baixo de maturidade em uma dimensão?',
+   op:['Digital','Automático','Inteligente','Indefinido'],
+   r:3,
+   exp:'"Indefinido" (Banda 0) representa o nível mais baixo de maturidade em uma dimensão da Matriz de Avaliação SIRI.'},
+  // Q23
+  {q:'Quais são os três principais requisitos de informação para a Matriz de Priorização?',
+   op:['AM, Qualidade, Performance, Volume','Utilização, Segurança, rendimento da primeira passagem','Benchmark, pontuações de bandas, nicho industrial','Perfil de custo, KPIs, Horizonte de planejamento'],
+   r:3,
+   exp:'Os três principais requisitos de informação para a Matriz de Priorização são: Perfil de Custo, KPIs e Horizonte de Planejamento.'},
+  // Q24
+  {q:'Qual horizonte de planejamento dá maior ênfase aos custos?',
+   op:['Operacional','Estratégico','Tático','Financeiro'],
+   r:0,
+   exp:'O horizonte Operacional dá maior ênfase aos custos e à execução eficiente das operações do dia a dia.'},
+  // Q25
+  {q:'Qual é o primeiro pilar do Bloco de Construção de Tecnologia?',
+   op:['Inteligência','Operação','Conectividade','Automação'],
+   r:3,
+   exp:'Automação é o primeiro pilar do Bloco de Construção da Tecnologia, seguido de Conectividade e Inteligência.'},
+  // Q26
+  {q:'Qual arquétipo de transformação tem pontuação baixa tanto na Variância do SIRI quanto na Maturidade do SIRI?',
+   op:['Savana','Floresta de Coníferas','Floresta Tropical','Tundra'],
+   r:3,
+   exp:'A Tundra representa setores com baixa Maturidade SIRI e baixa Variância SIRI — indústrias atrasadas de forma uniforme.'},
+  // Q27
+  {q:'Qual é o foco do pilar Cadeia de Suprimentos?',
+   op:['Desenvolvimento de produto','Produção de bens e serviços','Integração vertical','Integração e compartilhamento de informações com fornecedores'],
+   r:3,
+   exp:'O pilar Cadeia de Suprimentos foca na integração e compartilhamento de informações com fornecedores e parceiros ao longo da cadeia de valor.'},
+  // Q28
+  {q:'Qual das alternativas a seguir descreve melhor o papel do Fator Custo na Matriz de Priorização?',
+   op:['Para calcular a lucratividade geral de um projeto','Para avaliar o custo das matérias-primas','Avaliar o impacto financeiro da implementação de uma iniciativa específica','Para determinar o orçamento para toda a organização'],
+   r:2,
+   exp:'O Fator Custo avalia o impacto financeiro da implementação de uma iniciativa específica dentro do contexto da priorização.'},
+  // Q29
+  {q:'Quem deve acompanhá-lo no tour pela fábrica?',
+   op:['TI','Ponto de contato','SMEs','Todas as opções acima'],
+   r:3,
+   exp:'Durante o tour pela fábrica, devem acompanhar o avaliador: representantes de TI, o Ponto de Contato e os SMEs (especialistas no assunto).'},
+  // Q30
+  {q:'Aproximadamente quantas avaliações de SIRI foram concluídas até o momento?',
+   op:['200','9600','600','1600'],
+   r:3,
+   exp:'Aproximadamente 1600 avaliações SIRI foram concluídas até o momento em todo o mundo.'},
+  // Q31
+  {q:'Qual é o foco da Prontidão de Talentos?',
+   op:['Governança empresarial','Colaboração interna','Estratégia organizacional','Melhorar as habilidades da força de trabalho'],
+   r:3,
+   exp:'O pilar Prontidão de Talentos se concentra no aprimoramento das habilidades da força de trabalho para a Indústria 4.0.'},
+  // Q32
+  {q:'O que poderia ser uma razão para a alta variação do SIRI no arquétipo da Floresta Tropical?',
+   op:['Todas as empresas são igualmente avançadas','Não há variação: todos os diretórios são avançados','Algumas empresas demoram a adotar os processos e tecnologias mais recentes','Todas as empresas demoram a adotar os processos e tecnologias mais recentes'],
+   r:2,
+   exp:'A alta variância ocorre porque algumas empresas do setor são lentas na adoção de novas tecnologias e processos, enquanto outras são líderes avançados.'},
+  // Q33
+  {q:'Qual é o primeiro pilar dos Blocos de Construção da Organização?',
+   op:['Competência de Liderança','Estrutura e Gestão','Desenvolvimento e aprendizagem da força de trabalho','Preparação de Talentos'],
+   r:3,
+   exp:'Prontidão de Talentos (Talent Readiness) é o primeiro pilar do Bloco de Construção da Organização.'},
+  // Q34
+  {q:'O que avalia a dimensão Integração Vertical?',
+   op:['Novo produto desenvolvido','Colaboração horizontal entre departamentos','Conexão entre ERP e os sistemas do chão de fábrica','Integração entre a cadeia de suprimentos'],
+   r:2,
+   exp:'A Integração Vertical avalia as conexões entre sistemas de TI e TO, especialmente entre ERP e os sistemas do chão de fábrica.'},
+  // Q35
+  {q:'Qual dimensão está especificamente relacionada ao pilar Supply Chain?',
+   op:['Integração Vertical','Integração Horizontal','Ciclo de vida do produto integrado','Nenhuma das opções acima'],
+   r:1,
+   exp:'A Integração Horizontal trata da integração de informações ao longo de toda a cadeia de suprimentos, relacionando-se diretamente ao pilar Supply Chain.'},
+  // Q36
+  {q:'Qual é o tempo máximo recomendado entre o workshop de avaliação e o debrief?',
+   op:['15 dias','7 dias','1 mês','3 meses'],
+   r:0,
+   exp:'O tempo máximo recomendado entre o workshop de avaliação e o debrief com o cliente é de 15 dias.'},
+  // Q37
+  {q:'Qual nível de faixas do Bloco de Construção do Processo indica que os processos estão configurados para serem executados sem intervenção manual?',
+   op:['Digital','Automático','Integrado','Indefinido'],
+   r:1,
+   exp:'O nível "Automatizado" (Automático) indica que os processos estão configurados para execução autônoma, sem necessidade de intervenção manual.'},
+  // Q38
+  {q:'O que não é uma dimensão no Bloco de Construção de Organização?',
+   op:['Automação chão de fábrica','Desenvolvimento e aprendizagem da força de trabalho','Estratégia e governança','Competência de liderança'],
+   r:0,
+   exp:'"Automação chão de fábrica" pertence ao Bloco de Tecnologia, não ao Bloco de Organização.'},
+  // Q39
+  {q:'Qual é o foco da Competência de Liderança?',
+   op:['Desenvolver habilidades','Liderança efetiva','Colaboração interna','Conhecimento em Indústria 4.0'],
+   r:3,
+   exp:'A dimensão Competência de Liderança foca na conscientização e no conhecimento dos líderes sobre a Indústria 4.0 e suas implicações.'},
+  // Q40
+  {q:'Qual pilar não faz parte dos Blocos de Construção da Tecnologia?',
+   op:['Automação','Conectividade','Inteligência','Operações'],
+   r:3,
+   exp:'Operações pertence ao Bloco de Construção do Processo. O Bloco de Tecnologia é composto por Automação, Conectividade e Inteligência.'},
+  // Q41
+  {q:'Qual pilar foca em capacidades preditivas?',
+   op:['Automação','Conectividade','Inteligência','Nenhuma das opções acima'],
+   r:2,
+   exp:'O pilar Inteligência é responsável por capacidades analíticas e preditivas, incluindo manutenção preditiva e análise avançada de dados.'},
+  // Q42
+  {q:'Quantas dimensões do SIRI são recomendadas como principais áreas de foco no relatório do SIRI?',
+   op:['16','4','8','1'],
+   r:1,
+   exp:'O relatório SIRI recomenda 4 dimensões como principais áreas de foco prioritário para a organização avaliada.'},
+  // Q43
+  {q:'Qual das opções a seguir não é um fator de KPI?',
+   op:['Qualidade','Produtividade','Velocidade','Rentabilidade'],
+   r:3,
+   exp:'"Rentabilidade" não é um fator de KPI padrão na Matriz de Priorização SIRI. Os fatores típicos incluem Qualidade, Produtividade, Velocidade e outros operacionais.'},
+  // Q44
+  {q:'Qual é o último fator na fórmula da Matriz de Priorização?',
+   op:['Perfil de custos','KPI','Pontuação Matriz atual','O melhor da indústria na categoria Benchmark'],
+   r:3,
+   exp:'A Referência da Melhor Empresa do Setor (Best-in-Industry Benchmark) é o último fator na fórmula da Matriz de Priorização.'},
+  // Q45
+  {q:'Quais dos seguintes níveis de faixas fazem parte da dimensão de Competência de Liderança?',
+   op:['Desconhecido','Compreensão limitada','Semi dependente','Todas acima'],
+   r:3,
+   exp:'Todos os três níveis (Desconhecido, Compreensão Limitada e Semi-Dependente) fazem parte da dimensão Competência de Liderança.'},
+  // Q46
+  {q:'De acordo com o Relatório SIRI Manufacturing Transformation Insights, o que é enfatizado como o aspecto mais importante no Bloco de Tecnologia?',
+   op:['Eficiência da força de trabalho','Maximização do lucro','Conectividade','Automação avançada'],
+   r:2,
+   exp:'O Relatório de Insights SIRI aponta a Conectividade como o aspecto mais discrepante e importante a ser desenvolvido no Bloco de Tecnologia.'},
+  // Q47
+  {q:'O que TIER significa na estrutura TIER?',
+   op:['Tempo, Impacto, Eficiência, Resultados','Estado atual, Impacto nos resultados financeiros, Objetivos essenciais para o negócio, Referências à comunidade mais ampla','Tecnologia, Inovação, Eficiência, Resultados','Nenhuma das opções acima'],
+   r:1,
+   exp:'TIER significa: Today\'s State (Estado Atual), Impact on End Result (Impacto nos Resultados), Essential Business Objectives (Objetivos Essenciais) e Reference (Referências).'},
+  // Q48
+  {q:'Qual pilar melhora a troca de dados?',
+   op:['Automação','Conectividade','Inteligência','Nenhuma das opções acima'],
+   r:1,
+   exp:'O pilar Conectividade aprimora a troca e o compartilhamento de dados entre sistemas, máquinas e pessoas.'},
+  // Q49
+  {q:'Como o setor industrial é usado no relatório SIRI?',
+   op:['Para calcular o fator custo','Para validar os KPI','Fazer um benchmarking entre seus pares','Para determinar sua área-chave de foco'],
+   r:2,
+   exp:'O setor industrial é usado para realizar benchmarking — comparar o desempenho da empresa avaliada com seus pares do mesmo setor.'},
+  // Q50
+  {q:'O que a alta variação do SIRI indica no contexto do Relatório SIRI Manufacturing Transformation Insights?',
+   op:['Uniformidade na transformação industrial','Diferentes níveis de maturidade da Indústria 4.0','Baixa adoção de tecnologia','Alta rentabilidade'],
+   r:1,
+   exp:'Alta Variância SIRI indica que há níveis muito diferentes de maturidade entre as empresas do mesmo setor industrial.'},
+  // Q51
+  {q:'Qual pilar engloba o planejamento e execução de processos que levam à produção de bens e serviços?',
+   op:['Operações','Cadeia de suprimentos','Ciclo de vida do produto','Nenhuma das opções acima'],
+   r:0,
+   exp:'O pilar Operações abrange o planejamento e a execução dos processos de produção de bens e serviços.'},
+  // Q52
+  {q:'Quais faixas representam o nível mais alto de maturidade em uma dimensão?',
+   op:['Inteligente','Digital','Indefinido','Automático'],
+   r:0,
+   exp:'"Inteligente" (Banda 5) representa o mais alto nível de maturidade em uma dimensão da Matriz de Avaliação SIRI.'},
+  // Q53
+  {q:'Qual dos seguintes não é um horizonte de planejamento?',
+   op:['Estratégico','Imediato','Tático','Operacional'],
+   r:1,
+   exp:'"Imediato" não é um horizonte de planejamento SIRI. Os três horizontes são: Estratégico, Tático e Operacional.'},
+  // Q54
+  {q:'Em que a Estratégia e a Governança se concentram?',
+   op:['Plano estratégico','Colaboração interna','Desenvolvimento de habilidades','Liderança efetiva'],
+   r:0,
+   exp:'A dimensão Estratégia e Governança foca no planejamento estratégico e na estrutura de governança da organização para a Indústria 4.0.'},
+  // Q55
+  {q:'Qual representante do departamento deve estar presente durante todo o workshop de avaliação?',
+   op:['Financeiro','TI','Utilidades','Manufatura'],
+   r:3,
+   exp:'O representante de Manufatura deve estar presente durante todo o workshop de avaliação SIRI, pois é o departamento central da avaliação.'},
+  // Q56
+  {q:'No mínimo, quais pessoas devem estar envolvidas na teleconferência?',
+   op:['CEO e Gerente de produção','Gerente de TI e SMEs','Diretor financeiro e Gerente de RH','Patrocinador do projeto e Ponto de contato'],
+   r:3,
+   exp:'No mínimo, o Patrocinador do Projeto e o Ponto de Contato devem estar envolvidos na teleconferência de alinhamento.'},
+  // Q57
+  {q:'Qual é o terceiro pilar do Bloco de Construção de Tecnologia?',
+   op:['Inteligência','Operações','Automação','Conectividade'],
+   r:0,
+   exp:'A sequência dos pilares do Bloco de Tecnologia é: 1º Automação, 2º Conectividade, 3º Inteligência.'},
+  // Q58
+  {q:'Quais dois arquétipos de transformação têm alta pontuação no nível de maturidade SIRI?',
+   op:['Floresta de Coníferas e Tundra','Tundra e Floresta Tropical','Savana e Tundra','Floresta Tropical e Floresta de Coníferas'],
+   r:3,
+   exp:'Floresta Tropical (alta maturidade, alta variância) e Floresta de Coníferas (alta maturidade, baixa variância) são os dois arquétipos com alta pontuação em maturidade SIRI.'},
+  // Q59
+  {q:'Quais são os três níveis de Grau de Relevância (DOR) nas tabelas DOR (Custo) e DOR (KPI)?',
+   op:['Baixo, médio, alto','Nenhum, parcial, cheio','Insignificante, médio, alto','Insignificante, baixo e/ou Indireto, Alto e Direto'],
+   r:3,
+   exp:'Os três níveis de DOR são: Desprezível (Insignificante), Pequeno e/ou Indireto, e Alto e Direto.'},
+  // Q60
+  {q:'Ao apresentar o relatório SIRI ao seu cliente, quais informações relevantes às 4 dimensões foco devem ser comunicadas?',
+   op:['Como eles impactarão nos KPIs selecionados','Como eles impactarão no perfil de custo','Potencial próximos passos para progredir no avanço de banda','Todas as opções acima'],
+   r:3,
+   exp:'Ao apresentar as 4 dimensões foco, devem ser comunicadas: impacto nos KPIs, impacto no perfil de custo e os próximos passos para avançar de banda.'}
+];
+
+let mode='quiz',idx=0,score=0,errs=0,skips=0,answered=false,results=[],studyIdx=0;
+
+function renderQ(){
+  answered=false;
+  const q=QS[idx];
+  document.getElementById('q-badge').textContent='Questão '+(idx+1)+' de '+QS.length;
+  document.getElementById('q-text').textContent=q.q;
+  document.getElementById('q-fb').className='feedback';
+  document.getElementById('btn-next').disabled=true;
+  document.getElementById('btn-skip').disabled=false;
+  const opts=document.getElementById('q-opts');
+  opts.innerHTML='';
+  q.op.forEach((op,i)=>{
+    const b=document.createElement('button');
+    b.className='opt';b.dataset.i=i;
+    b.innerHTML=`<span class="opt-l">${L[i]}</span><span>${op}</span>`;
+    b.addEventListener('click',()=>pick(i));
+    opts.appendChild(b);
+  });
+  const pct=Math.round(idx/QS.length*100);
+  document.getElementById('prog-lbl').textContent='Questão '+(idx+1)+' de '+QS.length;
+  document.getElementById('prog-pct').textContent=pct+'%';
+  document.getElementById('prog-bar').style.width=pct+'%';
+  document.getElementById('prog-txt').textContent='Respondidas: '+idx+'/'+QS.length;
+  const c=document.getElementById('q-card');
+  c.style.animation='none';requestAnimationFrame(()=>{c.style.animation='';});
+}
+
+function pick(chosen){
+  if(answered)return;
+  answered=true;
+  const q=QS[idx];const ok=chosen===q.r;
+  document.querySelectorAll('#q-opts .opt').forEach((el,i)=>{
+    el.classList.add('disabled');
+    if(i===q.r)el.classList.add('show-ok');
+    if(i===chosen&&ok)el.classList.add('ok');
+    if(i===chosen&&!ok)el.classList.add('ng');
+  });
+  const fb=document.getElementById('q-fb');
+  if(ok){fb.className='feedback ok';fb.textContent='✓ Correto!'+(q.exp?' – '+q.exp:'');score++;}
+  else{fb.className='feedback ng';fb.textContent='✗ Incorreto. Resposta: '+L[q.r]+') '+q.op[q.r]+(q.exp?' — '+q.exp:'');errs++;}
+  results.push({q,chosen,ok,skipped:false});
+  document.getElementById('sv').textContent=score;
+  document.getElementById('ev').textContent=errs;
+  document.getElementById('btn-next').disabled=false;
+  document.getElementById('btn-skip').disabled=true;
+}
+
+function skip(){
+  if(answered)return;
+  results.push({q:QS[idx],chosen:-1,ok:false,skipped:true});
+  skips++;next();
+}
+
+function next(){
+  idx++;
+  if(idx>=QS.length){showScore();return;}
+  renderQ();
+}
+
+function showScore(){
+  document.getElementById('quiz-mode').style.display='none';
+  document.getElementById('score-screen').style.display='';
+  document.getElementById('scorebar').style.display='none';
+  const pct=Math.round(score/QS.length*100);
+  document.getElementById('sc-emoji').textContent=pct>=80?'🎉':pct>=60?'👍':'📚';
+  document.getElementById('sc-num').textContent=pct+'%';
+  document.getElementById('sc-sub').textContent=score+' de '+QS.length+' corretas';
+  document.getElementById('sc-ok').textContent=score;
+  document.getElementById('sc-ng').textContent=errs;
+  document.getElementById('sc-sk').textContent=skips;
+  document.getElementById('prog-bar').style.width='100%';
+  document.getElementById('prog-pct').textContent='100%';
+}
+
+function toggleReview(){
+  const sec=document.getElementById('rev-section');
+  if(sec.style.display!=='none'){sec.style.display='none';return;}
+  sec.style.display='';
+  const c=document.getElementById('rev-items');c.innerHTML='';
+  results.forEach((r,i)=>{
+    const d=document.createElement('div');d.className='rev-item';
+    let h=`<div class="rev-q">${i+1}. ${r.q.q}</div>`;
+    if(r.skipped)h+=`<div class="rev-a" style="color:var(--muted)">Pulada — correta: ${L[r.q.r]}) ${r.q.op[r.q.r]}</div>`;
+    else if(r.ok)h+=`<div class="rev-a ok">✓ ${L[r.chosen]}) ${r.q.op[r.chosen]}</div>`;
+    else{h+=`<div class="rev-a ng">✗ Sua: ${L[r.chosen]}) ${r.q.op[r.chosen]}</div>`;h+=`<div class="rev-c">✓ Correta: ${L[r.q.r]}) ${r.q.op[r.q.r]}</div>`;}
+    if(r.q.exp)h+=`<div class="rev-exp">${r.q.exp}</div>`;
+    d.innerHTML=h;c.appendChild(d);
+  });
+}
+
+function renderStudy(){
+  const q=QS[studyIdx];
+  document.getElementById('sn-badge').textContent='Questão '+(studyIdx+1)+' de '+QS.length;
+  document.getElementById('sn-text').textContent=q.q;
+  document.getElementById('sn-ans').style.display='none';
+  const opts=document.getElementById('sn-opts');opts.innerHTML='';
+  q.op.forEach((op,i)=>{
+    const b=document.createElement('button');b.className='opt disabled';
+    b.innerHTML=`<span class="opt-l">${L[i]}</span><span>${op}</span>`;
+    opts.appendChild(b);
+  });
+  document.getElementById('sn-num').textContent=(studyIdx+1)+' / '+QS.length;
+}
+
+function revealAnswer(){
+  const q=QS[studyIdx];
+  document.querySelectorAll('#sn-opts .opt').forEach((el,i)=>{if(i===q.r)el.classList.add('show-ok');});
+  const a=document.getElementById('sn-ans');
+  a.textContent='✓ '+L[q.r]+') '+q.op[q.r]+(q.exp?' — '+q.exp:'');
+  a.style.display='block';
+}
+
+function studyNext(){studyIdx=(studyIdx+1)%QS.length;renderStudy();}
+function studyPrev(){studyIdx=(studyIdx-1+QS.length)%QS.length;renderStudy();}
+
+function setMode(m){
+  mode=m;
+  document.querySelectorAll('.mode-btn').forEach((b,i)=>b.classList.toggle('active',['quiz','study'][i]===m));
+  document.getElementById('quiz-mode').style.display=m==='quiz'?'':'none';
+  document.getElementById('study-mode').style.display=m==='study'?'':'none';
+  document.getElementById('score-screen').style.display='none';
+  document.getElementById('scorebar').style.display=m==='quiz'?'':'none';
+  if(m==='study')renderStudy();
+}
+
+function resetAll(){
+  idx=0;score=0;errs=0;skips=0;results=[];
+  document.getElementById('sv').textContent='0';
+  document.getElementById('ev').textContent='0';
+  document.getElementById('score-screen').style.display='none';
+  document.getElementById('rev-section').style.display='none';
+  document.getElementById('scorebar').style.display=mode==='quiz'?'':'none';
+  if(mode==='quiz'){document.getElementById('quiz-mode').style.display='';renderQ();}
+  else renderStudy();
+}
+
+renderQ();
+</script>
+</body>
+</html>
