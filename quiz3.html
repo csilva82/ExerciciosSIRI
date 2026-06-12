@@ -1,1 +1,405 @@
 
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SIRI Quiz – Questões para a Prova</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --teal:#1a5f6e;--teal2:#1e7a8f;--teal-light:#d4eef4;
+  --bp:#eaf3fa;--bm:#b8d0e8;
+  --txt:#1a2b35;--muted:#5a7280;--white:#fff;
+  --ok:#1d6b48;--ok-bg:#d2f0e2;
+  --ng:#b72b1f;--ng-bg:#fde8e6;
+  --shadow:0 3px 14px rgba(0,0,0,.10);--r:8px;
+}
+body{font-family:'Inter',sans-serif;background:#eef4f8;color:var(--txt);min-height:100vh}
+nav{background:var(--teal);padding:13px 24px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+nav .brand{color:#fff;font-weight:700;font-size:.95rem;margin-right:6px}
+nav a{color:#fff;text-decoration:none;font-size:.82rem;font-weight:600;padding:6px 14px;border-radius:20px;border:1.5px solid rgba(255,255,255,.35);transition:.15s}
+nav a:hover,nav a.active{background:rgba(255,255,255,.2)}
+.wrap{max-width:780px;margin:0 auto;padding:28px 16px 64px}
+.quiz-header{text-align:center;margin-bottom:22px}
+.quiz-header h1{font-size:1.4rem;font-weight:700;color:var(--teal)}
+.quiz-header p{font-size:.87rem;color:var(--muted);margin-top:5px}
+.mode-row{display:flex;gap:8px;justify-content:center;margin-top:14px;flex-wrap:wrap}
+.mode-btn{padding:6px 18px;border-radius:20px;border:1.5px solid var(--teal);background:transparent;color:var(--teal);font-size:.82rem;font-weight:600;cursor:pointer;transition:.15s}
+.mode-btn.active{background:var(--teal);color:#fff}
+.scorebar{display:flex;justify-content:space-between;align-items:center;background:var(--white);border:0.5px solid var(--bm);border-radius:var(--r);padding:9px 16px;margin-bottom:16px;font-size:.85rem;gap:8px;flex-wrap:wrap;box-shadow:var(--shadow)}
+.scorebar strong{color:var(--teal)}
+.btn-reset{padding:6px 14px;background:transparent;border:1.5px solid var(--bm);border-radius:var(--r);font-size:.8rem;cursor:pointer;color:var(--muted)}
+.btn-reset:hover{background:var(--bp)}
+.prog-wrap{margin-bottom:16px}
+.prog-info{display:flex;justify-content:space-between;font-size:.77rem;color:var(--muted);margin-bottom:5px}
+.prog-bg{background:var(--bm);border-radius:20px;height:7px}
+.prog-bar{background:var(--teal2);border-radius:20px;height:7px;transition:width .4s}
+.q-card{background:var(--white);border-radius:12px;padding:24px 22px 20px;box-shadow:var(--shadow);margin-bottom:14px;animation:fadein .28s ease}
+@keyframes fadein{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.q-badge{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--teal2);margin-bottom:9px}
+.q-text{font-size:.97rem;font-weight:500;line-height:1.65}
+.options{margin-top:16px;display:flex;flex-direction:column;gap:9px}
+.opt{display:flex;align-items:flex-start;gap:11px;background:var(--bp);border:1.5px solid var(--bm);border-radius:var(--r);padding:11px 13px;cursor:pointer;transition:.15s;font-size:.88rem;line-height:1.5;text-align:left;width:100%}
+.opt:hover:not(.disabled){border-color:var(--teal2);background:var(--teal-light)}
+.opt.ok{background:var(--ok-bg);border-color:var(--ok);color:var(--ok);font-weight:600}
+.opt.ng{background:var(--ng-bg);border-color:var(--ng);color:var(--ng)}
+.opt.show-ok{background:var(--ok-bg);border-color:var(--ok);color:var(--ok)}
+.opt.disabled{cursor:default}
+.opt-l{min-width:25px;height:25px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.73rem;font-weight:700;background:var(--bm);color:var(--teal);flex-shrink:0;margin-top:1px}
+.opt.ok .opt-l,.opt.show-ok .opt-l{background:var(--ok);color:#fff}
+.opt.ng .opt-l{background:var(--ng);color:#fff}
+.feedback{border-radius:var(--r);padding:12px 15px;font-size:.855rem;margin-top:12px;display:none;line-height:1.6}
+.feedback.ok{background:var(--ok-bg);color:var(--ok);border-left:4px solid var(--ok);display:block;border-radius:0 var(--r) var(--r) 0}
+.feedback.ng{background:var(--ng-bg);color:var(--ng);border-left:4px solid var(--ng);display:block;border-radius:0 var(--r) var(--r) 0}
+.actions{display:flex;justify-content:flex-end;gap:10px;margin-top:14px}
+.btn{padding:9px 22px;border:none;border-radius:var(--r);font-size:.87rem;font-weight:600;cursor:pointer;transition:.15s}
+.btn-primary{background:var(--teal);color:#fff}
+.btn-primary:hover{background:var(--teal2)}
+.btn-secondary{background:transparent;border:1.5px solid var(--bm);color:var(--muted)}
+.btn-secondary:hover{background:var(--bp)}
+.btn:disabled{opacity:.4;cursor:default}
+#score-screen{display:none}
+.score-card{background:var(--white);border-radius:14px;padding:34px 26px;box-shadow:var(--shadow);text-align:center}
+.sc-emoji{font-size:3.2rem;line-height:1}
+.sc-num{font-size:2.8rem;font-weight:700;color:var(--teal);margin:8px 0 3px}
+.sc-sub{font-size:.92rem;color:var(--muted)}
+.sc-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:22px 0}
+.sc-item{background:var(--bp);border-radius:var(--r);padding:12px 8px}
+.sc-val{font-size:1.4rem;font-weight:700}
+.sc-lbl{font-size:.73rem;color:var(--muted);margin-top:2px}
+.ok-c{color:var(--ok)}.ng-c{color:var(--ng)}
+.sc-acts{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:8px}
+.rev-item{background:var(--white);border-radius:var(--r);padding:14px;margin-bottom:10px;box-shadow:0 1px 4px rgba(0,0,0,.07)}
+.rev-q{font-size:.86rem;font-weight:600;margin-bottom:7px}
+.rev-a{font-size:.81rem}
+.rev-a.ok{color:var(--ok)}.rev-a.ng{color:var(--ng)}
+.rev-c{font-size:.78rem;color:var(--ok);margin-top:3px}
+.rev-exp{font-size:.78rem;color:var(--muted);margin-top:5px;font-style:italic}
+.study-nav{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.study-nav button{padding:7px 16px;border:1.5px solid var(--bm);border-radius:var(--r);background:transparent;color:var(--muted);font-size:.83rem;cursor:pointer}
+.study-nav button:hover{background:var(--bp)}
+.study-nav .sn-num{font-size:.85rem;color:var(--teal);font-weight:600}
+.reveal-btn{margin-top:14px;padding:8px 18px;background:var(--teal);color:#fff;border:none;border-radius:var(--r);font-size:.85rem;cursor:pointer}
+.answer-box{background:var(--ok-bg);color:var(--ok);border-left:4px solid var(--ok);border-radius:0 var(--r) var(--r) 0;padding:12px 15px;font-size:.87rem;margin-top:12px;display:none;line-height:1.6}
+@media(max-width:480px){.sc-grid{grid-template-columns:1fr 1fr}.q-card{padding:16px 12px}}
+</style>
+</head>
+<body>
+
+<nav>
+  <span class="brand">SIRI Quiz</span>
+  <a href="siri_quiz.html">Atividades 2 e 6</a>
+  <a href="siri_quiz2.html" class="active">Questões para a Prova</a>
+  <a href="siri_drag_drop.html" style="margin-left:auto">🎮 Arrasta e Solta</a>
+</nav>
+
+<div class="wrap">
+  <div class="quiz-header">
+    <h1>Questões para a Prova SIRI</h1>
+    <p id="total-info">88 questões · Todos os módulos · 100% gabaritado</p>
+    <div class="mode-row">
+      <button class="mode-btn active" onclick="setMode('quiz')">🧠 Quiz</button>
+      <button class="mode-btn"        onclick="setMode('study')">📖 Estudo</button>
+    </div>
+  </div>
+
+  <div class="scorebar" id="scorebar">
+    <span>Acertos: <strong id="sv">0</strong></span>
+    <span>Erros: <strong id="ev">0</strong></span>
+    <span id="prog-txt" style="color:var(--muted);font-size:.8rem"></span>
+    <button class="btn-reset" onclick="resetAll()">↺ Reiniciar</button>
+  </div>
+
+  <!-- QUIZ -->
+  <div id="quiz-mode">
+    <div class="prog-wrap">
+      <div class="prog-info"><span id="prog-lbl"></span><span id="prog-pct"></span></div>
+      <div class="prog-bg"><div class="prog-bar" id="prog-bar" style="width:0%"></div></div>
+    </div>
+    <div class="q-card" id="q-card">
+      <div class="q-badge"  id="q-badge"></div>
+      <div class="q-text"   id="q-text"></div>
+      <div class="options"  id="q-opts"></div>
+      <div class="feedback" id="q-fb"></div>
+    </div>
+    <div class="actions">
+      <button class="btn btn-secondary" id="btn-skip" onclick="skip()">Pular</button>
+      <button class="btn btn-primary"   id="btn-next" onclick="next()" disabled>Próxima →</button>
+    </div>
+  </div>
+
+  <!-- STUDY -->
+  <div id="study-mode" style="display:none">
+    <div class="study-nav">
+      <button onclick="studyPrev()">← Anterior</button>
+      <span class="sn-num" id="sn-num"></span>
+      <button onclick="studyNext()">Próxima →</button>
+    </div>
+    <div class="q-card">
+      <div class="q-badge" id="sn-badge"></div>
+      <div class="q-text"  id="sn-text"></div>
+      <div class="options" id="sn-opts" style="pointer-events:none"></div>
+      <button class="reveal-btn" onclick="revealAnswer()">Revelar Resposta</button>
+      <div class="answer-box" id="sn-ans"></div>
+    </div>
+  </div>
+
+  <!-- SCORE -->
+  <div id="score-screen">
+    <div class="score-card">
+      <div class="sc-emoji" id="sc-emoji"></div>
+      <div class="sc-num"   id="sc-num"></div>
+      <div class="sc-sub"   id="sc-sub"></div>
+      <div class="sc-grid">
+        <div class="sc-item"><div class="sc-val ok-c" id="sc-ok"></div><div class="sc-lbl">Corretas</div></div>
+        <div class="sc-item"><div class="sc-val ng-c" id="sc-ng"></div><div class="sc-lbl">Erradas</div></div>
+        <div class="sc-item"><div class="sc-val"      id="sc-sk"></div><div class="sc-lbl">Puladas</div></div>
+      </div>
+      <div class="sc-acts">
+        <button class="btn btn-primary"   onclick="resetAll()">↺ Refazer</button>
+        <button class="btn btn-secondary" onclick="toggleReview()">📋 Revisão</button>
+      </div>
+    </div>
+    <div id="rev-section" style="display:none;margin-top:22px">
+      <h3 style="font-size:.98rem;color:var(--teal);margin-bottom:12px">Revisão das Respostas</h3>
+      <div id="rev-items"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const L=['A','B','C','D'];
+const QS=[
+{q:'Qual das seguintes NÃO é uma dimensão no Bloco de Construção do Processo?',op:['Integração Vertical','Integração Horizontal','Ciclo de Vida do Produto Integrado','Colaboração Inter e Intra Companhia'],r:3,exp:'Colaboração Inter e Intra Companhia pertence ao Bloco de Construção da Organização (pilar Estrutura e Gestão), não ao Processo.'},
+{q:'Qual horizonte de planejamento se concentra em metas de longo prazo?',op:['Estratégico','Tático','Operacional','Nenhuma das anteriores'],r:0,exp:'O horizonte Estratégico se concentra em metas de longo prazo da organização.'},
+{q:'Quais dos seguintes níveis de classificação fazem parte da dimensão Competência de Liderança?',op:['Não familiarizado','Compreensão limitada','Semi-dependente','Todas as anteriores'],r:3,exp:'Todos os três níveis fazem parte da dimensão Competência de Liderança.'},
+{q:'Qual das seguintes opções descreve melhor o papel do Fator de Custo na Matriz de Priorização?',op:['Calcular a lucratividade geral de um projeto','Avaliar o impacto financeiro da implementação de uma determinada iniciativa','Determinar o orçamento para toda a organização','Avaliar o custo das matérias-primas'],r:1,exp:'O Fator de Custo avalia o impacto financeiro da implementação de uma iniciativa específica.'},
+{q:'Todos os equipamentos no chão de fábrica são controlados pelo CLP com Digital Andon. Se algo sair dos parâmetros, um alerta é emitido. A manutenção é reativa. Qual é a classificação correta?',op:['Inteligência no Chão de Fábrica: Banda 2 Visível','Inteligência nas Instalações: Banda 2 Visível','Automação no Chão de Fábrica: Banda 2 Avançado','Integração Vertical: Banda 2 Digital'],r:0,exp:'O sistema monitora e alerta sobre desvios (visibilidade), mas a manutenção ainda é reativa — Inteligência no Chão de Fábrica Banda 2 Visível.'},
+{q:'Qual das seguintes NÃO é uma dimensão do Bloco de Construção da Organização?',op:['Aprendizado e Desenvolvimento da Força de Trabalho','Liderar pelo exemplo','Estratégia e Governança','Competência de Liderança'],r:1,exp:'"Liderar pelo exemplo" não é uma dimensão SIRI. As dimensões da Organização são: Aprendizado e Desenvolvimento, Competência de Liderança, Colaboração Inter/Intra e Estratégia e Governança.'},
+{q:'Qual pilar se concentra em recursos preditivos?',op:['Automação','Conectividade','Inteligência','Nenhuma das anteriores'],r:2,exp:'O pilar Inteligência é responsável por capacidades analíticas e preditivas.'},
+{q:'Os processos de produção são gerenciados com ERP, PLM, MES e WMS. Os humanos gerenciam predominantemente a troca de dados entre diferentes funções. Qual é a classificação correta?',op:['Integração Vertical: Banda 4 Automatizada','Integração Horizontal: Banda 3 Integrada','Integração Vertical: Banda 3 Integrada','Integração Horizontal: Banda 4 Automatizada'],r:2,exp:'Sistemas integrados com troca de dados ainda dependente de intervenção humana — Integração Vertical Banda 3 Integrada.'},
+{q:'Em que a Competência de Liderança se concentra?',op:['Conscientização da Indústria 4.0','Desenvolvimento de habilidades','Liderança eficaz','Colaboração interna'],r:0,exp:'A dimensão Competência de Liderança foca na conscientização e compreensão dos líderes sobre a Indústria 4.0.'},
+{q:'Qual é o primeiro fator na fórmula da Matriz de Priorização?',op:['Perfil de Custo','Indicadores Chave de Desempenho','Pontuação da Matriz de Avaliação','Referência da Melhor Empresa do Setor'],r:2,exp:'A Pontuação da Matriz de Avaliação é o primeiro fator na fórmula da Matriz de Priorização.'},
+{q:'O que a SIRI pretende oferecer às empresas?',op:['Um checklist para transformação','Um roadmap para a Indústria 4.0','Um framework para melhoria contínua','Todas as opções acima'],r:3,exp:'A SIRI oferece tudo isso: um checklist de transformação, um roadmap para a Indústria 4.0 e um framework de melhoria contínua.'},
+{q:'Os equipamentos no chão de fábrica estão ligados via rede de TI segura com transferência em tempo real. A arquitetura pode ser reconfigurada via plug-and-play (TSN, IIoT, nuvem, móveis). Qual é a classificação?',op:['Conectividade no Chão de Fábrica: Banda 4 Tempo Real','Automação no Chão de Fábrica: Banda 4 Flexível','Inteligência no Chão de Fábrica: Banda 5 Adaptável','Conectividade no Chão de Fábrica: Banda 5 Escalável'],r:3,exp:'Rede segura em tempo real E arquitetura reconfigurável via plug-and-play — Conectividade no Chão de Fábrica Banda 5 Escalável.'},
+{q:'Qual dimensão está especificamente relacionada ao pilar "Cadeia de Suprimentos"?',op:['Integração Vertical','Integração Horizontal','Ciclo de Vida do Produto Integrado','Nenhuma das anteriores'],r:1,exp:'A Integração Horizontal trata da integração de informações ao longo da cadeia de suprimentos.'},
+{q:'Quais são os dois Arquétipos de Transformação que pontuam alto no nível de maturidade SIRI?',op:['Tundra e Floresta Tropical','Savana e Tundra','Floresta Tropical e Floresta de Coníferas','Floresta de Coníferas e Tundra'],r:2,exp:'Floresta Tropical (alta maturidade, alta variância) e Floresta de Coníferas (alta maturidade, baixa variância) pontuam alto em maturidade SIRI.'},
+{q:'Em que Estratégia e Governança se concentram?',op:['Planejamento estratégico','Desenvolvimento de habilidades','Liderança eficaz','Colaboração interna'],r:0,exp:'A dimensão Estratégia e Governança foca no planejamento estratégico e na estrutura de governança da organização.'},
+{q:'Qual pilar abrange o planejamento e a execução de processos que levam à produção de bens e serviços?',op:['Operações','Cadeia de Suprimentos','Ciclo de Vida do Produto','Nenhuma das anteriores'],r:0,exp:'O pilar Operações abrange o planejamento e execução dos processos de produção de bens e serviços.'},
+{q:'O que TIER significa na Estrutura TIER?',op:['Tempo, Impacto, Eficiência, Resultados','Estado Atual, Impacto no Resultado Final, Objetivos de Negócios Essenciais e Referência','Tecnologia, Inovação, Eficiência, Resultados','Nenhuma das Anteriores'],r:1,exp:'TIER significa: Today\'s State, Impact on End Result, Essential Business Objectives e Reference.'},
+{q:'Qual é o foco principal da Indústria 4.0?',op:['Automação','Digitalização e Interconectividade','Fabricação just-in-time','Terceirização'],r:1,exp:'O foco principal da Indústria 4.0 é a Digitalização e Interconectividade dos sistemas de produção.'},
+{q:'As máquinas do chão de fábrica são operadas automaticamente pelo DCS sem envolvimento humano. A intervenção humana é necessária apenas para verificações de segurança e mau funcionamento. Qual é a classificação?',op:['Inteligência no Chão de Fábrica: Banda 2 Visível','Automação no Chão de Fábrica: Banda 2 Avançada','Inteligência no Chão de Fábrica: Banda 3 Diagnóstico','Automação no Chão de Fábrica: Banda 3 Completa'],r:3,exp:'Operação pelo DCS com mínima intervenção humana — Automação no Chão de Fábrica Banda 3 Completa.'},
+{q:'As operações de fabricação são realizadas por TI e TO conectados por protocolo padrão. As ordens de serviço são gerenciadas e transferidas diretamente para produção autônoma. Qual é a classificação?',op:['Conectividade no Chão de Fábrica: Banda 3 Interoperável e Segura','Automação no Chão de Fábrica: Banda 3 Completa','Integração Vertical: Banda 4 Automatizada','Integração Vertical: Banda 3 Integrada'],r:2,exp:'Integração total entre TI e TO com produção autônoma a partir de ordens de compra — Integração Vertical Banda 4 Automatizada.'},
+{q:'Qual dos seguintes NÃO é um fator de KPI?',op:['Qualidade','Velocidade','Lucratividade','Nenhuma das anteriores'],r:2,exp:'Lucratividade não é um fator de KPI padrão na Matriz de Priorização SIRI.'},
+{q:'Qual é o principal benefício da integração vertical na Indústria 4.0?',op:['Ganho de eficiência; transferência clara de informações entre planejamento de negócios e processos de produção','Melhorar a qualidade e a flexibilidade das operações de fabricação','Agilidade; insights e análises de fábrica em tempo real','Todas as opções acima'],r:3,exp:'A integração vertical traz todos esses benefícios: eficiência, qualidade, flexibilidade e agilidade.'},
+{q:'A maioria dos processos de produção é executada automaticamente pelo CLP. Porém, os operadores são obrigados a monitorar o estado de saúde das máquinas e resolver problemas. Qual é a classificação?',op:['Automação no Chão de Fábrica: Banda 1 Básica','Automação no Chão de Fábrica: Banda 2 Avançada','Inteligência no Chão de Fábrica: Banda 1 Informatizada/Computadorizada','Inteligência no Chão de Fábrica: Banda 2 Visível'],r:1,exp:'Automação via CLP com monitoramento humano necessário — Automação no Chão de Fábrica Banda 2 Avançada.'},
+{q:'A maioria das atividades empresariais é gerenciada pelo ERP. Planejamento, Compras e RH estão integrados, permitindo geração automática de relatórios. Porém, ainda há intervenção humana no fluxo de trabalho. Qual é a classificação?',op:['Automação na Empresa: Banda 2 Avançada','Integração Vertical: Banda 3 Integrada','Inteligência na Empresa: Banda 2 Visível','Integração Horizontal: Banda 3 Integrada'],r:0,exp:'ERP integrando vários departamentos com geração automática de relatórios, mas ainda com intervenção humana — Automação na Empresa Banda 2 Avançada.'},
+{q:'O que a dimensão "Integração Vertical" avalia?',op:['Conexões entre sistemas ERP e de chão de fábrica','Integração em toda a cadeia de suprimentos','Desenvolvimento de novos produtos','Colaboração horizontal entre departamentos'],r:0,exp:'A Integração Vertical avalia as conexões entre sistemas de TI e TO, especialmente entre ERP e sistemas de chão de fábrica.'},
+{q:'Qual das alternativas a seguir é um desafio na implementação da Indústria 4.0?',op:['Riscos de segurança cibernética','Sobrecarga de dados','Lacunas de habilidades','Todas as opções acima'],r:3,exp:'Todos são desafios reais: riscos cibernéticos, excesso de dados e falta de pessoal qualificado.'},
+{q:'Qual é o foco da etapa "Avaliar" no framework LEAD?',op:['Aprender os conceitos chave','Avaliações abrangentes','Estratégia e roadmap','Implementação'],r:1,exp:'No LEAD, a etapa "Avaliar" (Assess) foca em realizar avaliações abrangentes da maturidade da organização.'},
+{q:'Qual é o último fator na Fórmula da Matriz de Priorização?',op:['Referência da Melhor Empresa do Setor','Indicadores Chave de Desempenho','Perfil de Custo','Pontuação da Matriz de Avaliação'],r:0,exp:'A Referência da Melhor Empresa do Setor é o último fator na fórmula da Matriz de Priorização.'},
+{q:'O que a Conectividade visa alcançar?',op:['Análise de dados','Controle de produção','Coleta e compartilhamento de dados','Nenhuma das anteriores'],r:2,exp:'O pilar Conectividade visa alcançar a coleta e compartilhamento de dados entre sistemas, máquinas e pessoas.'},
+{q:'Qual é o nível de classificação mais alto para Aprendizado e Desenvolvimento da Força de Trabalho?',op:['Adaptativo','Integrado','Contínuo','Voltado para o futuro'],r:0,exp:'"Adaptativo" é o nível mais alto de classificação para a dimensão Aprendizado e Desenvolvimento da Força de Trabalho.'},
+{q:'Qual tecnologia NÃO é comumente associada à Indústria 4.0?',op:['Internet das Coisas (IoT)','Inteligência Artificial Generativa','Computação de borda','Sistemas SCADA'],r:1,exp:'Inteligência Artificial Generativa é uma tecnologia mais recente e não está listada como tecnologia central da Indústria 4.0.'},
+{q:'De acordo com o Relatório de Insights de Transformação, o que é enfatizado como o aspecto mais discrepante no Bloco de Tecnologia?',op:['Maximização do lucro','Automação Avançada','Conectividade','Eficiência da força de trabalho'],r:2,exp:'O Relatório de Insights SIRI aponta a Conectividade como o aspecto mais discrepante no Bloco de Tecnologia.'},
+{q:'Qual Arquétipo de Transformação pontua baixo tanto em Variância SIRI quanto em Maturidade SIRI?',op:['Floresta de Coníferas','Floresta Tropical','Tundra','Savana'],r:2,exp:'A Tundra representa indústrias com baixa maturidade SIRI e baixa variância.'},
+{q:'Em que a Prontidão de Talentos se concentra?',op:['Estratégia organizacional','Aprimoramento das habilidades da força de trabalho','Colaboração interna','Governança da empresa'],r:1,exp:'O pilar Prontidão de Talentos se concentra no aprimoramento das habilidades da força de trabalho para a Indústria 4.0.'},
+{q:'Os processos de design e desenvolvimento de produto são executados com ferramentas analógicas. Especificações via papel e e-mail. Feedback do cliente por e-mail e telefone. Qual é a classificação?',op:['Integração do Ciclo de Vida do Produto: Banda 0 Indefinida','Integração do Ciclo de Vida do Produto: Banda 1 Definida','Integração do Ciclo de Vida do Produto: Banda 2 Digital','Integração do Ciclo de Vida do Produto: Banda 4 Automatizado'],r:0,exp:'Processos completamente analógicos, sem ferramentas digitais de gestão do ciclo de vida — Banda 0 Indefinida.'},
+{q:'Qual dimensão estaria preocupada com a Indústria 4.0 sendo parte do foco estratégico da empresa?',op:['Aprendizado e Desenvolvimento da Força de Trabalho','Estratégia e Governança','Competência de Liderança','Integração Vertical'],r:1,exp:'A dimensão Estratégia e Governança trata do planejamento estratégico, incluindo a inserção da Indústria 4.0 na estratégia central da empresa.'},
+{q:'Qual é o objetivo final do pilar "Operações"?',op:['Converter matéria-prima e mão de obra em bens e serviços ao menor custo','Integrar e compartilhar informações com fornecedores','Focar no desenvolvimento de novos produtos','Focar na integração vertical'],r:0,exp:'O objetivo final do pilar Operações é converter matéria-prima e mão de obra em bens e serviços ao menor custo possível.'},
+{q:'O BMS é usado para gerenciar os serviços da instalação (compressores, iluminação, alarmes). Porém, os operadores são obrigados a monitorar e intervir em eventos não planejados. Qual é a classificação?',op:['Automação nas Instalações: Banda 2 Avançado','Automação nas Instalações: Banda 3 Completo','Inteligência nas Instalações: Banda 2 Visível','Inteligência nas Instalações: Banda 3 Diagnóstico'],r:0,exp:'O BMS gerencia automaticamente os serviços da instalação, mas ainda exige intervenção humana em eventos não planejados — Automação nas Instalações Banda 2 Avançado.'},
+{q:'O que a SIRI pretende estabelecer entre os stakeholders?',op:['Uma linguagem comum','Uma tecnologia comum','Um objetivo comum','Uma fonte de financiamento comum'],r:0,exp:'A SIRI pretende estabelecer uma linguagem comum entre todos os stakeholders envolvidos na transformação industrial.'},
+{q:'O MES gerencia a produção executada por robôs. O MES com IA pode prever falhas e identificar causa raiz. Qual é a classificação correta?',op:['Automação no Chão de Fábrica: Banda 3 Completa','Automação no Chão de Fábrica: Banda 4 Flexível','Inteligência no Chão de Fábrica: Banda 3 Diagnóstico','Inteligência no Chão de Fábrica: Banda 4 Preditiva'],r:3,exp:'Capacidade de prever falhas antes que ocorram usando IA — Inteligência no Chão de Fábrica Banda 4 Preditiva.'},
+{q:'Qual pilar não faz parte do Bloco de Construção da Tecnologia?',op:['Automação','Conectividade','Inteligência','Operações'],r:3,exp:'Operações pertence ao Bloco de Construção do Processo. O Bloco de Tecnologia é composto por Automação, Conectividade e Inteligência.'},
+{q:'Qual das alternativas a seguir NÃO é uma aplicação típica de IA na manufatura?',op:['Automação de controle de qualidade','Manutenção Preditiva','Gestão de Recursos Humanos','Gestão da cadeia de suprimentos'],r:2,exp:'Gestão de Recursos Humanos não é uma aplicação típica de IA na manufatura.'},
+{q:'Qual é o primeiro pilar do Bloco de Construção da Organização?',op:['Prontidão de Talentos','Estrutura e Gestão','Competência de Liderança','Aprendizado e Desenvolvimento da Força de Trabalho'],r:0,exp:'Prontidão de Talentos é o primeiro pilar do Bloco de Construção da Organização.'},
+{q:'Qual é o foco principal da SIRI?',op:['Processos, Tecnologia, Organização','Automação, Conectividade, Inteligência','Prontidão de Talentos, Estrutura e Gestão','Todas as opções acima'],r:3,exp:'A SIRI cobre todos esses aspectos: os 3 Blocos, os pilares de Tecnologia e os pilares de Organização.'},
+{q:'Quais são as três dimensões do modelo RAMI 4.0 que constituem a base para a discussão das inter-relações da Indústria 4.0?',op:['Ciclo de vida do produto, Níveis de hierarquia, IEC 62264','Tempo, Custo, Qualidade','Integração Vertical, Integração Horizontal, Ciclo de Vida do Produto','Camadas de arquitetura, Níveis de hierarquia, Ciclo de vida e Fluxo de valor'],r:3,exp:'O RAMI 4.0 possui três dimensões: Camadas de arquitetura, Níveis de hierarquia e Ciclo de vida e Fluxo de valor.'},
+{q:'Quais são os três níveis de Grau de Relevância (DOR) nas tabelas DOR (Custo) e DOR (KPI)?',op:['Desprezível, Pequeno e/ou Indireto, Alto e Direto','Baixo, Médio, Alto','Nenhum, Parcial, Total','Desprezível, Médio, Alto'],r:0,exp:'Os três níveis de DOR são: Desprezível, Pequeno e/ou Indireto, e Alto e Direto.'},
+{q:'Qual é o principal benefício da integração do ciclo de vida do produto na Indústria 4.0?',op:['Permite uma tomada de decisão mais rápida com base em dados em tempo real','Melhora a coordenação da produção entre departamentos','Redução de custos devido a menos erros e discrepâncias','Todas as opções acima'],r:3,exp:'A integração do ciclo de vida traz todos esses benefícios combinados.'},
+{q:'Qual NÃO é uma dimensão no Bloco de Construção da Organização?',op:['Competência de Liderança','Automação da Área de Produção','Aprendizado e Desenvolvimento da Força de Trabalho','Estratégia e Governança'],r:1,exp:'"Automação da Área de Produção" pertence ao Bloco de Tecnologia, não ao de Organização.'},
+{q:'Em qual área a Inteligência se concentra no nível empresarial?',op:['Equipamentos','Análise de Dados','Utilidades','Captura de dados da área de produção'],r:1,exp:'No nível empresarial, a Inteligência se concentra em Análise de Dados para suporte à tomada de decisão.'},
+{q:'Qual o objetivo da Colaboração Inter e Intra Companhia?',op:['Planejamento estratégico','Desenvolvimento de habilidades','Liderança eficaz','Colaboração interna e externa'],r:3,exp:'A dimensão Colaboração Inter e Intra Companhia visa promover a colaboração tanto internamente quanto externamente.'},
+{q:'Os sistemas CRM e ERP trocam informações em tempo real via rede segura. Os sistemas podem ser ligados a diferentes entidades legais no mundo e a rede pode ser reconfigurada rapidamente. Qual é a classificação?',op:['Conectividade no Chão de Fábrica: Banda 4 Tempo Real','Inteligência na Empresa: Banda 5 Adaptável','Integração Vertical: Banda 4 Automatizada','Conectividade na Empresa: Banda 5 Escalável'],r:3,exp:'CRM e ERP em tempo real com capacidade de reconfiguração global e rápida — Conectividade na Empresa Banda 5 Escalável.'},
+{q:'O que o Arquétipo da Floresta Tropical descreve no contexto do Relatório de Insights SIRI?',op:['Indústrias que são uniformemente avançadas','Indústrias que se classificam bem tanto em Maturidade SIRI quanto em Variância SIRI','Indústrias que estão atrasadas em Maturidade SIRI','Indústrias que têm baixa Variância SIRI'],r:1,exp:'A Floresta Tropical descreve indústrias com alta maturidade SIRI E alta variância.'},
+{q:'Qual é o primeiro pilar do Bloco de Construção da Tecnologia?',op:['Operações','Automação','Conectividade','Inteligência'],r:1,exp:'Automação é o primeiro pilar do Bloco de Construção da Tecnologia.'},
+{q:'Qual pilar é aplicado à área de produção?',op:['Somente Automação','Somente Inteligência','Todos eles','Nenhum deles'],r:2,exp:'Todos os pilares do Bloco de Tecnologia (Automação, Conectividade e Inteligência) são aplicados à área de produção.'},
+{q:'Qual poderia ser um motivo para a alta Variância SIRI no Arquétipo da Floresta Tropical?',op:['Todas as empresas são igualmente avançadas','Algumas empresas são lentas na adoção dos processos e tecnologias','Todas as empresas são lentas na adoção dos processos e tecnologia','Não há variação: todas as empresas são avançadas'],r:1,exp:'A alta variância ocorre porque algumas empresas do setor são lentas na adoção, enquanto outras são líderes.'},
+{q:'Qual é considerado o principal desafio que impede a adoção da Indústria 4.0?',op:['Falta de tecnologia','Falta de visão e estratégia','Falta de financiamento','Falta de mão de obra qualificada'],r:1,exp:'A falta de visão e estratégia clara é considerada o principal desafio que impede a adoção da Indústria 4.0.'},
+{q:'Qual é o foco do pilar "Cadeia de Suprimentos"?',op:['Produção de bens e serviços','Integração e compartilhamento de informações com fornecedores','Desenvolvimento de novos produtos','Integração Vertical'],r:1,exp:'O pilar Cadeia de Suprimentos foca na integração e compartilhamento de informações com fornecedores e parceiros externos.'},
+{q:'Aproximadamente quantas avaliações SIRI foram concluídas até o momento?',op:['1600','600','200','9600'],r:0,exp:'Aproximadamente 1600 avaliações SIRI foram concluídas até o momento.'},
+{q:'Quais são os princípios-chave da Indústria 4.0?',op:['Centralização, Isolamento, Controle Manual, Terceirização, Especialização','Automação, Eficiência, Velocidade, Escala, Complexidade, Flexibilidade','Interoperabilidade, Virtualização, Descentralização, Capacidade em Tempo Real, Orientação a Serviços, Modularidade','Nenhuma das opções acima'],r:2,exp:'Os princípios-chave incluem: Interoperabilidade, Virtualização, Descentralização, Capacidade em Tempo Real, Orientação a Serviços e Modularidade.'},
+{q:'Qual pilar aprimora a troca de dados?',op:['Automação','Conectividade','Inteligência','Nenhuma das anteriores'],r:1,exp:'O pilar Conectividade aprimora a troca e o compartilhamento de dados entre sistemas.'},
+{q:'Os departamentos da empresa (Vendas, Finanças, RH, Compras) estão interconectados com o ERP. Os dados são sincronizados em intervalos específicos e os sistemas têm segurança vigilante e resiliente. Qual é a classificação?',op:['Automação na Empresa: Banda 3 Completa','Automação na Empresa: Banda 4 Flexível','Conectividade na Empresa: Banda 3 Interoperável e Segura','Conectividade na Empresa: Banda 4 Tempo Real'],r:2,exp:'Sistemas interconectados via ERP com sincronização periódica e segurança robusta — Conectividade na Empresa Banda 3 Interoperável e Segura.'},
+{q:'Pedidos dos clientes e previsões de demanda são comunicados por e-mail e telefone. Sistemas de computador usados para projeção, mas os planos de produção são distribuídos manualmente. POPs impressos no chão de fábrica. Qual é a classificação?',op:['Integração Vertical: Banda 1 Definida','Inteligência na Empresa: Banda 1 Informatizada','Integração Horizontal: Banda 1 Definida','Inteligência na Empresa: Banda 2 Visível'],r:0,exp:'Uso de computadores para planejamento, mas distribuição manual de planos e POPs em papel — Integração Vertical Banda 1 Definida.'},
+{q:'Qual é o foco do pilar "Ciclo de Vida do Produto"?',op:['Gerenciar a cadeia de suprimentos e logística','Transformar o planejamento e a aquisição','Supervisionar o produto desde o design até o fim de sua vida útil','Garantir uma colaboração eficaz'],r:2,exp:'O pilar Ciclo de Vida do Produto supervisiona o produto desde o design e desenvolvimento até o fim de sua vida útil.'},
+{q:'O chão de fábrica está equipado com máquinas CNC e os processos são executados com limitada intervenção humana. Porém, a movimentação é realizada manualmente por empilhadeiras. Qual é a classificação?',op:['Automação no Chão de Fábrica: Banda 1 Básica','Automação no Chão de Fábrica: Banda 2 Avançada','Inteligência no Chão de Fábrica: Banda 1 Informatizada','Inteligência no Chão de Fábrica: Banda 2 Visível'],r:1,exp:'CNC com pouca intervenção humana no processo produtivo, mas movimentação ainda manual — Automação no Chão de Fábrica Banda 2 Avançada.'},
+{q:'As informações entre clientes e fornecedores são gerenciadas pelo ERP. Os dados da cadeia de abastecimento são transferidos via ferramentas digitais, mas ainda requer intervenção humana. Qual é a classificação?',op:['Integração Vertical: Banda 2 Digital','Integração Vertical: Banda 3 Integrada','Integração Horizontal: Banda 2 Digital','Integração Horizontal: Banda 3 Integrada'],r:2,exp:'Dados digitalizados ao longo da cadeia de abastecimento, mas com intervenção humana — Integração Horizontal Banda 2 Digital.'},
+{q:'O sistema de gestão de estoque processa e analisa saldos de matérias-primas. Os sistemas de RH e Financeiro geram alertas quando há desvio de parâmetro predefinido. Qual é a classificação?',op:['Automação na Empresa: Banda 2 Avançada','Integração Horizontal: Banda 4 Automatizada','Inteligência na Empresa: Banda 2 Visível','Inteligência no Chão de Fábrica: Banda 3 Diagnóstico'],r:2,exp:'Sistemas de TI que monitoram dados e geram alertas sobre desvios — Inteligência na Empresa Banda 2 Visível.'},
+{q:'Qual horizonte de planejamento coloca maior ênfase nos custos?',op:['Operacional','Estratégico','Tático','Financeiro'],r:0,exp:'O horizonte Operacional coloca maior ênfase nos custos e na execução das operações do dia a dia.'},
+{q:'Qual é o principal benefício da integração horizontal na Indústria 4.0?',op:['Respostas ágeis e em tempo real','Maior integração de dados em toda a cadeia de suprimentos','Capacidade aprimorada de ajustar operações internas simultaneamente','Todas as opções acima'],r:3,exp:'A integração horizontal traz todos esses benefícios ao conectar empresas ao longo de toda a cadeia de valor.'},
+{q:'Qual nível de classificação do Bloco de Construção do Processo indica que os processos estão configurados para serem executados sem intervenção manual?',op:['Indefinido','Digital','Integrado','Automatizado'],r:3,exp:'O nível "Automatizado" indica que os processos estão configurados para execução autônoma, sem necessidade de intervenção manual.'},
+{q:'No Bloco de Construção da Tecnologia, qual aspecto normalmente exibe a menor lacuna entre as empresas globalmente em termos de adoção de tecnologia?',op:['Automação','Conectividade','Inteligência','Eficiência da força de trabalho'],r:0,exp:'A Automação tende a apresentar a menor lacuna entre empresas globalmente, pois é a área de adoção mais madura e difundida.'},
+{q:'Aproximadamente quantas avaliações foram usadas para criar o Relatório de Insights SIRI de 2022?',op:['200','30','600','1600'],r:2,exp:'Aproximadamente 600 avaliações foram usadas como base para o Relatório de Insights SIRI de 2022.'},
+{q:'Qual é o modelo de referência da SIRI?',op:['RAMI 4.0','LEAD Framework','Índice de Maturidade da Indústria 4.0','Nenhuma das opções acima'],r:0,exp:'O RAMI 4.0 (Reference Architecture Model Industry 4.0) é o modelo de referência utilizado pela SIRI.'},
+{q:'Qual dos itens a seguir NÃO é um componente de uma Fábrica Inteligente?',op:['Sistemas Ciber-Físicos','Computação em nuvem','Análise de Big Data','Computação Quântica'],r:3,exp:'Computação Quântica não é um componente estabelecido de uma Fábrica Inteligente.'},
+{q:'Em que a Automação se concentra?',op:['Análise de Dados','Controle de Produção','Compartilhamento de dados','Nenhuma das anteriores'],r:1,exp:'O pilar Automação se concentra no Controle de Produção — automatizar o controle de máquinas, equipamentos e processos.'},
+{q:'Qual classificação representa o mais alto nível de maturidade em uma dimensão?',op:['Indefinido','Digital','Automatizado','Inteligente'],r:3,exp:'"Inteligente" representa o mais alto nível de maturidade em uma dimensão da Matriz de Avaliação SIRI (equivalente à Banda 5).'},
+{q:'O que uma alta Variância SIRI indica no contexto do Relatório de Insights sobre Transformação da Manufatura SIRI?',op:['Uniformidade na transformação industrial','Alta lucratividade','Níveis diferentes de maturidade da Indústria 4.0','Baixa adoção tecnológica'],r:2,exp:'Alta Variância SIRI indica que há níveis muito diferentes de maturidade entre as empresas do mesmo setor industrial.'},
+{q:'Todos os ativos das instalações estão conectados a uma sala de controle central pelo BMS. Informações monitoradas em tempo real por protocolo de alta velocidade. Estrutura de segurança vigilante implementada. Qual é a classificação?',op:['Automação nas Instalações: Banda 3 Completa','Automação nas Instalações: Banda 4 Flexível','Conectividade nas Instalações: Banda 3 Interoperável e Segura','Conectividade nas Instalações: Banda 4 Tempo Real'],r:3,exp:'Monitoramento em tempo real com protocolo de alta velocidade e segurança robusta — Conectividade nas Instalações Banda 4 Tempo Real.'},
+{q:'O que a SIRI oferece além de servir como um checklist?',op:['Uma plataforma tecnológica','Uma fonte de financiamento','Um guia de melhoria passo a passo','Um programa de certificação'],r:2,exp:'Além de servir como checklist, a SIRI oferece um guia de melhoria passo a passo para a transformação industrial.'},
+{q:'Qual dos seguintes NÃO é uma entrada na fórmula da Matriz de Priorização?',op:['Pontuação da Matriz de Avaliação','Perfil de Custo','Indicadores Chaves de Desempenho','Gestão do Tempo'],r:3,exp:'Gestão do Tempo não é uma entrada na fórmula da Matriz de Priorização.'},
+{q:'O que o framework LEAD representa no contexto da SIRI?',op:['Liderar, Envolver, Agir, Desenvolver','Aprender, Avaliar, Arquitetar, Entregar','Ouvir, Envolver, Adaptar, Conduzir','Aprender, Envolver, Adaptar, Entregar'],r:1,exp:'LEAD significa: Learn (Aprender), Evaluate (Avaliar), Architect (Arquitetar) e Deliver (Entregar).'},
+{q:'Quais são os "Três B\'s" no Benchmark de Maturidade 3B, conforme descrito no Relatório de Insights SIRI?',op:['Melhor da Classe, Meio Amplo, Inferiores','Benchmark, Melhor, Abaixo','Melhor, Melhor, Básico','Amplo, Melhor, Abaixo'],r:0,exp:'Os "Três B\'s" são: Best-in-Class (Melhor da Classe), Broad Middle (Meio Amplo) e Bottom (Inferiores).'},
+{q:'Qual é o terceiro pilar do Bloco de Construção da Tecnologia?',op:['Inteligência','Automação','Operações','Conectividade'],r:0,exp:'A sequência dos pilares do Bloco de Tecnologia é: Automação, Conectividade e Inteligência.'},
+{q:'Qual dos seguintes NÃO é um horizonte de planejamento?',op:['Estratégico','Tático','Operacional','Imediato'],r:3,exp:'"Imediato" não é um horizonte de planejamento SIRI. Os três horizontes são: Estratégico, Tático e Operacional.'},
+{q:'O sistema de chão de fábrica monitora e gera alerta sobre paradas. Fornece código de erro, análise de causa raiz e conjunto de falhas potenciais. Informações transferidas automaticamente para o OEM. Qual é a classificação?',op:['Automação no Chão de Fábrica: Banda 2 Avançada','Automação no Chão de Fábrica: Banda 3 Completa','Conectividade no Chão de Fábrica: Banda 1 Conectada','Inteligência no Chão de Fábrica: Banda 3 Diagnóstico'],r:3,exp:'Capacidade de diagnóstico completa com análise de causa raiz e transferência para OEM — Inteligência no Chão de Fábrica Banda 3 Diagnóstico.'},
+{q:'O BMS pode controlar os ativos das instalações com base em parâmetros predefinidos. O sistema é modernizado com monitoramento de condições para detectar problemas e fornecer possíveis causas raízes. Qual é a classificação?',op:['Automação nas Instalações: Banda 3 Completa','Automação nas Instalações: Banda 4 Flexível','Inteligência nas Instalações: Banda 3 Diagnóstico','Inteligência nas Instalações: Banda 4 Preditiva'],r:2,exp:'O sistema detecta problemas e fornece análise de causa raiz — Inteligência nas Instalações Banda 3 Diagnóstico.'},
+{q:'Principalmente, para que é usado um Digital Twin?',op:['Armazenamento de dados','Simulação e análise','Automação','Rede'],r:1,exp:'Um Digital Twin é usado principalmente para Simulação e análise — réplica virtual de ativos físicos para testar cenários.'},
+{q:'Os ativos da instalação (caldeira, gerador, compressores) estão interconectados e gerenciados pelo BMS. Porém, o nível de segurança é mínimo e vulnerável a ameaças externas. Qual é a classificação?',op:['Automação nas Instalações: Banda 2 Avançada','Automação nas Instalações: Banda 3 Completa','Conectividade nas instalações: Banda 2 Interoperável','Conectividade nas Instalações: Banda 3 Interoperável e Segura'],r:2,exp:'Ativos interconectados e gerenciados, mas sem segurança adequada — Conectividade nas Instalações Banda 2 Interoperável.'},
+{q:'Quem desenvolveu o Smart Industry Readiness Index (SIRI)?',op:['Fórum Econômico Mundial','Conselho de Desenvolvimento Econômico de Cingapura','McKinsey & Company','Accenture'],r:1,exp:'A SIRI foi desenvolvida pelo Conselho de Desenvolvimento Econômico de Cingapura (EDB – Economic Development Board of Singapore).'}
+];
+
+let mode='quiz',idx=0,score=0,errs=0,skips=0,answered=false,results=[],studyIdx=0;
+
+function renderQ(){
+  answered=false;
+  const q=QS[idx];
+  document.getElementById('q-badge').textContent='Questão '+(idx+1)+' de '+QS.length;
+  document.getElementById('q-text').textContent=q.q;
+  document.getElementById('q-fb').className='feedback';
+  document.getElementById('btn-next').disabled=true;
+  document.getElementById('btn-skip').disabled=false;
+  const opts=document.getElementById('q-opts');
+  opts.innerHTML='';
+  q.op.forEach((op,i)=>{
+    const b=document.createElement('button');
+    b.className='opt';b.dataset.i=i;
+    b.innerHTML=`<span class="opt-l">${L[i]}</span><span>${op}</span>`;
+    b.addEventListener('click',()=>pick(i));
+    opts.appendChild(b);
+  });
+  const pct=Math.round(idx/QS.length*100);
+  document.getElementById('prog-lbl').textContent='Questão '+(idx+1)+' de '+QS.length;
+  document.getElementById('prog-pct').textContent=pct+'%';
+  document.getElementById('prog-bar').style.width=pct+'%';
+  document.getElementById('prog-txt').textContent='Respondidas: '+idx+'/'+QS.length;
+  const c=document.getElementById('q-card');
+  c.style.animation='none';requestAnimationFrame(()=>{c.style.animation='';});
+}
+
+function pick(chosen){
+  if(answered)return;
+  answered=true;
+  const q=QS[idx];const ok=chosen===q.r;
+  document.querySelectorAll('#q-opts .opt').forEach((el,i)=>{
+    el.classList.add('disabled');
+    if(i===q.r)el.classList.add('show-ok');
+    if(i===chosen&&ok)el.classList.add('ok');
+    if(i===chosen&&!ok)el.classList.add('ng');
+  });
+  const fb=document.getElementById('q-fb');
+  if(ok){fb.className='feedback ok';fb.textContent='✓ Correto!'+(q.exp?' – '+q.exp:'');score++;}
+  else{fb.className='feedback ng';fb.textContent='✗ Incorreto. Resposta: '+L[q.r]+') '+q.op[q.r]+(q.exp?' — '+q.exp:'');errs++;}
+  results.push({q,chosen,ok,skipped:false});
+  document.getElementById('sv').textContent=score;
+  document.getElementById('ev').textContent=errs;
+  document.getElementById('btn-next').disabled=false;
+  document.getElementById('btn-skip').disabled=true;
+}
+
+function skip(){
+  if(answered)return;
+  results.push({q:QS[idx],chosen:-1,ok:false,skipped:true});
+  skips++;next();
+}
+
+function next(){
+  idx++;
+  if(idx>=QS.length){showScore();return;}
+  renderQ();
+}
+
+function showScore(){
+  document.getElementById('quiz-mode').style.display='none';
+  document.getElementById('score-screen').style.display='';
+  document.getElementById('scorebar').style.display='none';
+  const pct=Math.round(score/QS.length*100);
+  document.getElementById('sc-emoji').textContent=pct>=80?'🎉':pct>=60?'👍':'📚';
+  document.getElementById('sc-num').textContent=pct+'%';
+  document.getElementById('sc-sub').textContent=score+' de '+QS.length+' corretas';
+  document.getElementById('sc-ok').textContent=score;
+  document.getElementById('sc-ng').textContent=errs;
+  document.getElementById('sc-sk').textContent=skips;
+  document.getElementById('prog-bar').style.width='100%';
+  document.getElementById('prog-pct').textContent='100%';
+}
+
+function toggleReview(){
+  const sec=document.getElementById('rev-section');
+  if(sec.style.display!=='none'){sec.style.display='none';return;}
+  sec.style.display='';
+  const c=document.getElementById('rev-items');c.innerHTML='';
+  results.forEach((r,i)=>{
+    const d=document.createElement('div');d.className='rev-item';
+    let h=`<div class="rev-q">${i+1}. ${r.q.q}</div>`;
+    if(r.skipped)h+=`<div class="rev-a" style="color:var(--muted)">Pulada — correta: ${L[r.q.r]}) ${r.q.op[r.q.r]}</div>`;
+    else if(r.ok)h+=`<div class="rev-a ok">✓ ${L[r.chosen]}) ${r.q.op[r.chosen]}</div>`;
+    else{h+=`<div class="rev-a ng">✗ Sua: ${L[r.chosen]}) ${r.q.op[r.chosen]}</div>`;h+=`<div class="rev-c">✓ Correta: ${L[r.q.r]}) ${r.q.op[r.q.r]}</div>`;}
+    if(r.q.exp)h+=`<div class="rev-exp">${r.q.exp}</div>`;
+    d.innerHTML=h;c.appendChild(d);
+  });
+}
+
+function renderStudy(){
+  const q=QS[studyIdx];
+  document.getElementById('sn-badge').textContent='Questão '+(studyIdx+1)+' de '+QS.length;
+  document.getElementById('sn-text').textContent=q.q;
+  document.getElementById('sn-ans').style.display='none';
+  const opts=document.getElementById('sn-opts');opts.innerHTML='';
+  q.op.forEach((op,i)=>{
+    const b=document.createElement('button');b.className='opt disabled';
+    b.innerHTML=`<span class="opt-l">${L[i]}</span><span>${op}</span>`;
+    opts.appendChild(b);
+  });
+  document.getElementById('sn-num').textContent=(studyIdx+1)+' / '+QS.length;
+}
+
+function revealAnswer(){
+  const q=QS[studyIdx];
+  document.querySelectorAll('#sn-opts .opt').forEach((el,i)=>{if(i===q.r)el.classList.add('show-ok');});
+  const a=document.getElementById('sn-ans');
+  a.textContent='✓ '+L[q.r]+') '+q.op[q.r]+(q.exp?' — '+q.exp:'');
+  a.style.display='block';
+}
+
+function studyNext(){studyIdx=(studyIdx+1)%QS.length;renderStudy();}
+function studyPrev(){studyIdx=(studyIdx-1+QS.length)%QS.length;renderStudy();}
+
+function setMode(m){
+  mode=m;
+  document.querySelectorAll('.mode-btn').forEach((b,i)=>b.classList.toggle('active',['quiz','study'][i]===m));
+  document.getElementById('quiz-mode').style.display=m==='quiz'?'':'none';
+  document.getElementById('study-mode').style.display=m==='study'?'':'none';
+  document.getElementById('score-screen').style.display='none';
+  document.getElementById('scorebar').style.display=m==='quiz'?'':'none';
+  if(m==='study')renderStudy();
+}
+
+function resetAll(){
+  idx=0;score=0;errs=0;skips=0;results=[];
+  document.getElementById('sv').textContent='0';
+  document.getElementById('ev').textContent='0';
+  document.getElementById('score-screen').style.display='none';
+  document.getElementById('rev-section').style.display='none';
+  document.getElementById('scorebar').style.display=mode==='quiz'?'':'none';
+  if(mode==='quiz'){document.getElementById('quiz-mode').style.display='';renderQ();}
+  else renderStudy();
+}
+
+renderQ();
+</script>
+</body>
+</html>
