@@ -87,6 +87,15 @@
   }
   @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-6px)} 75%{transform:translateX(6px)} }
   .shake { animation:shake .35s ease; border-color:var(--error) !important; }
+
+
+  .dim-chip,
+.pillar-chip{
+  touch-action:none;
+  -webkit-user-select:none;
+  user-select:none;
+}
+  
 </style>
 </head>
 <body>
@@ -165,6 +174,75 @@ const DIMENSIONS = {
 let score=0, errs=0, currentMode=1, dragKey='', dragType='';
 
 function shuffle(arr){ return arr.sort(()=>Math.random()-.5); }
+
+  // ===== SUPORTE PARA TOUCH (CELULAR) =====
+
+let touchItem = null;
+
+function enableTouchDrag(selector, type){
+  document.addEventListener("touchstart", function(e){
+
+    const item = e.target.closest(selector);
+    if(!item || item.classList.contains('placed')) return;
+
+    touchItem = item;
+    dragType = type;
+    dragKey = item.dataset.key;
+
+    item.style.position = "fixed";
+    item.style.zIndex = "9999";
+    item.style.opacity = "0.8";
+
+  }, {passive:false});
+
+  document.addEventListener("touchmove", function(e){
+
+    if(!touchItem) return;
+
+    const touch = e.touches[0];
+
+    touchItem.style.left = (touch.clientX - touchItem.offsetWidth/2) + "px";
+    touchItem.style.top  = (touch.clientY - touchItem.offsetHeight/2) + "px";
+
+    e.preventDefault();
+
+  }, {passive:false});
+
+  document.addEventListener("touchend", function(e){
+
+    if(!touchItem) return;
+
+    const touch = e.changedTouches[0];
+
+    const target = document.elementFromPoint(
+      touch.clientX,
+      touch.clientY
+    );
+
+    // MODE 1
+    const pillarSlot = target?.closest(".pillar-slot");
+    if(pillarSlot){
+      const pillarKey = pillarSlot.id.replace("slot_","");
+      dropDim(pillarKey);
+    }
+
+    // MODE 2
+    const blockDrop = target?.closest(".block-drop");
+    if(blockDrop){
+      const blockKey = blockDrop.id.replace("block_","");
+      dropPillar(blockKey);
+    }
+
+    touchItem.style.position = "";
+    touchItem.style.left = "";
+    touchItem.style.top = "";
+    touchItem.style.zIndex = "";
+    touchItem.style.opacity = "";
+
+    touchItem = null;
+
+  }, {passive:false});
+}
 
 // ── MODE 1
 function buildMode1(){
@@ -330,6 +408,9 @@ buildMode1();
 buildMode2();
 buildMode3();
 checkComplete1();
+
+enableTouchDrag('.dim-chip','dim');
+enableTouchDrag('.pillar-chip','pc');
 </script>
 </body>
 </html>
