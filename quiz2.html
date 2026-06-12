@@ -246,7 +246,6 @@ function loadQuiz(id) {
   const quiz = QUIZZES[id];
   QUESTIONS = quiz.perguntas;
   document.getElementById('quiz-title').textContent = quiz.title;
-  document.getElementById('quiz-meta').textContent = QUESTIONS.length + ' perguntas · Tempo sugerido: ' + quiz.tempo;
   restartQuiz();
 }
 
