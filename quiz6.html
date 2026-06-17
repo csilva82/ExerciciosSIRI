@@ -1,1 +1,566 @@
 
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SIRI Quiz – Atividade 6</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --teal:#1a5f6e;--teal2:#1e7a8f;--teal-light:#d4eef4;
+  --bp:#eaf3fa;--bm:#b8d0e8;
+  --txt:#1a2b35;--muted:#5a7280;--white:#fff;
+  --ok:#1d6b48;--ok-bg:#d2f0e2;
+  --ng:#b72b1f;--ng-bg:#fde8e6;
+  --shadow:0 3px 14px rgba(0,0,0,.10);--r:8px;
+}
+body{font-family:'Inter',sans-serif;background:#eef4f8;color:var(--txt);min-height:100vh}
+nav{background:var(--teal);padding:13px 24px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+nav .brand{color:#fff;font-weight:700;font-size:.95rem;margin-right:6px}
+nav a{color:#fff;text-decoration:none;font-size:.82rem;font-weight:600;padding:6px 14px;border-radius:20px;border:1.5px solid rgba(255,255,255,.35);transition:.15s}
+nav a:hover,nav a.active{background:rgba(255,255,255,.2)}
+.wrap{max-width:780px;margin:0 auto;padding:28px 16px 64px}
+.quiz-header{text-align:center;margin-bottom:22px}
+.quiz-header h1{font-size:1.4rem;font-weight:700;color:var(--teal)}
+.quiz-header p{font-size:.87rem;color:var(--muted);margin-top:5px}
+.scorebar{display:flex;justify-content:space-between;align-items:center;background:var(--white);border:0.5px solid var(--bm);border-radius:var(--r);padding:9px 16px;margin-bottom:16px;font-size:.85rem;gap:8px;flex-wrap:wrap;box-shadow:var(--shadow)}
+.scorebar strong{color:var(--teal)}
+.btn-reset{padding:6px 14px;background:transparent;border:1.5px solid var(--bm);border-radius:var(--r);font-size:.8rem;cursor:pointer;color:var(--muted)}
+.btn-reset:hover{background:var(--bp)}
+.prog-wrap{margin-bottom:16px}
+.prog-info{display:flex;justify-content:space-between;font-size:.77rem;color:var(--muted);margin-bottom:5px}
+.prog-bg{background:var(--bm);border-radius:20px;height:7px}
+.prog-bar{background:var(--teal2);border-radius:20px;height:7px;transition:width .4s}
+.q-card{background:var(--white);border-radius:12px;padding:24px 22px 20px;box-shadow:var(--shadow);margin-bottom:14px;animation:fadein .28s ease}
+@keyframes fadein{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.q-badge{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--teal2);margin-bottom:9px}
+.q-text{font-size:.97rem;font-weight:500;line-height:1.65}
+.options{margin-top:16px;display:flex;flex-direction:column;gap:9px}
+.opt{display:flex;align-items:flex-start;gap:11px;background:var(--bp);border:1.5px solid var(--bm);border-radius:var(--r);padding:11px 13px;cursor:pointer;transition:.15s;font-size:.88rem;line-height:1.5;text-align:left;width:100%}
+.opt:hover:not(.disabled){border-color:var(--teal2);background:var(--teal-light)}
+.opt.ok{background:var(--ok-bg);border-color:var(--ok);color:var(--ok);font-weight:600}
+.opt.ng{background:var(--ng-bg);border-color:var(--ng);color:var(--ng)}
+.opt.show-ok{background:var(--ok-bg);border-color:var(--ok);color:var(--ok)}
+.opt.disabled{cursor:default}
+.opt-l{min-width:25px;height:25px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.73rem;font-weight:700;background:var(--bm);color:var(--teal);flex-shrink:0;margin-top:1px}
+.opt.ok .opt-l,.opt.show-ok .opt-l{background:var(--ok);color:#fff}
+.opt.ng .opt-l{background:var(--ng);color:#fff}
+.feedback{border-radius:var(--r);padding:12px 15px;font-size:.855rem;margin-top:12px;display:none;line-height:1.6}
+.feedback.ok{background:var(--ok-bg);color:var(--ok);border-left:4px solid var(--ok);display:block;border-radius:0 var(--r) var(--r) 0}
+.feedback.ng{background:var(--ng-bg);color:var(--ng);border-left:4px solid var(--ng);display:block;border-radius:0 var(--r) var(--r) 0}
+.actions{display:flex;justify-content:flex-end;gap:10px;margin-top:14px}
+.btn{padding:9px 22px;border:none;border-radius:var(--r);font-size:.87rem;font-weight:600;cursor:pointer;transition:.15s}
+.btn-primary{background:var(--teal);color:#fff}
+.btn-primary:hover{background:var(--teal2)}
+.btn-secondary{background:transparent;border:1.5px solid var(--bm);color:var(--muted)}
+.btn-secondary:hover{background:var(--bp)}
+.btn:disabled{opacity:.4;cursor:default}
+#score-screen{display:none}
+.score-card{background:var(--white);border-radius:14px;padding:34px 26px;box-shadow:var(--shadow);text-align:center}
+.sc-emoji{font-size:3.2rem;line-height:1}
+.sc-num{font-size:2.8rem;font-weight:700;color:var(--teal);margin:8px 0 3px}
+.sc-sub{font-size:.92rem;color:var(--muted)}
+.sc-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:22px 0}
+.sc-item{background:var(--bp);border-radius:var(--r);padding:12px 8px}
+.sc-val{font-size:1.4rem;font-weight:700}
+.sc-lbl{font-size:.73rem;color:var(--muted);margin-top:2px}
+.ok-c{color:var(--ok)}.ng-c{color:var(--ng)}
+.sc-acts{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:8px}
+.rev-item{background:var(--white);border-radius:var(--r);padding:14px;margin-bottom:10px;box-shadow:0 1px 4px rgba(0,0,0,.07)}
+.rev-q{font-size:.86rem;font-weight:600;margin-bottom:7px}
+.rev-a{font-size:.81rem}
+.rev-a.ok{color:var(--ok)}.rev-a.ng{color:var(--ng)}
+.rev-c{font-size:.78rem;color:var(--ok);margin-top:3px}
+.rev-exp{font-size:.78rem;color:var(--muted);margin-top:5px;font-style:italic}
+.study-nav{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.study-nav button{padding:7px 16px;border:1.5px solid var(--bm);border-radius:var(--r);background:transparent;color:var(--muted);font-size:.83rem;cursor:pointer}
+.study-nav button:hover{background:var(--bp)}
+.study-nav .sn-num{font-size:.85rem;color:var(--teal);font-weight:600}
+.reveal-btn{margin-top:14px;padding:8px 18px;background:var(--teal);color:#fff;border:none;border-radius:var(--r);font-size:.85rem;cursor:pointer}
+.answer-box{background:var(--ok-bg);color:var(--ok);border-left:4px solid var(--ok);border-radius:0 var(--r) var(--r) 0;padding:12px 15px;font-size:.87rem;margin-top:12px;display:none;line-height:1.6}
+.mode-row{display:flex;gap:8px;justify-content:center;margin-top:14px;flex-wrap:wrap}
+.mode-btn{padding:6px 18px;border-radius:20px;border:1.5px solid var(--teal);background:transparent;color:var(--teal);font-size:.82rem;font-weight:600;cursor:pointer;transition:.15s}
+.mode-btn.active{background:var(--teal);color:#fff}
+@media(max-width:480px){.sc-grid{grid-template-columns:1fr 1fr}.q-card{padding:16px 12px}}
+</style>
+</head>
+<body>
+
+<nav>
+  <span class="brand">SIRI Quiz</span>
+  <a href="index.html" style="margin-left:auto">⬅ Voltar</a>
+</nav>
+
+<div class="wrap">
+  <div class="quiz-header">
+    <h1>Atividade 6 – Matriz de Avaliação SIRI: Cenários Práticos</h1>
+    <p>50 cenários de casos de uso para domínio das 16 dimensões e Bandas 0–5</p>
+  </div>
+
+  <div class="mode-row">
+    <button class="mode-btn active" onclick="setMode('quiz')">🎯 Quiz</button>
+    <button class="mode-btn" onclick="setMode('study')">📖 Estudo</button>
+  </div>
+
+  <div class="scorebar" id="scorebar" style="margin-top:14px">
+    <span>Acertos: <strong id="sv">0</strong></span>
+    <span>Erros: <strong id="ev">0</strong></span>
+    <span id="prog-txt" style="color:var(--muted);font-size:.8rem"></span>
+    <button class="btn-reset" onclick="resetAll()">↺ Reiniciar</button>
+  </div>
+
+  <!-- QUIZ -->
+  <div id="quiz-mode">
+    <div class="prog-wrap">
+      <div class="prog-info"><span id="prog-lbl"></span><span id="prog-pct"></span></div>
+      <div class="prog-bg"><div class="prog-bar" id="prog-bar" style="width:0%"></div></div>
+    </div>
+    <div class="q-card" id="q-card">
+      <div class="q-badge" id="q-badge"></div>
+      <div class="q-text"  id="q-text"></div>
+      <div class="options" id="q-opts"></div>
+      <div class="feedback" id="q-fb"></div>
+    </div>
+    <div class="actions">
+      <button class="btn btn-secondary" id="btn-skip" onclick="skip()">Pular</button>
+      <button class="btn btn-primary"   id="btn-next" onclick="next()" disabled>Próxima →</button>
+    </div>
+  </div>
+
+  <!-- STUDY -->
+  <div id="study-mode" style="display:none">
+    <div class="study-nav">
+      <button onclick="studyPrev()">← Anterior</button>
+      <span class="sn-num" id="sn-num"></span>
+      <button onclick="studyNext()">Próxima →</button>
+    </div>
+    <div class="q-card">
+      <div class="q-badge" id="sn-badge"></div>
+      <div class="q-text"  id="sn-text"></div>
+      <div class="options" id="sn-opts" style="pointer-events:none"></div>
+      <button class="reveal-btn" onclick="revealAnswer()">Revelar Resposta</button>
+      <div class="answer-box" id="sn-ans"></div>
+    </div>
+  </div>
+
+  <!-- SCORE -->
+  <div id="score-screen">
+    <div class="score-card">
+      <div class="sc-emoji" id="sc-emoji"></div>
+      <div class="sc-num"   id="sc-num"></div>
+      <div class="sc-sub"   id="sc-sub"></div>
+      <div class="sc-grid">
+        <div class="sc-item"><div class="sc-val ok-c" id="sc-ok"></div><div class="sc-lbl">Corretas</div></div>
+        <div class="sc-item"><div class="sc-val ng-c" id="sc-ng"></div><div class="sc-lbl">Erradas</div></div>
+        <div class="sc-item"><div class="sc-val"      id="sc-sk"></div><div class="sc-lbl">Puladas</div></div>
+      </div>
+      <div class="sc-acts">
+        <button class="btn btn-primary"   onclick="resetAll()">↺ Refazer</button>
+        <button class="btn btn-secondary" onclick="toggleReview()">📋 Revisão</button>
+      </div>
+    </div>
+    <div id="rev-section" style="display:none;margin-top:22px">
+      <h3 style="font-size:.98rem;color:var(--teal);margin-bottom:12px">Revisão das Respostas</h3>
+      <div id="rev-items"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const L=['A','B','C','D'];
+const QS=[
+  // Q1
+  {q:'Na linha de montagem, os operadores seguem Procedimentos Operacionais Padrão (SOPs) impressos. Eles anotam os tempos de ciclo e o número de peças defeituosas em planilhas de papel que são arquivadas ao final do turno. Qual é a Dimensão e a Banda SIRI correspondente?',
+   op:['Integração Vertical – Banda 0 (Indefinida)','Integração Vertical – Banda 1 (Definida)','Automação no Chão de Fábrica – Banda 1 (Básica)','Inteligência no Chão de Fábrica – Banda 1 (Informatizada)'],
+   r:1,
+   exp:'O ponto de pivô é a existência de SOPs formais e processos definidos, embora executados com ferramentas puramente analógicas. Isso caracteriza Integração Vertical – Banda 1 (Definida).'},
+  // Q2
+  {q:'A empresa utiliza um sistema EDI para receber pedidos de compra dos clientes. Embora o sistema receba os dados, um analista de PCP deve digitar manualmente as informações no ERP para gerar a Ordem de Produção (OP). Qual é a Dimensão e a Banda SIRI correspondente?',
+   op:['Integração Horizontal – Banda 2 (Digital)','Integração Horizontal – Banda 3 (Integrada)','Integração Vertical – Banda 3 (Integrada)','Integração Vertical – Banda 2 (Digital)'],
+   r:1,
+   exp:'Há integração formal (EDI), mas a reconciliação e o fluxo de dados exigem intervenção humana para transferir informações entre sistemas. Isso define Integração Horizontal – Banda 3 (Integrada).'},
+  // Q3
+  {q:'O departamento de engenharia utiliza um software CAD 3D avançado. No entanto, para que a produção acesse as especificações, a engenharia gera arquivos PDF e os salva em uma pasta compartilhada que não possui comunicação direta com o sistema de gestão da fábrica. Qual é a Dimensão e a Banda SIRI correspondente?',
+   op:['Integração do Ciclo de Vida do Produto – Banda 1 (Definida)','Integração do Ciclo de Vida do Produto – Banda 2 (Digital)','Integração Vertical – Banda 2 (Digital)','Integração do Ciclo de Vida do Produto – Banda 3 (Integrada)'],
+   r:1,
+   exp:'O uso do CAD é digital, mas a transferência via pasta compartilhada/PDF não constitui integração formal entre sistemas. Caracteriza-se como digital, mas em silos: Integração do Ciclo de Vida do Produto – Banda 2 (Digital).'},
+  // Q4
+  {q:'A fábrica opera exclusivamente com bancadas de montagem manual e furadeiras de bancada acionadas por pedal. Todo o movimento de peças entre estações é realizado por esforço humano direto. Qual é a Dimensão e a Banda SIRI correspondente?',
+   op:['Automação no Chão de Fábrica – Banda 0 (Indefinida)','Automação no Chão de Fábrica – Banda 1 (Básica)','Integração Vertical – Banda 0 (Indefinida)','Inteligência no Chão de Fábrica – Banda 0 (Indefinida)'],
+   r:0,
+   exp:'Processos de produção puramente manuais, sem uso de equipamentos programáveis ou assistência automatizada. Isso define Automação no Chão de Fábrica – Banda 0 (Indefinida).'},
+  // Q5
+  {q:'O departamento financeiro realiza o processamento de contas a pagar e receber através de livros-caixa físicos e registros manuais em papel, sem o uso de qualquer software de contabilidade ou planilha eletrônica. Qual é a Dimensão e a Banda SIRI correspondente?',
+   op:['Automação na Empresa – Banda 1 (Básica)','Inteligência na Empresa – Banda 0 (Indefinida)','Automação na Empresa – Banda 0 (Indefinida)','Integração Horizontal – Banda 0 (Indefinida)'],
+   r:2,
+   exp:'Ausência total de ferramentas digitais; processos administrativos executados manualmente com ferramentas analógicas. Isso define Automação na Empresa – Banda 0 (Indefinida).'},
+  // Q6
+  {q:'O controle da temperatura nos galpões é feito abrindo e fechando janelas manualmente. A iluminação é controlada por disjuntores centrais operados pela equipe de segurança conforme o horário. Qual é a Dimensão e a Banda SIRI correspondente?',
+   op:['Conectividade nas Instalações – Banda 0 (Indefinida)','Automação nas Instalações – Banda 1 (Básica)','Inteligência nas Instalações – Banda 0 (Indefinida)','Automação nas Instalações – Banda 0 (Indefinida)'],
+   r:3,
+   exp:'Controle manual de utilidades e infraestrutura, sem qualquer automação predial básica. Isso define Automação nas Instalações – Banda 0 (Indefinida).'},
+  // Q7
+  {q:'As máquinas CNC da fábrica possuem portas Ethernet de fábrica, mas não há infraestrutura de cabeamento instalada. Os operadores utilizam pendrives para carregar os programas de usinagem (G-Code). Qual é a Dimensão e a Banda SIRI correspondente?',
+   op:['Conectividade no Chão de Fábrica – Banda 0 (Indefinida)','Conectividade no Chão de Fábrica – Banda 1 (Conectada)','Automação no Chão de Fábrica – Banda 1 (Básica)','Conectividade no Chão de Fábrica – Banda 2 (Interoperável)'],
+   r:1,
+   exp:'Os ativos possuem portas de comunicação (capacidade técnica), mas a ausência de rede física mantém a comunicação offline. Isso define Conectividade no Chão de Fábrica – Banda 1 (Conectada).'},
+  // Q8
+  {q:'Todos os computadores do setor administrativo possuem acesso à internet para e-mail corporativo, mas não existe uma rede local (LAN) que permita o compartilhamento de arquivos ou a interoperabilidade entre as pastas dos computadores. Qual é a Dimensão e a Banda SIRI correspondente?',
+   op:['Conectividade na Empresa – Banda 1 (Conectada)','Conectividade na Empresa – Banda 2 (Interoperável)','Automação na Empresa – Banda 1 (Básica)','Inteligência na Empresa – Banda 1 (Informatizada)'],
+   r:1,
+   exp:'Conectividade digital básica (internet) existe, mas a falta de LAN impede a interoperabilidade entre departamentos. Isso define Conectividade na Empresa – Banda 2 (Interoperável).'},
+  // Q9
+  {q:'A medição do consumo de água das torres de resfriamento é feita através de um hidrômetro analógico. Uma vez por semana, um técnico de manutenção lê o visor e anota o valor em uma caderneta. Qual é a Dimensão e a Banda SIRI correspondente?',
+   op:['Inteligência nas Instalações – Banda 0 (Indefinida)','Conectividade nas Instalações – Banda 1 (Conectada)','Conectividade nas Instalações – Banda 0 (Indefinida)','Automação nas Instalações – Banda 0 (Indefinida)'],
+   r:2,
+   exp:'Equipamentos de utilidades analógicos com coleta de dados puramente visual e manual. Isso define Conectividade nas Instalações – Banda 0 (Indefinida).'},
+  // Q10
+  {q:'O supervisor do chão de fábrica visualiza um dashboard que exibe o status de "Ligado/Desligado" das máquinas via rede. Ao detectar uma parada, ele deve se deslocar fisicamente até o ativo para investigar a causa. Qual é a Dimensão e a Banda SIRI correspondente?',
+   op:['Inteligência no Chão de Fábrica – Banda 2 (Visível)','Conectividade no Chão de Fábrica – Banda 3 (Interoperável e Segura)','Inteligência no Chão de Fábrica – Banda 3 (Diagnóstico)','Automação no Chão de Fábrica – Banda 2 (Avançada)'],
+   r:2,
+   exp:'O sistema identifica desvios (parada de máquina) — inteligência descritiva — mas o diagnóstico e a correção dependem totalmente de ação humana. Isso define Inteligência no Chão de Fábrica – Banda 3 (Diagnóstico).'},
+  // Q11
+  {q:'O sistema ERP gera relatórios de faturamento mensal que os gestores utilizam para entender o desempenho passado, mas o sistema não possui recursos para correlacionar dados ou identificar causas raiz de quedas nas vendas. Qual é a Dimensão e a Banda SIRI correspondente?',
+   op:['Inteligência na Empresa – Banda 1 (Informatizada)','Inteligência na Empresa – Banda 2 (Visível)','Automação na Empresa – Banda 2 (Avançada)','Integração Vertical – Banda 2 (Digital)'],
+   r:1,
+   exp:'Processamento de dados digitais para diagnósticos simples (relatórios), sem capacidade de identificar causas raiz ou correlações complexas. Isso define Inteligência na Empresa – Banda 2 (Visível).'},
+  // Q12
+  {q:'O sistema de climatização do Data Center (HVAC) possui sensores digitais que emitem um alerta sonoro e visual na sala de controle caso a temperatura exceda os 22°C, exigindo ação humana imediata. Qual é a Dimensão e a Banda SIRI correspondente?',
+   op:['Automação nas Instalações – Banda 2 (Avançada)','Inteligência nas Instalações – Banda 2 (Visível)','Inteligência nas Instalações – Banda 3 (Diagnóstico)','Conectividade nas Instalações – Banda 3 (Interoperável e Segura)'],
+   r:2,
+   exp:'Monitoramento de ativos prediais com detecção de desvios baseada em parâmetros predefinidos e alerta para humanos. Isso define Inteligência nas Instalações – Banda 3 (Diagnóstico).'},
+  // Q13
+  {q:'A empresa não possui um plano de treinamento técnico. Quando novos operadores são contratados, eles são colocados ao lado de veteranos para aprender as tarefas por observação direta (shadowing), sem um currículo definido. Qual é a Dimensão e a Banda SIRI correspondente?',
+   op:['Competência de Liderança – Banda 0 (Indefinida)','Aprendizagem e Desenvolvimento da Força de Trabalho – Banda 1 (Básica)','Colaboração Inter e Intraempresarial – Banda 0 (Indefinida)','Aprendizagem e Desenvolvimento da Força de Trabalho – Banda 0 (Indefinida)'],
+   r:3,
+   exp:'Inexistência de um programa formal ou estrutura mínima para o desenvolvimento de competências. Isso define Aprendizagem e Desenvolvimento da Força de Trabalho – Banda 0 (Indefinida).'},
+  // Q14
+  {q:'Os diretores da planta desconhecem os pilares do SIRI e acreditam que a Indústria 4.0 se resume apenas à compra de novos braços robóticos, sem investir tempo em educação ou estratégia digital. Qual é a Dimensão e a Banda SIRI correspondente?',
+   op:['Estratégia e Governança – Banda 0 (Indefinida)','Competência de Liderança – Banda 1 (Básica)','Competência de Liderança – Banda 0 (Indefinida)','Aprendizagem e Desenvolvimento da Força de Trabalho – Banda 0 (Indefinida)'],
+   r:2,
+   exp:'Liderança sem familiaridade básica com os conceitos de Indústria 4.0 e sem visão estratégica sobre o tema. Isso define Competência de Liderança – Banda 0 (Indefinida).'},
+  // Q15
+  {q:'Existe um conflito histórico entre TI e TO. Os dados coletados pelas máquinas não são compartilhados com a equipe de análise de dados corporativa devido a restrições de propriedade de dados e falta de uma cultura de transparência. Qual é a Dimensão e a Banda SIRI correspondente?',
+   op:['Integração Vertical – Banda 0 (Indefinida)','Estratégia e Governança – Banda 0 (Indefinida)','Colaboração Inter e Intraempresarial – Banda 1 (Básica)','Colaboração Inter e Intraempresarial – Banda 0 (Indefinida)'],
+   r:3,
+   exp:'Barreiras culturais e estruturais impedem qualquer colaboração, com departamentos operando em silos absolutos e desconfiança mútua. Isso define Colaboração Inter e Intraempresarial – Banda 0 (Indefinida).'},
+  // Q16
+  {q:'A empresa faz compras de software e hardware baseadas apenas no orçamento disponível no fim do ano, sem um roteiro de transformação digital ou governança sobre como essas tecnologias devem se integrar. Qual é a Dimensão e a Banda SIRI correspondente?',
+   op:['Estratégia e Governança – Banda 1 (Básica)','Competência de Liderança – Banda 0 (Indefinida)','Colaboração Inter e Intraempresarial – Banda 0 (Indefinida)','Estratégia e Governança – Banda 0 (Indefinida)'],
+   r:3,
+   exp:'Ausência de planejamento estratégico; investimentos em tecnologia são feitos de forma ad-hoc e sem governança. Isso define Estratégia e Governança – Banda 0 (Indefinida).'},
+  // Q17
+  {q:'O sistema MES está integrado ao ERP via uma interface formal. Quando a produção finaliza um lote, o estoque no ERP é atualizado automaticamente, eliminando a necessidade de redigitação de dados. Qual é a Dimensão e a Banda SIRI correspondente?',
+   op:['Integração Vertical – Banda 3 (Integrada)','Automação na Empresa – Banda 4 (Flexível)','Integração Vertical – Banda 4 (Automatizada)','Conectividade no Chão de Fábrica – Banda 4 (Tempo Real)'],
+   r:2,
+   exp:'Integração automatizada de dados entre OT (MES) e IT (ERP), permitindo a troca de informações com intervenção humana limitada. Isso define Integração Vertical – Banda 4 (Automatizada).'},
+  // Q18
+  {q:'A empresa compartilha dados de estoque em tempo real com seus fornecedores. Um algoritmo no portal do fornecedor identifica a baixa de insumos e dispara a logística de reposição sem intervenção humana de ambos os lados. Qual é a Dimensão e a Banda SIRI correspondente?',
+   op:['Integração Horizontal – Banda 4 (Automatizada)','Integração Horizontal – Banda 5 (Inteligente)','Conectividade na Empresa – Banda 5 (Escalável)','Inteligência na Empresa – Banda 5 (Adaptável)'],
+   r:1,
+   exp:'Integração de ponta a ponta na cadeia de suprimentos com análise autônoma e reação inteligente a mudanças de demanda. Isso define Integração Horizontal – Banda 5 (Inteligente).'},
+  // Q19
+  {q:'A engenharia utiliza o "Digital Twin" do produto para realizar simulações de estresse térmico. Os resultados alimentam automaticamente o sistema de planejamento de produção para ajustar as tolerâncias de usinagem de forma autônoma. Qual é a Dimensão e a Banda SIRI correspondente?',
+   op:['Integração do Ciclo de Vida do Produto – Banda 4 (Automatizada)','Inteligência no Chão de Fábrica – Banda 5 (Adaptável)','Integração Vertical – Banda 5 (Inteligente)','Integração do Ciclo de Vida do Produto – Banda 5 (Inteligente)'],
+   r:3,
+   exp:'Uso de Digital Twins e Big Data para otimizar o ciclo de vida do produto de forma autônoma e integrada aos sistemas de manufatura. Isso define Integração do Ciclo de Vida do Produto – Banda 5 (Inteligente).'},
+  // Q20
+  {q:'A linha de montagem possui células robóticas onde braços industriais executam toda a soldagem. Operadores são necessários apenas para carregar o material e apertar o botão "Start" para cada ciclo. Qual é a Dimensão e a Banda SIRI correspondente?',
+   op:['Automação no Chão de Fábrica – Banda 3 (Completa)','Automação no Chão de Fábrica – Banda 2 (Avançada)','Inteligência no Chão de Fábrica – Banda 2 (Visível)','Automação no Chão de Fábrica – Banda 4 (Flexível)'],
+   r:1,
+   exp:'Automação avançada, mas não plena. A máquina executa o ciclo, mas exige intervenção humana para iniciar e concluir cada processo. Isso define Automação no Chão de Fábrica – Banda 2 (Avançada).'},
+  // Q21
+  {q:'O sistema de gestão de viagens da empresa utiliza uma IA que reserva voos e hotéis automaticamente com base no calendário dos executivos e nas políticas de custo, processando o reembolso sem supervisão humana. Qual é a Dimensão e a Banda SIRI correspondente?',
+   op:['Automação na Empresa – Banda 4 (Flexível)','Inteligência na Empresa – Banda 5 (Adaptável)','Automação na Empresa – Banda 5 (Convergida)','Integração Horizontal – Banda 5 (Inteligente)'],
+   r:2,
+   exp:'Automação convergida com inteligência; processos administrativos autônomos que se adaptam e otimizam fluxos complexos sem supervisão humana. Isso define Automação na Empresa – Banda 5 (Convergida).'},
+  // Q22
+  {q:'O sistema de iluminação inteligente da planta detecta a luminosidade natural e a presença de pessoas, ajustando o fluxo luminoso e desligando zonas vazias autonomamente para otimizar o consumo de energia. Qual é a Dimensão e a Banda SIRI correspondente?',
+   op:['Inteligência nas Instalações – Banda 4 (Preditiva)','Automação nas Instalações – Banda 3 (Completa)','Automação nas Instalações – Banda 4 (Flexível)','Conectividade nas Instalações – Banda 4 (Tempo Real)'],
+   r:2,
+   exp:'Automação flexível e reconfigurável que reage ao ambiente (presença/luminosidade) com mínima intervenção humana. Isso define Automação nas Instalações – Banda 4 (Flexível).'},
+  // Q23
+  {q:'Todos os ativos de produção utilizam o protocolo OPC-UA, permitindo que máquinas de três fabricantes diferentes troquem dados de performance de forma transparente através de uma arquitetura de rede unificada. Qual é a Dimensão e a Banda SIRI correspondente?',
+   op:['Conectividade no Chão de Fábrica – Banda 3 (Interoperável e Segura)','Integração Vertical – Banda 4 (Automatizada)','Conectividade no Chão de Fábrica – Banda 5 (Escalável)','Conectividade no Chão de Fábrica – Banda 4 (Tempo Real)'],
+   r:3,
+   exp:'Rede industrial com alta interoperabilidade baseada em protocolos padrão (OPC-UA), permitindo comunicação agnóstica a fornecedores. Isso define Conectividade no Chão de Fábrica – Banda 4 (Tempo Real).'},
+  // Q24
+  {q:'A rede administrativa da matriz e das filiais está conectada via VPN segura, permitindo que o ERP acesse bancos de dados de vendas locais de forma integrada e segura. Qual é a Dimensão e a Banda SIRI correspondente?',
+   op:['Conectividade na Empresa – Banda 2 (Interoperável)','Conectividade na Empresa – Banda 4 (Tempo Real)','Integração Horizontal – Banda 3 (Integrada)','Conectividade na Empresa – Banda 3 (Interoperável e Segura)'],
+   r:3,
+   exp:'Integração formal e segura entre redes geográficas distintas, permitindo o fluxo de dados corporativos de forma estruturada. Isso define Conectividade na Empresa – Banda 3 (Interoperável e Segura).'},
+  // Q25
+  {q:'A fábrica possui cobertura Wi-Fi em todas as áreas comuns, permitindo que laptops administrativos se conectem à rede local e acessem o servidor de arquivos corporativo. Qual é a Dimensão e a Banda SIRI correspondente?',
+   op:['Conectividade nas Instalações – Banda 3 (Interoperável e Segura)','Conectividade nas Instalações – Banda 2 (Interoperável)','Conectividade no Chão de Fábrica – Banda 2 (Interoperável)','Conectividade na Empresa – Banda 2 (Interoperável)'],
+   r:1,
+   exp:'Infraestrutura digital presente na facilidade (Wi-Fi), mas servindo apenas para acesso básico em silos de informação. Isso define Conectividade nas Instalações – Banda 2 (Interoperável).'},
+  // Q26
+  {q:'O sistema de monitoramento de ativos utiliza análise de vibração e Machine Learning para emitir um diagnóstico técnico indicando que o rolamento "X" falhará em 15 dias, permitindo o agendamento prévio da manutenção. Qual é a Dimensão e a Banda SIRI correspondente?',
+   op:['Inteligência no Chão de Fábrica – Banda 3 (Diagnóstico)','Inteligência nas Instalações – Banda 4 (Preditiva)','Inteligência no Chão de Fábrica – Banda 5 (Adaptável)','Inteligência no Chão de Fábrica – Banda 4 (Preditiva)'],
+   r:3,
+   exp:'Inteligência preditiva: uso de modelos analíticos (Machine Learning) para antecipar falhas de ativos antes que ocorram. Isso define Inteligência no Chão de Fábrica – Banda 4 (Preditiva).'},
+  // Q27
+  {q:'A empresa utiliza Big Data para cruzar dados de vendas globais e câmbio, permitindo que o sistema de precificação altere os valores no site de forma autônoma e otimizada. Qual é a Dimensão e a Banda SIRI correspondente?',
+   op:['Inteligência na Empresa – Banda 4 (Preditiva)','Integração Horizontal – Banda 5 (Inteligente)','Inteligência na Empresa – Banda 5 (Adaptável)','Conectividade na Empresa – Banda 5 (Escalável)'],
+   r:2,
+   exp:'Inteligência autônoma aplicada ao negócio; o sistema analisa, decide e executa a estratégia de preços sem supervisão humana. Isso define Inteligência na Empresa – Banda 5 (Adaptável).'},
+  // Q28
+  {q:'O sistema de gestão de utilidades utiliza IA para prever picos de demanda de ar comprimido com base no plano de produção e ajusta autonomamente a pressão dos compressores para evitar desperdício. Qual é a Dimensão e a Banda SIRI correspondente?',
+   op:['Automação nas Instalações – Banda 4 (Flexível)','Inteligência nas Instalações – Banda 5 (Adaptável)','Inteligência nas Instalações – Banda 4 (Preditiva)','Conectividade nas Instalações – Banda 4 (Tempo Real)'],
+   r:2,
+   exp:'Capacidade preditiva aplicada a utilidades (ar comprimido) para otimização de recursos baseada no plano de demanda futuro. Isso define Inteligência nas Instalações – Banda 4 (Preditiva).'},
+  // Q29
+  {q:'A empresa oferece treinamentos anuais de segurança do trabalho e operação de empilhadeiras, mas não há módulos voltados para competências digitais, programação ou análise de dados. Qual é a Dimensão e a Banda SIRI correspondente?',
+   op:['Aprendizagem e Desenvolvimento da Força de Trabalho – Banda 0 (Indefinida)','Competência de Liderança – Banda 1 (Básica)','Aprendizagem e Desenvolvimento da Força de Trabalho – Banda 2 (Digital)','Aprendizagem e Desenvolvimento da Força de Trabalho – Banda 1 (Básica)'],
+   r:3,
+   exp:'Programa de treinamento estruturado, mas limitado a competências operacionais tradicionais, sem foco em Indústria 4.0. Isso define Aprendizagem e Desenvolvimento da Força de Trabalho – Banda 1 (Básica).'},
+  // Q30
+  {q:'A gerência sênior criou um comitê de transformação digital e cada gestor de departamento concluiu um curso de "Liderança na Era 4.0" para desenhar o roteiro técnico da planta. Qual é a Dimensão e a Banda SIRI correspondente?',
+   op:['Estratégia e Governança – Banda 3 (Integrada)','Competência de Liderança – Banda 5 (Autônoma)','Competência de Liderança – Banda 3 (Integrada)','Competência de Liderança – Banda 4 (Avançada)'],
+   r:3,
+   exp:'Liderança capacitada e independente, capaz de desenhar e gerir a estratégia de transformação da planta. Isso define Competência de Liderança – Banda 4 (Avançada).'},
+  // Q31
+  {q:'Diferentes departamentos compartilham documentos via Microsoft SharePoint, mas as métricas de sucesso de cada área permanecem isoladas e muitas vezes conflitantes entre si. Qual é a Dimensão e a Banda SIRI correspondente?',
+   op:['Integração Horizontal – Banda 2 (Digital)','Colaboração Inter e Intraempresarial – Banda 3 (Integrada)','Colaboração Inter e Intraempresarial – Banda 2 (Digital)','Estratégia e Governança – Banda 2 (Digital)'],
+   r:2,
+   exp:'Uso de ferramentas digitais para colaboração, mas a estrutura organizacional e os KPIs ainda refletem silos operacionais. Isso define Colaboração Inter e Intraempresarial – Banda 2 (Digital).'},
+  // Q32
+  {q:'A estratégia de Indústria 4.0 está documentada no plano plurianual da empresa, com metas de eficiência definidas e um orçamento específico alocado para a modernização dos sistemas legados. Qual é a Dimensão e a Banda SIRI correspondente?',
+   op:['Estratégia e Governança – Banda 3 (Integrada)','Competência de Liderança – Banda 2 (Digital)','Colaboração Inter e Intraempresarial – Banda 2 (Digital)','Estratégia e Governança – Banda 2 (Digital)'],
+   r:3,
+   exp:'Reconhecimento formal da transformação digital como foco estratégico, com documentação e alocação inicial de recursos. Isso define Estratégia e Governança – Banda 2 (Digital).'},
+  // Q33
+  {q:'Quando um teste de qualidade detecta uma não conformidade no sensor de medição, o sistema envia automaticamente um comando de bloqueio para o lote correspondente no ERP via rede industrial. Qual é a Dimensão e a Banda SIRI correspondente?',
+   op:['Integração Vertical – Banda 3 (Integrada)','Conectividade no Chão de Fábrica – Banda 4 (Tempo Real)','Inteligência no Chão de Fábrica – Banda 4 (Preditiva)','Integração Vertical – Banda 4 (Automatizada)'],
+   r:3,
+   exp:'Fluxo de dados automatizado entre qualidade (fábrica) e controle de lote (ERP), com intervenção humana limitada. Isso define Integração Vertical – Banda 4 (Automatizada).'},
+  // Q34
+  {q:'A empresa utiliza um portal de colaboração onde fornecedores podem visualizar as necessidades de produção futuras, mas a confirmação de entrega e prazos ainda é feita via troca de e-mails. Qual é a Dimensão e a Banda SIRI correspondente?',
+   op:['Integração Horizontal – Banda 3 (Integrada)','Integração Horizontal – Banda 2 (Digital)','Colaboração Inter e Intraempresarial – Banda 3 (Integrada)','Conectividade na Empresa – Banda 2 (Interoperável)'],
+   r:1,
+   exp:'Uso de portal digital para compartilhamento, mas o processo de negócio ainda é conduzido em silos via e-mails manuais. Isso define Integração Horizontal – Banda 2 (Digital).'},
+  // Q35
+  {q:'A Lista de Materiais (BOM) da engenharia está linkada ao ERP; quando o engenheiro altera um componente no PLM, a estrutura de custos e a lista de compras no ERP são atualizadas automaticamente. Qual é a Dimensão e a Banda SIRI correspondente?',
+   op:['Integração Vertical – Banda 4 (Automatizada)','Integração do Ciclo de Vida do Produto – Banda 3 (Integrada)','Integração do Ciclo de Vida do Produto – Banda 4 (Automatizada)','Automação na Empresa – Banda 4 (Flexível)'],
+   r:2,
+   exp:'Integração automatizada entre PLM e ERP; a thread digital garante que alterações na BOM fluam sem intervenção humana. Isso define Integração do Ciclo de Vida do Produto – Banda 4 (Automatizada).'},
+  // Q36
+  {q:'A linha de produção utiliza sistemas de automação "Plug-and-Produce", permitindo que novos módulos de teste sejam inseridos na rede e reconhecidos instantaneamente sem necessidade de nova programação. Qual é a Dimensão e a Banda SIRI correspondente?',
+   op:['Conectividade no Chão de Fábrica – Banda 5 (Escalável)','Automação no Chão de Fábrica – Banda 5 (Convergida)','Automação no Chão de Fábrica – Banda 3 (Completa)','Automação no Chão de Fábrica – Banda 4 (Flexível)'],
+   r:3,
+   exp:'Automação flexível baseada em plug-and-produce, permitindo reconfiguração rápida do hardware via rede. Isso define Automação no Chão de Fábrica – Banda 4 (Flexível).'},
+  // Q37
+  {q:'A empresa utiliza softwares de automação de fluxo de trabalho (RPA) para validar notas fiscais de entrada contra pedidos de compra, processando pagamentos de rotina com mínima intervenção humana. Qual é a Dimensão e a Banda SIRI correspondente?',
+   op:['Automação na Empresa – Banda 3 (Completa)','Inteligência na Empresa – Banda 4 (Preditiva)','Automação na Empresa – Banda 4 (Flexível)','Integração Horizontal – Banda 4 (Automatizada)'],
+   r:2,
+   exp:'Uso de RPA para automatizar fluxos de trabalho administrativos de alta repetitividade com intervenção humana limitada. Isso define Automação na Empresa – Banda 4 (Flexível).'},
+  // Q38
+  {q:'O sistema de ventilação de emergência está integrado ao sistema de detecção de fumaça, mas a abertura dos exaustores deve ser confirmada por um operador na central de incêndio. Qual é a Dimensão e a Banda SIRI correspondente?',
+   op:['Automação nas Instalações – Banda 4 (Flexível)','Inteligência nas Instalações – Banda 3 (Diagnóstico)','Automação nas Instalações – Banda 2 (Avançada)','Automação nas Instalações – Banda 3 (Completa)'],
+   r:3,
+   exp:'Sistemas prediais formalmente integrados (fogo e ventilação), mas a execução final do processo depende de aprovação humana. Isso define Automação nas Instalações – Banda 3 (Completa).'},
+  // Q39
+  {q:'O chão de fábrica possui uma rede privada 5G dedicada, garantindo baixa latência e alta largura de banda para a coordenação de uma frota de 50 robôs móveis autônomos (AMRs). Qual é a Dimensão e a Banda SIRI correspondente?',
+   op:['Automação no Chão de Fábrica – Banda 5 (Convergida)','Conectividade no Chão de Fábrica – Banda 5 (Escalável)','Conectividade no Chão de Fábrica – Banda 4 (Tempo Real)','Inteligência no Chão de Fábrica – Banda 5 (Adaptável)'],
+   r:2,
+   exp:'Conectividade de alta velocidade e baixa latência (5G) que suporta agilidade e mobilidade em tempo real para ativos críticos. Isso define Conectividade no Chão de Fábrica – Banda 4 (Tempo Real).'},
+  // Q40
+  {q:'Todos os escritórios regionais estão integrados em uma rede de alta velocidade que permite o acesso transparente a aplicações em nuvem e servidores locais com redundância automática de link. Qual é a Dimensão e a Banda SIRI correspondente?',
+   op:['Conectividade na Empresa – Banda 3 (Interoperável e Segura)','Conectividade na Empresa – Banda 5 (Escalável)','Integração Horizontal – Banda 4 (Automatizada)','Conectividade na Empresa – Banda 4 (Tempo Real)'],
+   r:3,
+   exp:'Rede corporativa resiliente e integrada, capaz de suportar fluxos de dados em nuvem com alta disponibilidade e agilidade. Isso define Conectividade na Empresa – Banda 4 (Tempo Real).'},
+  // Q41
+  {q:'O sistema de automação predial utiliza protocolos interoperáveis (como Modbus ou BACnet), permitindo que o software de supervisão leia dados de medidores de energia de diferentes marcas. Qual é a Dimensão e a Banda SIRI correspondente?',
+   op:['Conectividade nas Instalações – Banda 2 (Interoperável)','Automação nas Instalações – Banda 3 (Completa)','Conectividade nas Instalações – Banda 4 (Tempo Real)','Conectividade nas Instalações – Banda 3 (Interoperável e Segura)'],
+   r:3,
+   exp:'Interoperabilidade estabelecida através de protocolos padrão de comunicação predial (Modbus/BACnet). Isso define Conectividade nas Instalações – Banda 3 (Interoperável e Segura).'},
+  // Q42
+  {q:'O sistema de planejamento dinâmico identifica autonomamente a quebra de uma máquina gargalo e recalcula toda a sequência de produção, enviando as novas ordens de trabalho para os terminais dos operadores. Qual é a Dimensão e a Banda SIRI correspondente?',
+   op:['Inteligência no Chão de Fábrica – Banda 4 (Preditiva)','Integração Vertical – Banda 5 (Inteligente)','Automação no Chão de Fábrica – Banda 5 (Convergida)','Inteligência no Chão de Fábrica – Banda 5 (Adaptável)'],
+   r:3,
+   exp:'Inteligência autônoma e adaptativa; o sistema aprende com a anomalia (quebra) e re-otimiza a produção de forma independente. Isso define Inteligência no Chão de Fábrica – Banda 5 (Adaptável).'},
+  // Q43
+  {q:'A IA da empresa analisa o histórico de compras de 10 anos e variáveis macroeconômicas para prever a demanda sazonal, gerando automaticamente sugestões de compra de matéria-prima para os compradores. Qual é a Dimensão e a Banda SIRI correspondente?',
+   op:['Integração Horizontal – Banda 5 (Inteligente)','Inteligência na Empresa – Banda 5 (Adaptável)','Inteligência na Empresa – Banda 4 (Preditiva)','Automação na Empresa – Banda 4 (Flexível)'],
+   r:2,
+   exp:'Uso de modelos avançados e Big Data para predição de demanda com alta acurácia para suporte à decisão humana. Isso define Inteligência na Empresa – Banda 4 (Preditiva).'},
+  // Q44
+  {q:'O sistema de inteligência predial monitora o estado de saúde dos transformadores de energia através de modelos preditivos, indicando a necessidade de manutenção antes que ocorra um blackout. Qual é a Dimensão e a Banda SIRI correspondente?',
+   op:['Automação nas Instalações – Banda 4 (Flexível)','Inteligência nas Instalações – Banda 3 (Diagnóstico)','Conectividade nas Instalações – Banda 4 (Tempo Real)','Inteligência nas Instalações – Banda 4 (Preditiva)'],
+   r:3,
+   exp:'Monitoramento preditivo da saúde dos ativos de utilidades (transformadores), focando em prevenir interrupções da facilidade. Isso define Inteligência nas Instalações – Banda 4 (Preditiva).'},
+  // Q45
+  {q:'Existe um programa de L&D avançado que utiliza Realidade Aumentada para treinar técnicos em manutenção preditiva, com currículos que se adaptam conforme o progresso individual do aluno. Qual é a Dimensão e a Banda SIRI correspondente?',
+   op:['Competência de Liderança – Banda 4 (Avançada)','Aprendizagem e Desenvolvimento da Força de Trabalho – Banda 3 (Integrada)','Aprendizagem e Desenvolvimento da Força de Trabalho – Banda 5 (Adaptativa)','Aprendizagem e Desenvolvimento da Força de Trabalho – Banda 4 (Avançada)'],
+   r:3,
+   exp:'Programa de L&D integrado e voltado para o futuro, utilizando tecnologias avançadas (AR) e personalização do ensino. Isso define Aprendizagem e Desenvolvimento da Força de Trabalho – Banda 4 (Avançada).'},
+  // Q46
+  {q:'A diretoria utiliza um sistema de governança digital que monitora em tempo real o ROI de cada projeto de digitalização, ajustando a estratégia de investimento trimestralmente de forma autônoma. Qual é a Dimensão e a Banda SIRI correspondente?',
+   op:['Estratégia e Governança – Banda 4 (Avançada)','Competência de Liderança – Banda 4 (Avançada)','Competência de Liderança – Banda 5 (Autônoma)','Estratégia e Governança – Banda 5 (Autônoma)'],
+   r:2,
+   exp:'Liderança que utiliza governança digital autônoma para ajustar dinamicamente a estratégia de transformação da empresa. Isso define Competência de Liderança – Banda 5 (Autônoma).'},
+  // Q47
+  {q:'A empresa opera como parte de uma rede estendida (Extended Enterprise), onde KPIs de pegada de carbono são compartilhados e otimizados em conjunto com parceiros logísticos em uma plataforma comum. Qual é a Dimensão e a Banda SIRI correspondente?',
+   op:['Integração Horizontal – Banda 5 (Inteligente)','Estratégia e Governança – Banda 5 (Autônoma)','Colaboração Inter e Intraempresarial – Banda 4 (Avançada)','Colaboração Inter e Intraempresarial – Banda 5 (Expandida)'],
+   r:3,
+   exp:'Colaboração avançada via Extended Enterprise com KPIs de sustentabilidade compartilhados e confiança institucional mútua. Isso define Colaboração Inter e Intraempresarial – Banda 5 (Expandida).'},
+  // Q48
+  {q:'A governança da Indústria 4.0 inclui auditorias semestrais de cibersegurança e uma estrutura clara de papéis e responsabilidades para a manutenção dos ativos digitais em toda a organização. Qual é a Dimensão e a Banda SIRI correspondente?',
+   op:['Competência de Liderança – Banda 4 (Avançada)','Colaboração Inter e Intraempresarial – Banda 4 (Avançada)','Estratégia e Governança – Banda 3 (Integrada)','Estratégia e Governança – Banda 4 (Avançada)'],
+   r:3,
+   exp:'Governança implementada em escala, com auditorias formais e estruturas de suporte para sustentar a transformação. Isso define Estratégia e Governança – Banda 4 (Avançada).'},
+  // Q49
+  {q:'Uma máquina de injeção de plástico detecta variações na umidade do polímero e ajusta automaticamente a pressão de injeção e o tempo de resfriamento para manter a qualidade, sem parar a produção. Qual é a Dimensão e a Banda SIRI correspondente?',
+   op:['Automação no Chão de Fábrica – Banda 4 (Flexível)','Inteligência no Chão de Fábrica – Banda 4 (Preditiva)','Inteligência no Chão de Fábrica – Banda 5 (Adaptável)','Automação no Chão de Fábrica – Banda 5 (Convergida)'],
+   r:2,
+   exp:'Automação inteligente de borda (Edge Intelligence); a máquina se auto-otimiza em tempo real perante variações físicas, sem intervenção humana. Isso define Inteligência no Chão de Fábrica – Banda 5 (Adaptável).'},
+  // Q50
+  {q:'O sistema predial detecta um vazamento de gás e, além de isolar a área, aciona autonomamente o protocolo de emergência no sistema dos bombeiros e na empresa de manutenção externa. Qual é a Dimensão e a Banda SIRI correspondente?',
+   op:['Automação nas Instalações – Banda 5 (Convergida)','Conectividade nas Instalações – Banda 5 (Escalável)','Inteligência nas Instalações – Banda 4 (Preditiva)','Inteligência nas Instalações – Banda 5 (Adaptável)'],
+   r:3,
+   exp:'Sistemas prediais integrados em um ecossistema autônomo que aciona parceiros externos e executa protocolos de segurança sem ação humana. Isso define Inteligência nas Instalações – Banda 5 (Adaptável).'}
+];
+
+let mode='quiz',idx=0,score=0,errs=0,skips=0,answered=false,results=[],studyIdx=0;
+
+function renderQ(){
+  answered=false;
+  const q=QS[idx];
+  document.getElementById('q-badge').textContent='Questão '+(idx+1)+' de '+QS.length;
+  document.getElementById('q-text').textContent=q.q;
+  document.getElementById('q-fb').className='feedback';
+  document.getElementById('btn-next').disabled=true;
+  document.getElementById('btn-skip').disabled=false;
+  const opts=document.getElementById('q-opts');
+  opts.innerHTML='';
+  q.op.forEach((op,i)=>{
+    const b=document.createElement('button');
+    b.className='opt';b.dataset.i=i;
+    b.innerHTML=`<span class="opt-l">${L[i]}</span><span>${op}</span>`;
+    b.addEventListener('click',()=>pick(i));
+    opts.appendChild(b);
+  });
+  const pct=Math.round(idx/QS.length*100);
+  document.getElementById('prog-lbl').textContent='Questão '+(idx+1)+' de '+QS.length;
+  document.getElementById('prog-pct').textContent=pct+'%';
+  document.getElementById('prog-bar').style.width=pct+'%';
+  document.getElementById('prog-txt').textContent='Respondidas: '+idx+'/'+QS.length;
+  const c=document.getElementById('q-card');
+  c.style.animation='none';requestAnimationFrame(()=>{c.style.animation='';});
+}
+
+function pick(chosen){
+  if(answered)return;
+  answered=true;
+  const q=QS[idx];const ok=chosen===q.r;
+  document.querySelectorAll('#q-opts .opt').forEach((el,i)=>{
+    el.classList.add('disabled');
+    if(i===q.r)el.classList.add('show-ok');
+    if(i===chosen&&ok)el.classList.add('ok');
+    if(i===chosen&&!ok)el.classList.add('ng');
+  });
+  const fb=document.getElementById('q-fb');
+  if(ok){fb.className='feedback ok';fb.textContent='✓ Correto! – '+q.exp;score++;}
+  else{fb.className='feedback ng';fb.textContent='✗ Incorreto. Resposta: '+L[q.r]+') '+q.op[q.r]+' — '+q.exp;errs++;}
+  results.push({q,chosen,ok,skipped:false});
+  document.getElementById('sv').textContent=score;
+  document.getElementById('ev').textContent=errs;
+  document.getElementById('btn-next').disabled=false;
+  document.getElementById('btn-skip').disabled=true;
+}
+
+function skip(){
+  if(answered)return;
+  results.push({q:QS[idx],chosen:-1,ok:false,skipped:true});
+  skips++;next();
+}
+
+function next(){
+  idx++;
+  if(idx>=QS.length){showScore();return;}
+  renderQ();
+}
+
+function showScore(){
+  document.getElementById('quiz-mode').style.display='none';
+  document.getElementById('score-screen').style.display='';
+  document.getElementById('scorebar').style.display='none';
+  const pct=Math.round(score/QS.length*100);
+  document.getElementById('sc-emoji').textContent=pct>=80?'🎉':pct>=60?'👍':'📚';
+  document.getElementById('sc-num').textContent=pct+'%';
+  document.getElementById('sc-sub').textContent=score+' de '+QS.length+' corretas';
+  document.getElementById('sc-ok').textContent=score;
+  document.getElementById('sc-ng').textContent=errs;
+  document.getElementById('sc-sk').textContent=skips;
+  document.getElementById('prog-bar').style.width='100%';
+  document.getElementById('prog-pct').textContent='100%';
+}
+
+function toggleReview(){
+  const sec=document.getElementById('rev-section');
+  if(sec.style.display!=='none'){sec.style.display='none';return;}
+  sec.style.display='';
+  const c=document.getElementById('rev-items');c.innerHTML='';
+  results.forEach((r,i)=>{
+    const d=document.createElement('div');d.className='rev-item';
+    let h=`<div class="rev-q">${i+1}. ${r.q.q}</div>`;
+    if(r.skipped)h+=`<div class="rev-a" style="color:var(--muted)">Pulada — correta: ${L[r.q.r]}) ${r.q.op[r.q.r]}</div>`;
+    else if(r.ok)h+=`<div class="rev-a ok">✓ ${L[r.chosen]}) ${r.q.op[r.chosen]}</div>`;
+    else{h+=`<div class="rev-a ng">✗ Sua: ${L[r.chosen]}) ${r.q.op[r.chosen]}</div>`;h+=`<div class="rev-c">✓ Correta: ${L[r.q.r]}) ${r.q.op[r.q.r]}</div>`;}
+    if(r.q.exp)h+=`<div class="rev-exp">${r.q.exp}</div>`;
+    d.innerHTML=h;c.appendChild(d);
+  });
+}
+
+function renderStudy(){
+  const q=QS[studyIdx];
+  document.getElementById('sn-badge').textContent='Questão '+(studyIdx+1)+' de '+QS.length;
+  document.getElementById('sn-text').textContent=q.q;
+  document.getElementById('sn-ans').style.display='none';
+  const opts=document.getElementById('sn-opts');opts.innerHTML='';
+  q.op.forEach((op,i)=>{
+    const b=document.createElement('button');b.className='opt disabled';
+    b.innerHTML=`<span class="opt-l">${L[i]}</span><span>${op}</span>`;
+    opts.appendChild(b);
+  });
+  document.getElementById('sn-num').textContent=(studyIdx+1)+' / '+QS.length;
+}
+
+function revealAnswer(){
+  const q=QS[studyIdx];
+  document.querySelectorAll('#sn-opts .opt').forEach((el,i)=>{if(i===q.r)el.classList.add('show-ok');});
+  const a=document.getElementById('sn-ans');
+  a.textContent='✓ '+L[q.r]+') '+q.op[q.r]+' — '+q.exp;
+  a.style.display='block';
+}
+
+function studyNext(){studyIdx=(studyIdx+1)%QS.length;renderStudy();}
+function studyPrev(){studyIdx=(studyIdx-1+QS.length)%QS.length;renderStudy();}
+
+function setMode(m){
+  mode=m;
+  document.querySelectorAll('.mode-btn').forEach((b,i)=>b.classList.toggle('active',['quiz','study'][i]===m));
+  document.getElementById('quiz-mode').style.display=m==='quiz'?'':'none';
+  document.getElementById('study-mode').style.display=m==='study'?'':'none';
+  document.getElementById('score-screen').style.display='none';
+  document.getElementById('scorebar').style.display=m==='quiz'?'':'none';
+  if(m==='study')renderStudy();
+}
+
+function resetAll(){
+  idx=0;score=0;errs=0;skips=0;results=[];
+  document.getElementById('sv').textContent='0';
+  document.getElementById('ev').textContent='0';
+  document.getElementById('score-screen').style.display='none';
+  document.getElementById('rev-section').style.display='none';
+  document.getElementById('scorebar').style.display=mode==='quiz'?'':'none';
+  if(mode==='quiz'){document.getElementById('quiz-mode').style.display='';renderQ();}
+  else renderStudy();
+}
+
+renderQ();
+</script>
+</body>
+</html>
