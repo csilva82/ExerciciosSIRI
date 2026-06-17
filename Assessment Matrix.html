@@ -1,1 +1,1239 @@
 
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SIRI – Matriz de Avaliação: 16 Dimensões</title>
+<style>
+  :root {
+    --bg: #0d1117;
+    --bg2: #161b22;
+    --bg3: #1c2333;
+    --border: rgba(255,255,255,0.08);
+    --border2: rgba(255,255,255,0.14);
+    --text: #e6edf3;
+    --text2: #8b949e;
+    --text3: #6e7681;
+    --accent: #3b82f6;
+    --accent2: #1d4ed8;
+    --green: #22c55e;
+    --green2: #15803d;
+    --amber: #f59e0b;
+    --amber2: #b45309;
+    --red: #ef4444;
+    --teal: #14b8a6;
+    --purple: #a855f7;
+    --coral: #f97316;
+    --radius: 10px;
+    --radius-lg: 14px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    font-size: 15px;
+    line-height: 1.6;
+  }
+
+  /* NAV */
+  nav {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(13,17,23,0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 0;
+    padding: 0 1.5rem;
+    height: 52px;
+    overflow-x: auto;
+  }
+  .nav-brand {
+    font-size: 13px; font-weight: 600; color: var(--accent);
+    letter-spacing: .5px; white-space: nowrap;
+    margin-right: 1.5rem; padding-right: 1.5rem;
+    border-right: 1px solid var(--border);
+  }
+  .nav-tabs { display: flex; gap: 2px; }
+  .nav-tab {
+    padding: 6px 14px; border-radius: 6px;
+    border: none; background: none; color: var(--text2);
+    cursor: pointer; font-size: 13px; white-space: nowrap;
+    transition: all .15s;
+  }
+  .nav-tab:hover { background: var(--bg3); color: var(--text); }
+  .nav-tab.active { background: var(--bg3); color: var(--accent); }
+
+  /* SECTIONS */
+  .section { display: none; padding: 2rem 1.5rem; max-width: 1100px; margin: 0 auto; }
+  .section.active { display: block; }
+
+  /* HERO */
+  .hero {
+    text-align: center; padding: 3rem 1rem 2rem;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 2rem;
+  }
+  .hero-badge {
+    display: inline-block;
+    background: rgba(59,130,246,0.12); color: var(--accent);
+    border: 1px solid rgba(59,130,246,0.25);
+    padding: 4px 14px; border-radius: 20px;
+    font-size: 12px; font-weight: 600; letter-spacing: .5px;
+    margin-bottom: 1rem;
+  }
+  .hero h1 { font-size: 2rem; font-weight: 700; margin-bottom: .5rem; }
+  .hero p { color: var(--text2); font-size: 1rem; max-width: 600px; margin: 0 auto; }
+
+  /* BLOCKS */
+  .blocks-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem; margin-bottom: 2rem;
+  }
+  @media (max-width: 768px) { .blocks-grid { grid-template-columns: 1fr; } }
+  .block-card {
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+  }
+  .block-header {
+    padding: .75rem 1rem;
+    display: flex; align-items: center; gap: .6rem;
+    font-weight: 600; font-size: 14px;
+  }
+  .block-icon { font-size: 1.2rem; }
+  .block-body { padding: .25rem 0; }
+
+  /* PILLARS */
+  .pillar-item {
+    padding: .6rem 1rem;
+    cursor: pointer;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: .6rem;
+    transition: background .12s; font-size: 13px;
+  }
+  .pillar-item:last-child { border-bottom: none; }
+  .pillar-item:hover { background: rgba(255,255,255,0.04); }
+  .pillar-item .pi-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+  .pillar-item .pi-name { flex: 1; }
+  .pillar-item .pi-dims { color: var(--text3); font-size: 11px; }
+  .pillar-item .pi-arrow { color: var(--text3); font-size: 11px; }
+
+  /* DIMENSION MODAL */
+  .modal-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.75); z-index: 200;
+    align-items: center; justify-content: center;
+    padding: 1rem;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--bg2); border: 1px solid var(--border2);
+    border-radius: var(--radius-lg);
+    width: 100%; max-width: 700px;
+    max-height: 88vh; overflow-y: auto;
+  }
+  .modal-head {
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: flex-start; gap: 1rem;
+  }
+  .modal-head-info { flex: 1; }
+  .modal-title { font-size: 1.1rem; font-weight: 700; margin-bottom: .25rem; }
+  .modal-subtitle { color: var(--text2); font-size: 13px; }
+  .modal-close {
+    background: none; border: none; color: var(--text3);
+    font-size: 1.3rem; cursor: pointer; padding: 2px;
+    line-height: 1;
+  }
+  .modal-close:hover { color: var(--text); }
+  .modal-body { padding: 1.25rem 1.5rem; }
+  .dim-definition {
+    background: var(--bg3); border-radius: var(--radius);
+    padding: .75rem 1rem; margin-bottom: 1rem;
+    font-size: 13px; color: var(--text2); line-height: 1.6;
+    border-left: 3px solid var(--accent);
+  }
+
+  /* BAND TABLE */
+  .band-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .band-table th {
+    text-align: left; padding: .5rem .75rem;
+    color: var(--text3); font-weight: 500; font-size: 11px;
+    letter-spacing: .5px; text-transform: uppercase;
+    border-bottom: 1px solid var(--border);
+  }
+  .band-table td {
+    padding: .65rem .75rem;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    vertical-align: top;
+  }
+  .band-table tr:last-child td { border-bottom: none; }
+  .band-table tr:hover td { background: rgba(255,255,255,0.02); }
+  .band-num {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 24px; height: 24px; border-radius: 50%;
+    font-size: 12px; font-weight: 700; flex-shrink: 0;
+  }
+  .band-name { font-weight: 600; font-size: 13px; }
+  .band-def { color: var(--text2); font-size: 12px; line-height: 1.5; }
+  .band-desc { color: var(--text2); font-size: 12px; line-height: 1.5; }
+
+  /* COLORS PER BLOCK */
+  .blk-process .block-header { background: rgba(59,130,246,0.1); color: #60a5fa; }
+  .blk-process .pi-dot { background: #60a5fa; }
+  .blk-process .band-num { background: rgba(59,130,246,0.15); color: #60a5fa; }
+  .blk-tech .block-header { background: rgba(168,85,247,0.1); color: #c084fc; }
+  .blk-tech .pi-dot { background: #c084fc; }
+  .blk-tech .band-num { background: rgba(168,85,247,0.15); color: #c084fc; }
+  .blk-org .block-header { background: rgba(34,197,94,0.1); color: #4ade80; }
+  .blk-org .pi-dot { background: #4ade80; }
+  .blk-org .band-num { background: rgba(34,197,94,0.15); color: #4ade80; }
+
+  /* SECTION TITLES */
+  .sec-title {
+    font-size: 1.3rem; font-weight: 700;
+    margin-bottom: 1.5rem;
+    display: flex; align-items: center; gap: .6rem;
+  }
+  .sec-title::after {
+    content: ''; flex: 1; height: 1px;
+    background: var(--border);
+  }
+
+  /* MIND MAP */
+  #mindmap-container {
+    width: 100%; overflow: auto;
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+  }
+  #mindmap-svg { display: block; }
+  .mm-tooltip {
+    position: fixed; pointer-events: none;
+    background: var(--bg2); border: 1px solid var(--border2);
+    padding: .5rem .75rem; border-radius: 8px;
+    font-size: 12px; max-width: 280px; line-height: 1.5;
+    display: none; z-index: 300;
+  }
+
+  /* QUIZ */
+  .quiz-header {
+    display: flex; align-items: center; gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  .quiz-progress-bar {
+    flex: 1; height: 6px; background: var(--bg3);
+    border-radius: 3px; overflow: hidden;
+  }
+  .quiz-progress-fill {
+    height: 100%; background: var(--accent);
+    border-radius: 3px; transition: width .3s;
+  }
+  .quiz-count { color: var(--text2); font-size: 13px; white-space: nowrap; }
+  .quiz-score-badge {
+    background: rgba(59,130,246,0.12); color: var(--accent);
+    border: 1px solid rgba(59,130,246,0.2);
+    border-radius: 20px; padding: 3px 12px; font-size: 13px;
+    font-weight: 600;
+  }
+  .quiz-card {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: var(--radius-lg); padding: 1.5rem;
+    margin-bottom: 1rem;
+  }
+  .quiz-meta {
+    font-size: 11px; color: var(--text3);
+    text-transform: uppercase; letter-spacing: .5px;
+    margin-bottom: .75rem;
+  }
+  .quiz-q {
+    font-size: 1rem; font-weight: 600;
+    margin-bottom: 1.25rem; line-height: 1.5;
+  }
+  .quiz-options { display: grid; gap: .6rem; }
+  .quiz-opt {
+    padding: .75rem 1rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    cursor: pointer; font-size: 13px;
+    transition: all .12s; background: var(--bg3);
+    text-align: left; color: var(--text);
+    display: flex; align-items: flex-start; gap: .6rem;
+  }
+  .quiz-opt:hover:not(:disabled) { border-color: var(--border2); background: rgba(255,255,255,0.05); }
+  .quiz-opt.correct { background: rgba(34,197,94,0.12); border-color: rgba(34,197,94,0.4); color: #4ade80; }
+  .quiz-opt.wrong { background: rgba(239,68,68,0.1); border-color: rgba(239,68,68,0.35); color: #f87171; }
+  .quiz-opt:disabled { cursor: default; }
+  .opt-letter {
+    width: 22px; height: 22px; border-radius: 50%;
+    background: var(--bg); border: 1px solid var(--border2);
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 700; flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .quiz-feedback {
+    margin-top: 1rem; padding: .75rem 1rem;
+    border-radius: var(--radius); font-size: 13px;
+    display: none; line-height: 1.5;
+  }
+  .quiz-feedback.show { display: block; }
+  .quiz-feedback.ok { background: rgba(34,197,94,0.1); border: 1px solid rgba(34,197,94,0.25); color: #4ade80; }
+  .quiz-feedback.fail { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.25); color: #f87171; }
+  .quiz-nav {
+    display: flex; gap: .75rem; justify-content: flex-end; margin-top: .75rem;
+  }
+  .btn {
+    padding: .55rem 1.25rem; border-radius: 8px;
+    border: 1px solid var(--border2);
+    background: var(--bg3); color: var(--text);
+    cursor: pointer; font-size: 13px; font-weight: 500;
+    transition: all .12s;
+  }
+  .btn:hover { background: rgba(255,255,255,0.07); }
+  .btn.primary { background: var(--accent); border-color: transparent; color: #fff; }
+  .btn.primary:hover { background: var(--accent2); }
+  .quiz-result {
+    text-align: center; padding: 2rem;
+    display: none;
+  }
+  .quiz-result.show { display: block; }
+  .result-score {
+    font-size: 3rem; font-weight: 800; margin-bottom: .5rem;
+  }
+  .result-label { color: var(--text2); margin-bottom: 1.5rem; }
+  .result-stars { font-size: 2rem; margin-bottom: 1.5rem; }
+
+  /* FLASHCARDS */
+  .flash-grid { display: grid; grid-template-columns: repeat(auto-fill,minmax(280px,1fr)); gap: 1rem; }
+  .flash-card {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    cursor: pointer; perspective: 600px;
+    height: 160px;
+  }
+  .flash-inner {
+    position: relative; width: 100%; height: 100%;
+    transform-style: preserve-3d;
+    transition: transform .45s cubic-bezier(.4,0,.2,1);
+  }
+  .flash-card.flipped .flash-inner { transform: rotateY(180deg); }
+  .flash-front, .flash-back {
+    position: absolute; inset: 0;
+    backface-visibility: hidden;
+    border-radius: var(--radius-lg);
+    padding: 1.1rem;
+    display: flex; flex-direction: column;
+    justify-content: center;
+  }
+  .flash-front {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+  }
+  .flash-back {
+    background: var(--bg3);
+    border: 1px solid var(--border2);
+    transform: rotateY(180deg);
+  }
+  .flash-tag {
+    font-size: 10px; font-weight: 600; letter-spacing: .6px;
+    text-transform: uppercase; color: var(--text3); margin-bottom: .5rem;
+  }
+  .flash-term { font-size: 1rem; font-weight: 700; }
+  .flash-def { font-size: 12px; color: var(--text2); line-height: 1.5; }
+  .flash-hint { font-size: 11px; color: var(--text3); margin-top: .5rem; }
+
+  /* FILTER TABS */
+  .filter-row {
+    display: flex; gap: .4rem; flex-wrap: wrap;
+    margin-bottom: 1.25rem;
+  }
+  .filter-btn {
+    padding: 4px 12px; border-radius: 20px;
+    border: 1px solid var(--border);
+    background: none; color: var(--text2);
+    cursor: pointer; font-size: 12px; transition: all .12s;
+  }
+  .filter-btn:hover { border-color: var(--border2); color: var(--text); }
+  .filter-btn.active { background: var(--accent); border-color: transparent; color: #fff; }
+
+  /* TABLE OVERVIEW */
+  .overview-table {
+    width: 100%; border-collapse: collapse; font-size: 12px;
+    margin-bottom: 1.5rem;
+  }
+  .overview-table th {
+    padding: .5rem .75rem; text-align: left;
+    background: var(--bg3);
+    color: var(--text3); font-size: 11px;
+    letter-spacing: .5px; text-transform: uppercase;
+    border-bottom: 1px solid var(--border);
+    position: sticky; top: 52px; z-index: 5;
+  }
+  .overview-table td {
+    padding: .55rem .75rem;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    vertical-align: middle;
+  }
+  .overview-table tr:hover td { background: rgba(255,255,255,0.02); }
+  .tag {
+    display: inline-block; padding: 2px 8px;
+    border-radius: 10px; font-size: 11px; font-weight: 600;
+  }
+  .tag-process { background: rgba(59,130,246,0.12); color: #60a5fa; }
+  .tag-tech { background: rgba(168,85,247,0.12); color: #c084fc; }
+  .tag-org { background: rgba(34,197,94,0.12); color: #4ade80; }
+
+  /* STICKY NOTES / TIPS */
+  .tips-grid { display: grid; grid-template-columns: repeat(auto-fill,minmax(220px,1fr)); gap: 1rem; }
+  .tip-card {
+    padding: 1rem; border-radius: var(--radius);
+    border-left: 3px solid;
+    background: var(--bg2); font-size: 13px;
+  }
+  .tip-card .tip-label {
+    font-size: 10px; font-weight: 700; letter-spacing: .5px;
+    text-transform: uppercase; margin-bottom: .4rem; opacity: .7;
+  }
+  .tip-card .tip-text { color: var(--text2); line-height: 1.5; }
+  .tip-process { border-color: #60a5fa; }
+  .tip-process .tip-label { color: #60a5fa; }
+  .tip-tech { border-color: #c084fc; }
+  .tip-tech .tip-label { color: #c084fc; }
+  .tip-org { border-color: #4ade80; }
+  .tip-org .tip-label { color: #4ade80; }
+
+  /* RESPONSIVE */
+  @media (max-width: 600px) {
+    .hero h1 { font-size: 1.4rem; }
+    .blocks-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-brand">SIRI CSA</div>
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="showSection('visao')">Visão Geral</button>
+    <button class="nav-tab" onclick="showSection('dimensoes')">Dimensões</button>
+    <button class="nav-tab" onclick="showSection('mapa')">Mapa Mental</button>
+    <button class="nav-tab" onclick="showSection('flashcards')">Flashcards</button>
+    <button class="nav-tab" onclick="showSection('quiz')">Quiz</button>
+    <button class="nav-tab" onclick="showSection('dicas')">Dicas de Estudo</button>
+  </div>
+</nav>
+
+<!-- ═══════════════════ VISÃO GERAL ═══════════════════ -->
+<div id="sec-visao" class="section active">
+  <div class="hero">
+    <div class="hero-badge">SIRI – Assessment Matrix</div>
+    <h1>As 16 Dimensões de Avaliação</h1>
+    <p>Guia completo e interativo para o exame de Certificação de Assessor SIRI (CSA). Explore os 3 blocos, 8 pilares e 16 dimensões.</p>
+  </div>
+
+  <div class="sec-title">Tabela Resumo – Todas as 16 Dimensões</div>
+  <table class="overview-table">
+    <thead>
+      <tr>
+        <th>Bloco</th>
+        <th>Pilar</th>
+        <th>Dimensão</th>
+        <th>Bandas (0→5)</th>
+        <th>Ver</th>
+      </tr>
+    </thead>
+    <tbody id="overview-tbody"></tbody>
+  </table>
+
+  <div class="sec-title">Os 3 Blocos Construtivos</div>
+  <div class="blocks-grid" id="blocks-grid"></div>
+</div>
+
+<!-- ═══════════════════ DIMENSÕES ═══════════════════ -->
+<div id="sec-dimensoes" class="section">
+  <div class="sec-title">Explorar Dimensões</div>
+  <div class="filter-row" id="dim-filters">
+    <button class="filter-btn active" onclick="filterDims('todos',this)">Todos</button>
+    <button class="filter-btn" onclick="filterDims('Processo',this)">Processo</button>
+    <button class="filter-btn" onclick="filterDims('Tecnologia',this)">Tecnologia</button>
+    <button class="filter-btn" onclick="filterDims('Organização',this)">Organização</button>
+  </div>
+  <div id="dim-list"></div>
+</div>
+
+<!-- ═══════════════════ MAPA MENTAL ═══════════════════ -->
+<div id="sec-mapa" class="section">
+  <div class="sec-title">Mapa Mental – SIRI</div>
+  <div id="mindmap-container">
+    <svg id="mindmap-svg" viewBox="0 0 1000 680" width="1000" height="680"></svg>
+  </div>
+  <div class="mm-tooltip" id="mm-tooltip"></div>
+  <p style="color:var(--text3);font-size:12px;margin-top:.75rem;">Passe o mouse sobre os nós para ver a definição. Clique para ir à dimensão.</p>
+</div>
+
+<!-- ═══════════════════ FLASHCARDS ═══════════════════ -->
+<div id="sec-flashcards" class="section">
+  <div class="sec-title">Flashcards – Clique para revelar</div>
+  <div class="filter-row" id="flash-filters">
+    <button class="filter-btn active" onclick="filterFlash('todos',this)">Todos</button>
+    <button class="filter-btn" onclick="filterFlash('Processo',this)">Processo</button>
+    <button class="filter-btn" onclick="filterFlash('Tecnologia',this)">Tecnologia</button>
+    <button class="filter-btn" onclick="filterFlash('Organização',this)">Organização</button>
+    <button class="filter-btn" onclick="filterFlash('bandas',this)">Bandas</button>
+  </div>
+  <div class="flash-grid" id="flash-grid"></div>
+</div>
+
+<!-- ═══════════════════ QUIZ ═══════════════════ -->
+<div id="sec-quiz" class="section">
+  <div class="sec-title">Quiz – Teste seus conhecimentos</div>
+  <div id="quiz-ui">
+    <div class="quiz-header">
+      <div class="quiz-progress-bar"><div class="quiz-progress-fill" id="qpf"></div></div>
+      <div class="quiz-count" id="q-count">1 / 20</div>
+      <div class="quiz-score-badge" id="q-score">0 pts</div>
+    </div>
+    <div class="quiz-card" id="quiz-card">
+      <div class="quiz-meta" id="q-meta"></div>
+      <div class="quiz-q" id="q-text"></div>
+      <div class="quiz-options" id="q-opts"></div>
+      <div class="quiz-feedback" id="q-feedback"></div>
+    </div>
+    <div class="quiz-nav">
+      <button class="btn" onclick="restartQuiz()">↺ Reiniciar</button>
+      <button class="btn primary" id="btn-next" onclick="nextQuestion()" style="display:none">Próxima →</button>
+    </div>
+  </div>
+  <div class="quiz-result" id="quiz-result">
+    <div class="result-stars" id="r-stars"></div>
+    <div class="result-score" id="r-score"></div>
+    <div class="result-label" id="r-label"></div>
+    <button class="btn primary" onclick="restartQuiz()" style="margin:0 auto;">↺ Tentar Novamente</button>
+  </div>
+</div>
+
+<!-- ═══════════════════ DICAS ═══════════════════ -->
+<div id="sec-dicas" class="section">
+  <div class="sec-title">Dicas de Estudo para o CSA</div>
+  <div class="tips-grid" id="tips-grid"></div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal" onclick="closeModal(event)">
+  <div class="modal" id="modal-box">
+    <div class="modal-head">
+      <div class="modal-head-info">
+        <div class="modal-title" id="modal-title"></div>
+        <div class="modal-subtitle" id="modal-sub"></div>
+      </div>
+      <button class="modal-close" onclick="closeModalDirect()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="dim-definition" id="modal-def"></div>
+      <table class="band-table" id="modal-table">
+        <thead><tr><th width="40">Banda</th><th width="120">Nome</th><th>Definição</th><th>Descrição</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+// ════════════════════════════════════════════
+// DATA
+// ════════════════════════════════════════════
+const DATA = {
+  blocks: [
+    {
+      id:'processo', name:'Bloco de Processo', icon:'⚙️',
+      cls:'blk-process', tag:'tag-process', tagTxt:'Processo',
+      pillars:[
+        {
+          name:'Pilar de Operações',
+          dims:[{
+            id:'vi', name:'Integração Vertical',
+            def:'Integração de processos e sistemas em todos os níveis hierárquicos da pirâmide de automação dentro de uma instalação para estabelecer um fluxo de dados conectado de ponta a ponta.',
+            bands:[
+              {n:0,name:'Indefinido',def:'Processos verticais não estão definidos explicitamente.',desc:'Planejamento de recursos e processos de produção técnica são gerenciados e executados em silos, baseados em métodos informais ou ad hoc.'},
+              {n:1,name:'Definido',def:'Processos verticais são definidos e executados por humanos, com suporte de ferramentas analógicas.',desc:'Planejamento de recursos e processos de produção técnica são gerenciados e executados em silos, com base em instruções formalmente definidas.'},
+              {n:2,name:'Digital',def:'Processos verticais definidos são concluídos por humanos com suporte de ferramentas digitais.',desc:'Planejamento de recursos e processos de produção técnica são gerenciados e executados em silos, por sistemas OT e TI.'},
+              {n:3,name:'Integrado',def:'Processos e sistemas verticais digitalizados são integrados com segurança em todos os níveis hierárquicos da pirâmide de automação.',desc:'Sistemas OT e TI que gerenciam planejamento de recursos e produção técnica estão formalmente vinculados; porém, a troca de dados entre funções é predominantemente gerenciada por humanos.'},
+              {n:4,name:'Automatizado',def:'Processos e sistemas verticais integrados são automatizados, com intervenção humana limitada.',desc:'Sistemas OT e TI estão formalmente vinculados, com a troca de dados entre funções executada predominantemente por equipamentos, máquinas e sistemas computacionais.'},
+              {n:5,name:'Inteligente',def:'Processos e sistemas verticais automatizados estão ativamente analisando e reagindo a dados.',desc:'Sistemas OT e TI são integrados de ponta a ponta, com processos otimizados por meio de insights gerados pela análise de dados.'}
+            ]
+          }]
+        },
+        {
+          name:'Pilar de Cadeia de Suprimentos',
+          dims:[{
+            id:'hi', name:'Integração Horizontal',
+            def:'Integração de processos empresariais em toda a organização e com as partes interessadas ao longo da cadeia de valor.',
+            bands:[
+              {n:0,name:'Indefinido',def:'Processos de cadeia de suprimentos não estão explicitamente definidos.',desc:'Processos empresariais são gerenciados e executados em silos, com base em métodos informais ou ad hoc.'},
+              {n:1,name:'Definido',def:'Processos de cadeia de suprimentos são definidos e executados por humanos, com suporte de ferramentas analógicas.',desc:'Processos empresariais são gerenciados e executados em silos, com base em instruções formalmente definidas.'},
+              {n:2,name:'Digital',def:'Processos de cadeia de suprimentos definidos são concluídos por humanos com suporte de ferramentas digitais.',desc:'Processos empresariais são gerenciados e executados em silos por sistemas de TI.'},
+              {n:3,name:'Integrado',def:'Processos e sistemas de cadeia de suprimentos digitalizados são integrados com segurança entre parceiros de negócios e clientes ao longo da cadeia de valor.',desc:'Sistemas de TI que gerenciam processos empresariais estão formalmente vinculados; porém, a troca de dados é predominantemente gerenciada por humanos.'},
+              {n:4,name:'Automatizado',def:'Processos e sistemas integrados da cadeia de suprimentos são automatizados, com intervenção humana limitada.',desc:'Sistemas de TI que gerenciam processos empresariais estão formalmente vinculados, com a troca de dados executada predominantemente por sistemas computacionais.'},
+              {n:5,name:'Inteligente',def:'Processos e sistemas automatizados da cadeia de suprimentos estão ativamente analisando e reagindo a dados.',desc:'Sistemas de TI são integrados de ponta a ponta, com processos otimizados por insights gerados por análise de dados.'}
+            ]
+          }]
+        },
+        {
+          name:'Pilar de Ciclo de Vida do Produto',
+          dims:[{
+            id:'ipl', name:'Ciclo de Vida Integrado do Produto',
+            def:'Integração de pessoas, processos e sistemas ao longo de todo o ciclo de vida do produto, abrangendo as etapas de design e desenvolvimento, engenharia, produção, uso pelo cliente, serviço e descarte.',
+            bands:[
+              {n:0,name:'Indefinido',def:'Processos do ciclo de vida do produto não estão explicitamente definidos.',desc:'Processos ao longo do ciclo de vida do produto são gerenciados e executados em silos, com base em métodos informais ou ad hoc.'},
+              {n:1,name:'Definido',def:'Processos do ciclo de vida do produto são definidos e executados por humanos, com suporte de ferramentas analógicas.',desc:'Processos são gerenciados e executados em silos, com base em instruções formalmente definidas.'},
+              {n:2,name:'Digital',def:'Processos do ciclo de vida do produto definidos são concluídos por humanos com suporte de ferramentas digitais.',desc:'Processos são gerenciados e executados em silos por ferramentas digitais.'},
+              {n:3,name:'Integrado',def:'Processos e sistemas digitalizados do ciclo de vida do produto são integrados com segurança em todas as etapas.',desc:'Ferramentas e sistemas digitais que gerenciam o ciclo de vida estão formalmente vinculados; porém, a troca de informações é predominantemente gerenciada por humanos.'},
+              {n:4,name:'Automatizado',def:'Processos integrados do ciclo de vida do produto são automatizados, com intervenção humana limitada.',desc:'Ferramentas e sistemas digitais estão formalmente vinculados, com a troca de informações executada predominantemente por sistemas computacionais.'},
+              {n:5,name:'Inteligente',def:'Processos automatizados do ciclo de vida do produto estão ativamente analisando e reagindo a dados.',desc:'Ferramentas e sistemas digitais são integrados de ponta a ponta, com processos otimizados por insights de análise de dados.'}
+            ]
+          }]
+        }
+      ]
+    },
+    {
+      id:'tecnologia', name:'Bloco de Tecnologia', icon:'💡',
+      cls:'blk-tech', tag:'tag-tech', tagTxt:'Tecnologia',
+      pillars:[
+        {
+          name:'Pilar de Automação',
+          dims:[
+            {
+              id:'sfa', name:'Automação do Chão de Fábrica',
+              def:'Aplicação de tecnologia para monitorar, controlar e executar a produção e entrega de produtos e serviços, dentro do local onde a produção e gestão de bens é realizada.',
+              bands:[
+                {n:0,name:'Nenhum',def:'Processos repetitivos de produção e suporte não são automatizados.',desc:'Processos de produção são executados por humanos.'},
+                {n:1,name:'Básico',def:'Processos repetitivos de produção são parcialmente automatizados, com intervenção humana significativa.',desc:'Processos de produção são executados por humanos com assistência de equipamentos, máquinas e sistemas computacionais.'},
+                {n:2,name:'Avançado',def:'Processos repetitivos de produção são automatizados, com intervenção humana mínima.',desc:'Processos de produção são predominantemente executados por equipamentos e máquinas. Intervenção humana necessária para iniciar e concluir cada processo.'},
+                {n:3,name:'Total',def:'Processos repetitivos de produção são totalmente automatizados, sem intervenção humana.',desc:'Processos de produção são totalmente automatizados. Intervenção humana necessária apenas para eventos não planejados.'},
+                {n:4,name:'Flexível',def:'Processos de produção automatizados são reconfiguráveis por automação plug-and-play.',desc:'Equipamentos e sistemas computacionais podem ser modificados, reconfigurados e reatribuídos rapidamente. Intervenção humana limitada necessária para eventos não planejados.'},
+                {n:5,name:'Convergido',def:'Processos flexíveis de produção e suporte convergem com plataformas de automação empresarial e de instalação.',desc:'Equipamentos e sistemas computacionais são flexíveis e formalmente integrados a sistemas empresariais e de instalação para permitir interações dinâmicas entre domínios.'}
+              ]
+            },
+            {
+              id:'ea', name:'Automação Empresarial',
+              def:'Aplicação de tecnologia para monitorar, controlar e executar processos no local onde o trabalho administrativo é realizado, incluindo vendas, marketing, planejamento de demanda, compras e gestão de RH.',
+              bands:[
+                {n:0,name:'Nenhum',def:'Processos empresariais não são automatizados.',desc:'Processos empresariais são executados por humanos.'},
+                {n:1,name:'Básico',def:'Processos empresariais são parcialmente automatizados, com intervenção humana significativa.',desc:'Processos empresariais são executados por humanos com assistência de sistemas computacionais.'},
+                {n:2,name:'Avançado',def:'Processos empresariais são automatizados, com intervenção humana mínima.',desc:'Processos empresariais são predominantemente executados por sistemas computacionais. Intervenção humana necessária para iniciar e concluir cada processo.'},
+                {n:3,name:'Total',def:'Processos empresariais são totalmente automatizados, sem intervenção humana.',desc:'Processos empresariais são totalmente automatizados. Intervenção humana necessária para eventos não planejados.'},
+                {n:4,name:'Flexível',def:'Processos empresariais automatizados são adaptáveis.',desc:'Sistemas computacionais podem ser modificados, reconfigurados e reatribuídos rapidamente. Intervenção humana limitada para eventos não planejados.'},
+                {n:5,name:'Convergido',def:'Processos empresariais flexíveis convergem com automação do chão de fábrica e da instalação.',desc:'Sistemas computacionais são flexíveis e formalmente integrados ao chão de fábrica e sistemas de instalação para interações dinâmicas entre domínios.'}
+              ]
+            },
+            {
+              id:'fa', name:'Automação da Instalação',
+              def:'Aplicação de tecnologia para monitorar, controlar e executar processos dentro do edifício físico onde a área de produção está localizada, incluindo HVAC, refrigeração, segurança e iluminação.',
+              bands:[
+                {n:0,name:'Nenhum',def:'Processos de instalação não são automatizados.',desc:'Processos de instalação são executados por humanos.'},
+                {n:1,name:'Básico',def:'Processos de instalação são parcialmente automatizados, com intervenção humana significativa.',desc:'Processos de instalação são executados por humanos com assistência de equipamentos e sistemas computacionais.'},
+                {n:2,name:'Avançado',def:'Processos de instalação são automatizados, com intervenção humana mínima.',desc:'Processos de instalação são predominantemente executados por equipamentos e sistemas computacionais. Intervenção humana necessária para iniciar e concluir cada processo.'},
+                {n:3,name:'Total',def:'Processos de instalação são totalmente automatizados, sem intervenção humana.',desc:'Processos de instalação são totalmente automatizados. Intervenção humana necessária para eventos não planejados.'},
+                {n:4,name:'Flexível',def:'Processos de instalação automatizados são adaptáveis.',desc:'Equipamentos e sistemas computacionais podem ser modificados, reconfigurados e reatribuídos rapidamente.'},
+                {n:5,name:'Convergido',def:'Processos flexíveis de instalação convergem com automação do chão de fábrica e empresarial.',desc:'Equipamentos e sistemas computacionais são flexíveis e formalmente integrados ao chão de fábrica e sistemas empresariais.'}
+              ]
+            }
+          ]
+        },
+        {
+          name:'Pilar de Conectividade',
+          dims:[
+            {
+              id:'sfc', name:'Conectividade do Chão de Fábrica',
+              def:'Interconexão de equipamentos, máquinas e sistemas computacionais para permitir comunicação e troca contínua de dados, dentro do local onde a produção e gestão de bens é realizada.',
+              bands:[
+                {n:0,name:'Nenhum',def:'Ativos e sistemas de produção não estão conectados.',desc:'Equipamentos, máquinas e sistemas computacionais não conseguem interagir ou trocar informações.'},
+                {n:1,name:'Conectado',def:'Ativos e sistemas de produção estão conectados via múltiplas tecnologias e protocolos de comunicação.',desc:'Existem links de rede formais que permitem que equipamentos, máquinas e sistemas computacionais interajam ou troquem informações.'},
+                {n:2,name:'Interoperável',def:'Ativos e sistemas de produção conectados são interoperáveis entre múltiplas tecnologias e protocolos.',desc:'Equipamentos, máquinas e sistemas computacionais conseguem interagir e trocar informações sem restrições significativas.'},
+                {n:3,name:'Interoperável e Seguro',def:'Ativos e sistemas de produção interoperáveis são seguros.',desc:'Existe uma estrutura de segurança vigilante e resiliente para proteger a rede de equipamentos interoperáveis contra acessos indesejados.'},
+                {n:4,name:'Tempo Real',def:'Ativos e sistemas de produção interoperáveis são seguros e capazes de comunicação em tempo real.',desc:'Links de rede interoperáveis e seguros conseguem interagir ou trocar informações à medida que as informações são geradas, sem atraso.'},
+                {n:5,name:'Escalável',def:'Ativos e sistemas de produção interoperáveis são seguros, com comunicação em tempo real e escaláveis.',desc:'As redes existentes podem ser configuradas rapidamente para acomodar modificações na composição de equipamentos, máquinas e sistemas computacionais.'}
+              ]
+            },
+            {
+              id:'ec', name:'Conectividade Empresarial',
+              def:'Interconexão de equipamentos, máquinas e sistemas computacionais para permitir comunicação e troca contínua de dados, dentro do local onde o trabalho administrativo é realizado.',
+              bands:[
+                {n:0,name:'Nenhum',def:'Sistemas de TI empresariais não estão conectados.',desc:'Sistemas computacionais não conseguem interagir ou trocar informações.'},
+                {n:1,name:'Conectado',def:'Sistemas de TI empresariais estão conectados via múltiplas tecnologias e protocolos.',desc:'Existem links de rede formais que permitem que sistemas computacionais interajam ou troquem informações.'},
+                {n:2,name:'Interoperável',def:'Sistemas de TI empresariais são interoperáveis entre múltiplas tecnologias e protocolos.',desc:'Sistemas computacionais conseguem interagir e trocar informações sem restrições significativas.'},
+                {n:3,name:'Interoperável e Seguro',def:'Sistemas de TI empresariais interoperáveis são seguros.',desc:'Existe uma estrutura de segurança vigilante e resiliente para proteger a rede de sistemas computacionais interoperáveis.'},
+                {n:4,name:'Tempo Real',def:'Sistemas de TI empresariais interoperáveis são seguros e capazes de comunicação em tempo real.',desc:'Links de rede interoperáveis e seguros conseguem interagir ou trocar informações sem atraso.'},
+                {n:5,name:'Escalável',def:'Sistemas de TI empresariais interoperáveis são seguros, com comunicação em tempo real e escaláveis.',desc:'As redes existentes podem ser configuradas rapidamente para acomodar modificações na composição de sistemas computacionais.'}
+              ]
+            },
+            {
+              id:'fc', name:'Conectividade da Instalação',
+              def:'Interconexão de equipamentos, máquinas e sistemas computacionais para permitir comunicação e troca contínua de dados, dentro do edifício físico onde a área de produção está localizada.',
+              bands:[
+                {n:0,name:'Nenhum',def:'Ativos e sistemas de instalação não estão conectados.',desc:'Equipamentos, máquinas e sistemas não conseguem interagir ou trocar informações.'},
+                {n:1,name:'Conectado',def:'Ativos e sistemas de instalação estão conectados via múltiplas tecnologias e protocolos.',desc:'Existem links de rede formais que permitem que equipamentos, máquinas e sistemas computacionais interajam ou troquem informações.'},
+                {n:2,name:'Interoperável',def:'Ativos e sistemas de instalação são interoperáveis entre múltiplas tecnologias e protocolos.',desc:'Equipamentos, máquinas e sistemas computacionais conseguem interagir e trocar informações sem restrições significativas.'},
+                {n:3,name:'Interoperável e Seguro',def:'Ativos e sistemas de instalação interoperáveis são seguros.',desc:'Existe uma estrutura de segurança vigilante e resiliente para proteger a rede de sistemas interoperáveis.'},
+                {n:4,name:'Tempo Real',def:'Ativos e sistemas de instalação interoperáveis são seguros e capazes de comunicação em tempo real.',desc:'Links de rede conseguem interagir ou trocar informações à medida que são geradas.'},
+                {n:5,name:'Escalável',def:'Ativos e sistemas de instalação interoperáveis são seguros, com comunicação em tempo real e escaláveis.',desc:'As redes existentes podem ser configuradas rapidamente para acomodar modificações na composição de equipamentos e sistemas.'}
+              ]
+            }
+          ]
+        },
+        {
+          name:'Pilar de Inteligência',
+          dims:[
+            {
+              id:'sfi', name:'Inteligência do Chão de Fábrica',
+              def:'Processamento e análise de dados para otimizar processos existentes e criar novas aplicações, produtos e serviços, dentro do local onde a produção e gestão de bens é realizada.',
+              bands:[
+                {n:0,name:'Nenhum',def:'Sistemas OT e TI não estão em uso.',desc:'Nenhum dispositivo eletrônico ou digital é utilizado.'},
+                {n:1,name:'Computadorizado',def:'Sistemas OT e TI executam tarefas e processos pré-programados.',desc:'Equipamentos, máquinas e sistemas computacionais conseguem executar tarefas com base em lógica pré-programada.'},
+                {n:2,name:'Visível',def:'Sistemas OT e TI computadorizados conseguem identificar desvios.',desc:'Equipamentos, máquinas e sistemas computacionais conseguem notificar operadores sobre desvios de parâmetros predefinidos.'},
+                {n:3,name:'Diagnóstico',def:'Sistemas OT e TI computadorizados conseguem identificar desvios e diagnosticar causas potenciais.',desc:'Equipamentos e sistemas computacionais conseguem notificar operadores sobre desvios e fornecer informações sobre as possíveis causas.'},
+                {n:4,name:'Preditivo',def:'Sistemas OT e TI computadorizados conseguem diagnosticar problemas e prever estados futuros.',desc:'Equipamentos e sistemas computacionais conseguem prever e notificar operadores sobre desvios potenciais e fornecer informações sobre possíveis causas.'},
+                {n:5,name:'Adaptativo',def:'Sistemas OT e TI computadorizados conseguem diagnosticar problemas, prever estados futuros e executar decisões de forma autônoma.',desc:'Equipamentos e sistemas computacionais conseguem prever e diagnosticar desvios potenciais e executar decisões de forma independente para otimizar desempenho e eficiência de recursos.'}
+              ]
+            },
+            {
+              id:'ei', name:'Inteligência Empresarial',
+              def:'Processamento e análise de dados para otimizar processos administrativos existentes e criar novas aplicações, produtos e serviços.',
+              bands:[
+                {n:0,name:'Nenhum',def:'Sistemas empresariais não estão em uso.',desc:'Nenhum dispositivo eletrônico ou digital é utilizado.'},
+                {n:1,name:'Computadorizado',def:'Sistemas de TI empresariais executam tarefas e processos pré-programados.',desc:'Sistemas computacionais empresariais executam tarefas com base em lógica pré-programada.'},
+                {n:2,name:'Visível',def:'Sistemas de TI empresariais conseguem identificar desvios.',desc:'Sistemas computacionais empresariais conseguem notificar pessoal relevante sobre desvios de parâmetros predefinidos.'},
+                {n:3,name:'Diagnóstico',def:'Sistemas de TI empresariais conseguem identificar desvios e diagnosticar causas potenciais.',desc:'Sistemas computacionais empresariais conseguem notificar pessoal e fornecer informações sobre possíveis causas.'},
+                {n:4,name:'Preditivo',def:'Sistemas de TI empresariais conseguem diagnosticar problemas e prever estados futuros.',desc:'Sistemas computacionais empresariais conseguem prever e notificar pessoal relevante sobre desvios potenciais.'},
+                {n:5,name:'Adaptativo',def:'Sistemas de TI empresariais conseguem diagnosticar problemas, prever estados futuros e executar decisões de forma autônoma.',desc:'Sistemas computacionais empresariais conseguem prever e diagnosticar desvios potenciais e executar decisões de forma independente.'}
+              ]
+            },
+            {
+              id:'fi', name:'Inteligência da Instalação',
+              def:'Processamento e análise de dados para otimizar processos existentes e criar novas aplicações, produtos e serviços, dentro do edifício físico e instalações onde a área de produção está localizada.',
+              bands:[
+                {n:0,name:'Nenhum',def:'Sistemas OT e TI não estão em uso.',desc:'Nenhum dispositivo eletrônico ou digital é utilizado.'},
+                {n:1,name:'Computadorizado',def:'Sistemas OT e TI executam tarefas e processos pré-programados.',desc:'Equipamentos, máquinas e sistemas computacionais executam tarefas com base em lógica pré-programada.'},
+                {n:2,name:'Visível',def:'Sistemas OT e TI computadorizados conseguem identificar desvios.',desc:'Equipamentos, máquinas e sistemas computacionais conseguem notificar pessoal relevante sobre desvios de parâmetros predefinidos.'},
+                {n:3,name:'Diagnóstico',def:'Sistemas OT e TI computadorizados conseguem identificar desvios e diagnosticar causas potenciais.',desc:'Equipamentos e sistemas computacionais conseguem notificar pessoal relevante sobre desvios e fornecer informações sobre causas possíveis.'},
+                {n:4,name:'Preditivo',def:'Sistemas OT e TI computadorizados conseguem diagnosticar problemas e prever estados futuros.',desc:'Equipamentos e sistemas computacionais conseguem prever e notificar pessoal relevante sobre desvios potenciais.'},
+                {n:5,name:'Adaptativo',def:'Sistemas OT e TI computadorizados conseguem diagnosticar problemas, prever estados futuros e executar decisões de forma autônoma.',desc:'Equipamentos e sistemas computacionais conseguem prever e diagnosticar desvios potenciais e executar decisões de forma independente.'}
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      id:'organizacao', name:'Bloco de Organização', icon:'🏢',
+      cls:'blk-org', tag:'tag-org', tagTxt:'Organização',
+      pillars:[
+        {
+          name:'Pilar de Prontidão de Talentos',
+          dims:[
+            {
+              id:'wld', name:'Aprendizagem e Desenvolvimento da Força de Trabalho',
+              def:'Sistema de processos e programas que visa desenvolver as capacidades, habilidades e competências da força de trabalho para alcançar a excelência organizacional.',
+              bands:[
+                {n:0,name:'Informal',def:'Mentoria e aprendizagem informal são os modos predominantes de A&D da força de trabalho.',desc:'Não há currículo formal de A&D para integrar e treinar a força de trabalho.'},
+                {n:1,name:'Estruturado',def:'Currículo de treinamento formalmente projetado para aquisição de habilidades é o modo predominante de A&D.',desc:'Existe um currículo formal de A&D com pontos claros de início e conclusão. O escopo de A&D é limitado à aquisição de habilidades.'},
+                {n:2,name:'Contínuo',def:'Programas estruturados de A&D são projetados para funcionar continuamente, permitindo aprimoramento e expansão das habilidades dos funcionários.',desc:'Existe um currículo estruturado de A&D que adota uma abordagem de aprendizado contínuo.'},
+                {n:3,name:'Integrado',def:'Programas contínuos de A&D estão formalmente alinhados com as necessidades de negócios e funções de RH da organização.',desc:'Existe um currículo contínuo de A&D integrado com objetivos organizacionais, atração de talentos e caminhos de desenvolvimento de carreira.'},
+                {n:4,name:'Adaptativo',def:'Programas integrados de A&D são ativamente desenvolvidos, atualizados e customizados com base em insights de principais partes interessadas.',desc:'Canais formais de feedback estão em vigor para permitir que programas integrados de A&D sejam co-curados e atualizados por funcionários, RH e equipes de negócios.'},
+                {n:5,name:'Prospectivo',def:'São feitos esforços ativos para identificar e incorporar práticas inovadoras de A&D e treinamento para habilidades futuras.',desc:'Há etapas proativas para incorporar requisitos de habilidades futuras e novas metodologias de A&D nos programas existentes.'}
+              ]
+            },
+            {
+              id:'lc', name:'Competência de Liderança',
+              def:'Prontidão do núcleo de gestão para aproveitar as tendências e tecnologias mais recentes para a relevância e competitividade contínua da organização.',
+              bands:[
+                {n:0,name:'Não Familiar',def:'A gestão não está familiarizada com as tendências e tecnologias mais recentes.',desc:'A gestão desconhece os conceitos mais recentes que podem habilitar a próxima fase de avanço.'},
+                {n:1,name:'Entendimento Limitado',def:'A gestão tem alguma consciência, por canais ad hoc, das tendências e tecnologias mais recentes.',desc:'A gestão está parcialmente familiarizada com os conceitos mais recentes.'},
+                {n:2,name:'Informada',def:'A gestão está bem informada, por canais e meios formais, sobre as tendências e tecnologias mais recentes.',desc:'A gestão está totalmente familiarizada com os conceitos mais recentes que podem habilitar a próxima fase de avanço.'},
+                {n:3,name:'Semidependente',def:'A gestão depende de parceiros externos para desenvolver iniciativas que alavancam as tendências e tecnologias mais recentes.',desc:'Com assistência externa, a gestão consegue aplicar os conceitos mais recentes para permitir melhorias em pelo menos uma área.'},
+                {n:4,name:'Independente',def:'A gestão é capaz, com relativa independência, de desenvolver iniciativas que alavancam as mais recentes tendências e tecnologias.',desc:'A gestão consegue aplicar os conceitos mais recentes para permitir melhorias em múltiplas áreas.'},
+                {n:5,name:'Adaptativa',def:'A gestão é capaz de adaptar de forma independente sua estrutura de transformação organizacional a tendências e tecnologias em mudança.',desc:'A gestão consegue aprimorar suas iniciativas de melhoria à medida que os conceitos mais recentes mudam ou evoluem ao longo do tempo.'}
+              ]
+            }
+          ]
+        },
+        {
+          name:'Pilar de Estrutura e Gestão',
+          dims:[
+            {
+              id:'col', name:'Colaboração Inter e Intraempresarial',
+              def:'Processo de trabalhar em conjunto, por meio de equipes multifuncionais e com parceiros externos, para alcançar uma visão e propósito compartilhados.',
+              bands:[
+                {n:0,name:'Informal',def:'Comunicação e compartilhamento de informações entre equipes acontece de forma informal.',desc:'Equipes geralmente trabalham em silos. Comunicação e colaborações acontecem de forma casual e ad hoc.'},
+                {n:1,name:'Comunicando',def:'Canais formais são estabelecidos para comunicação e compartilhamento de informações entre equipes.',desc:'Equipes são providas de meios formais para trocar informações.'},
+                {n:2,name:'Cooperando',def:'Canais formais são estabelecidos para permitir que as equipes trabalhem juntas em tarefas e projetos pontuais.',desc:'Equipes são providas de meios formais para interagir e trabalhar em tarefas e projetos discretos juntos.'},
+                {n:3,name:'Coordenando',def:'Equipes são capacitadas pela organização para fazer ajustes que facilitem a cooperação em tarefas e projetos discretos.',desc:'Equipes têm o mandato para alterar certas obrigações e responsabilidades para reduzir barreiras para cooperação.'},
+                {n:4,name:'Colaborando',def:'Equipes são capacitadas pela organização para compartilhar recursos em tarefas e projetos discretos e de longo prazo.',desc:'Equipes têm o mandato para comprometer recursos em tarefas e projetos. Riscos, responsabilidades e recompensas são parcialmente compartilhados.'},
+                {n:5,name:'Integrado',def:'Canais formais são estabelecidos para permitir a formação dinâmica de equipes para trabalhar em projetos multifuncionais com metas, recursos e KPIs compartilhados.',desc:'Equipes podem ser formadas com flexibilidade e agilidade para resolver problemas. Riscos, responsabilidades e recompensas são predominantemente compartilhados.'}
+              ]
+            },
+            {
+              id:'sg', name:'Estratégia e Governança',
+              def:'Design e execução de um plano de ação para alcançar um conjunto de metas de longo prazo. Inclui identificação de prioridades, formulação de um roteiro e desenvolvimento de um sistema de regras, práticas e processos para traduzir uma visão em valor empresarial.',
+              bands:[
+                {n:0,name:'Nenhum',def:'A transformação em direção à Fábrica/Planta do Futuro não está presente em nenhuma parte da estratégia organizacional.',desc:'Intenções de estabelecer uma Fábrica/Planta do Futuro não são identificadas como foco estratégico nos planos atuais ou futuros da empresa.'},
+                {n:1,name:'Formalização',def:'A transformação em direção a uma Fábrica/Planta do Futuro foi formalmente identificada como uma estratégia de negócios a nível corporativo.',desc:'Intenções de estabelecer uma Fábrica/Planta do Futuro foram identificadas como foco estratégico nos planos da empresa.'},
+                {n:2,name:'Desenvolvimento',def:'A iniciativa de transformação em direção a uma Fábrica/Planta do Futuro está sendo desenvolvida por uma equipe dedicada.',desc:'Uma estratégia de longo prazo e modelo de governança para estabelecer uma Fábrica/Planta do Futuro está sendo desenvolvida.'},
+                {n:3,name:'Implementação',def:'A iniciativa de transformação em direção a uma Fábrica/Planta do Futuro foi formalmente implementada em pelo menos uma área funcional.',desc:'A estratégia de longo prazo e o modelo de governança para estabelecer uma Fábrica/Planta do Futuro foi colocada em prática.'},
+                {n:4,name:'Escalonamento',def:'A iniciativa de transformação em direção a uma Fábrica/Planta do Futuro é expandida para incluir mais de uma área funcional.',desc:'A estratégia de longo prazo e o modelo de governança são escalonados para incluir outras áreas secundárias.'},
+                {n:5,name:'Adaptativo',def:'A iniciativa de transformação em direção a uma Fábrica/Planta do Futuro é atualizada dinamicamente.',desc:'A estratégia de longo prazo e o modelo de governança são constantemente revisados e dinamicamente atualizados para contabilizar os mais recentes avanços em tecnologia, filosofia e práticas de negócios.'}
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+};
+
+// ── FLATTEN helpers ──────────────────────────────────
+function allDims() {
+  const list = [];
+  DATA.blocks.forEach(b => {
+    b.pillars.forEach(p => {
+      p.dims.forEach(d => {
+        list.push({...d, block:b, pillar:p});
+      });
+    });
+  });
+  return list;
+}
+
+// ════════════════════════════════════════════
+// SECTION NAVIGATION
+// ════════════════════════════════════════════
+function showSection(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('sec-'+id).classList.add('active');
+  event.target.classList.add('active');
+  if (id==='mapa') drawMindMap();
+}
+
+// ════════════════════════════════════════════
+// OVERVIEW TABLE + BLOCKS GRID
+// ════════════════════════════════════════════
+function initOverview() {
+  const tbody = document.getElementById('overview-tbody');
+  DATA.blocks.forEach(b => {
+    b.pillars.forEach(p => {
+      p.dims.forEach((d,i) => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${i===0?`<span class="tag ${b.tag}">${b.tagTxt}</span>`:'↳'}</td>
+          <td style="color:var(--text2)">${i===0?p.name:'<span style="opacity:.5">'+p.name+'</span>'}</td>
+          <td style="font-weight:500">${d.name}</td>
+          <td style="color:var(--text3);font-size:11px">${d.bands.map(x=>x.name).join(' → ')}</td>
+          <td><button class="btn" style="padding:3px 10px;font-size:11px" onclick='openDimById("${d.id}")'>Ver</button></td>
+        `;
+        tbody.appendChild(tr);
+      });
+    });
+  });
+}
+
+function initBlocksGrid() {
+  const grid = document.getElementById('blocks-grid');
+  DATA.blocks.forEach(b => {
+    const card = document.createElement('div');
+    card.className = `block-card ${b.cls}`;
+    let pillarsHTML = '';
+    b.pillars.forEach(p => {
+      p.dims.forEach(d => {
+        pillarsHTML += `<div class="pillar-item" onclick='openDimById("${d.id}")'>
+          <span class="pi-dot"></span>
+          <span class="pi-name">${d.name}</span>
+          <span class="pi-dims">${d.bands.length} bandas</span>
+          <span class="pi-arrow">›</span>
+        </div>`;
+      });
+    });
+    card.innerHTML = `
+      <div class="block-header"><span class="block-icon">${b.icon}</span>${b.name}</div>
+      <div class="block-body">${pillarsHTML}</div>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+// ════════════════════════════════════════════
+// DIMENSION LIST (sec-dimensoes)
+// ════════════════════════════════════════════
+function initDimList() {
+  const container = document.getElementById('dim-list');
+  allDims().forEach(d => {
+    const div = document.createElement('div');
+    div.dataset.block = d.block.tagTxt;
+    div.style.cssText = 'background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-lg);margin-bottom:.75rem;overflow:hidden;';
+    div.innerHTML = `
+      <div style="padding:.9rem 1.1rem;cursor:pointer;display:flex;align-items:center;gap:.75rem;" onclick='openDimById("${d.id}")'>
+        <span class="tag ${d.block.tag}">${d.block.tagTxt}</span>
+        <span style="font-size:12px;color:var(--text3)">${d.pillar.name}</span>
+        <span style="font-weight:600;flex:1">${d.name}</span>
+        <span style="color:var(--text3);font-size:13px">Ver detalhes ›</span>
+      </div>
+      <div style="padding:0 1.1rem .8rem;display:flex;gap:.4rem;flex-wrap:wrap;">
+        ${d.bands.map(b=>`<span style="background:var(--bg3);border:1px solid var(--border);padding:2px 9px;border-radius:10px;font-size:11px;color:var(--text2)">${b.n} – ${b.name}</span>`).join('')}
+      </div>
+    `;
+    container.appendChild(div);
+  });
+}
+
+function filterDims(block, btn) {
+  document.querySelectorAll('#dim-filters .filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('#dim-list > div').forEach(el => {
+    el.style.display = (block==='todos' || el.dataset.block===block) ? '' : 'none';
+  });
+}
+
+// ════════════════════════════════════════════
+// MODAL
+// ════════════════════════════════════════════
+const BAND_COLORS = ['var(--text3)','#60a5fa','var(--teal)','var(--green)','var(--amber)','var(--coral)','var(--purple)'];
+const DIM_MAP = {};
+allDims().forEach(d => DIM_MAP[d.id] = d);
+
+function openDimById(id) {
+  const d = DIM_MAP[id];
+  if (!d) return;
+  document.getElementById('modal-title').textContent = d.name;
+  document.getElementById('modal-sub').textContent = `${d.block.name} › ${d.pillar.name}`;
+  document.getElementById('modal-def').textContent = d.def;
+  const tbody = document.querySelector('#modal-table tbody');
+  tbody.innerHTML = '';
+  d.bands.forEach(b => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><span class="band-num" style="background:rgba(255,255,255,0.06);color:${BAND_COLORS[b.n]||'var(--text2)'}">${b.n}</span></td>
+      <td><span class="band-name" style="color:${BAND_COLORS[b.n]||'var(--text)'}">${b.name}</span></td>
+      <td><span class="band-def">${b.def}</span></td>
+      <td><span class="band-desc">${b.desc}</span></td>
+    `;
+    tbody.appendChild(tr);
+  });
+  document.getElementById('modal').classList.add('open');
+}
+
+function closeModal(e) {
+  if (e.target === document.getElementById('modal')) closeModalDirect();
+}
+function closeModalDirect() {
+  document.getElementById('modal').classList.remove('open');
+}
+
+// ════════════════════════════════════════════
+// MIND MAP
+// ════════════════════════════════════════════
+function drawMindMap() {
+  const svg = document.getElementById('mindmap-svg');
+  svg.innerHTML = '';
+
+  const W=1000, H=680, cx=500, cy=340;
+  const blockColors = ['#60a5fa','#c084fc','#4ade80'];
+  const blockAngles = [-Math.PI/2 - Math.PI/3, -Math.PI/2, -Math.PI/2 + Math.PI/3];
+
+  function el(tag, attrs, text) {
+    const e = document.createElementNS('http://www.w3.org/2000/svg', tag);
+    for (const [k,v] of Object.entries(attrs)) e.setAttribute(k,v);
+    if (text) e.textContent = text;
+    return e;
+  }
+  function line(x1,y1,x2,y2,color,width=1,dash='') {
+    return el('line',{x1,y1,x2,y2,stroke:color,'stroke-width':width,'stroke-dasharray':dash,'stroke-opacity':'.5'});
+  }
+  function roundRect(x,y,w,h,r,fill,stroke) {
+    return el('rect',{x,y,width:w,height:h,rx:r,fill,stroke:'stroke-width:0.5',...(stroke?{stroke,'stroke-width':'1'}:{stroke:'transparent'})});
+  }
+  function text(x,y,t,fs,fill,anchor='middle',fw='400') {
+    return el('text',{x,y,'font-size':fs,fill,'text-anchor':anchor,'dominant-baseline':'central','font-weight':fw,'font-family':'Segoe UI,sans-serif'},t);
+  }
+
+  // Center node
+  const cg = el('g',{cursor:'pointer'});
+  cg.appendChild(el('circle',{cx,cy,r:52,fill:'rgba(59,130,246,0.15)',stroke:'#3b82f6','stroke-width':'1.5'}));
+  cg.appendChild(text(cx,cy-8,'SIRI','16','#e6edf3','middle','700'));
+  cg.appendChild(text(cx,cy+9,'Assessment','12','#8b949e','middle','400'));
+  cg.appendChild(text(cx,cy+22,'Matrix','12','#8b949e','middle','400'));
+  svg.appendChild(cg);
+
+  const tooltip = document.getElementById('mm-tooltip');
+
+  DATA.blocks.forEach((block, bi) => {
+    const ba = blockAngles[bi];
+    const br = 185;
+    const bx = cx + Math.cos(ba)*br;
+    const by = cy + Math.sin(ba)*br;
+    const bc = blockColors[bi];
+
+    // Line to block
+    svg.appendChild(line(cx, cy, bx, by, bc, 1.5, ''));
+
+    // Block node
+    const bw=130, bh=38;
+    const bg = el('g',{cursor:'pointer'});
+    bg.appendChild(el('rect',{x:bx-bw/2,y:by-bh/2,width:bw,height:bh,rx:10,fill:`rgba(${bi===0?'59,130,246':bi===1?'168,85,247':'34,197,94'},0.12)`,stroke:bc,'stroke-width':'1'}));
+    bg.appendChild(text(bx,by-5,block.icon,'14',bc));
+    bg.appendChild(text(bx,by+10,block.name.replace('Bloco de ',''),'11',bc,'middle','600'));
+    svg.appendChild(bg);
+
+    // Pillars
+    const numPillars = block.pillars.length;
+    const spreadAngle = Math.PI / 2.2;
+    block.pillars.forEach((pillar, pi) => {
+      const pa = ba + (pi - (numPillars-1)/2) * (spreadAngle/(numPillars));
+      const pr = 155;
+      const px = bx + Math.cos(pa)*pr;
+      const py = by + Math.sin(pa)*pr;
+
+      svg.appendChild(line(bx,by,px,py,bc,0.8,'4 3'));
+
+      const pg = el('g',{cursor:'pointer'});
+      const pw=110, ph=28;
+      pg.appendChild(el('rect',{x:px-pw/2,y:py-ph/2,width:pw,height:ph,rx:7,fill:'rgba(255,255,255,0.04)',stroke:bc,'stroke-width':'0.5','stroke-opacity':'.5'}));
+      const pname = pillar.name.replace('Pilar de ','').replace(' do ','').replace(' da ','').replace(' de ','');
+      pg.appendChild(text(px,py,pname,'10','#8b949e','middle','500'));
+      svg.appendChild(pg);
+
+      // Dims
+      pillar.dims.forEach((dim, di) => {
+        const numDims = pillar.dims.length;
+        const da = pa + (di - (numDims-1)/2) * 0.28;
+        const dr = 130;
+        const dx = px + Math.cos(da)*dr;
+        const dy = py + Math.sin(da)*dr;
+
+        const clampedX = Math.max(55, Math.min(W-55, dx));
+        const clampedY = Math.max(22, Math.min(H-22, dy));
+
+        svg.appendChild(line(px,py,clampedX,clampedY,bc,0.6,'2 3'));
+
+        const dg = el('g',{cursor:'pointer'});
+        const dw=100, dh=30;
+        const drect = el('rect',{x:clampedX-dw/2,y:clampedY-dh/2,width:dw,height:dh,rx:6,fill:'rgba(255,255,255,0.06)',stroke:bc,'stroke-width':'0.8','stroke-opacity':'.4'});
+        const dname = dim.name.length>16 ? dim.name.substring(0,14)+'…' : dim.name;
+        const dtxt = text(clampedX,clampedY,dname,'9','#c9d1d9','middle','500');
+
+        dg.appendChild(drect);
+        dg.appendChild(dtxt);
+
+        dg.addEventListener('mouseenter', e => {
+          drect.setAttribute('fill',`rgba(${bi===0?'59,130,246':bi===1?'168,85,247':'34,197,94'},0.18)`);
+          tooltip.style.display='block';
+          tooltip.innerHTML=`<b style="color:${bc}">${dim.name}</b><br><span style="color:#8b949e;font-size:11px">${dim.def.substring(0,120)}...</span>`;
+        });
+        dg.addEventListener('mousemove', e => {
+          tooltip.style.left = (e.clientX+14)+'px';
+          tooltip.style.top = (e.clientY-10)+'px';
+        });
+        dg.addEventListener('mouseleave', () => {
+          drect.setAttribute('fill','rgba(255,255,255,0.06)');
+          tooltip.style.display='none';
+        });
+        dg.addEventListener('click', () => { openDimById(dim.id); });
+
+        svg.appendChild(dg);
+      });
+    });
+  });
+}
+
+// ════════════════════════════════════════════
+// FLASHCARDS
+// ════════════════════════════════════════════
+const FLASHDATA = [];
+allDims().forEach(d => {
+  FLASHDATA.push({
+    tag: d.block.tagTxt, front: d.name,
+    back: d.def, hint: `${d.pillar.name}`
+  });
+  d.bands.forEach(b => {
+    FLASHDATA.push({
+      tag: 'bandas',
+      front: `Banda ${b.n} – "${b.name}" (${d.name})`,
+      back: b.def,
+      hint: b.desc.substring(0,90)+'…'
+    });
+  });
+});
+
+function initFlashcards(filter='todos') {
+  const grid = document.getElementById('flash-grid');
+  grid.innerHTML = '';
+  const items = filter==='todos' ? FLASHDATA : FLASHDATA.filter(f=>f.tag===filter);
+  items.forEach(f => {
+    const card = document.createElement('div');
+    card.className = 'flash-card';
+    card.innerHTML = `
+      <div class="flash-inner">
+        <div class="flash-front">
+          <div class="flash-tag">${f.tag}</div>
+          <div class="flash-term">${f.front}</div>
+          <div class="flash-hint" style="margin-top:.5rem;color:var(--text3);font-size:11px">Clique para revelar ↓</div>
+        </div>
+        <div class="flash-back">
+          <div class="flash-tag">${f.tag}</div>
+          <div class="flash-def">${f.back}</div>
+          ${f.hint?`<div class="flash-hint">${f.hint}</div>`:''}
+        </div>
+      </div>`;
+    card.addEventListener('click', () => card.classList.toggle('flipped'));
+    grid.appendChild(card);
+  });
+}
+
+function filterFlash(t, btn) {
+  document.querySelectorAll('#flash-filters .filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  initFlashcards(t);
+}
+
+// ════════════════════════════════════════════
+// QUIZ
+// ════════════════════════════════════════════
+const QUIZ_POOL = [
+  {q:'Qual bloco construtivo do SIRI contém a dimensão de Integração Vertical?',opts:['Bloco de Processo','Bloco de Tecnologia','Bloco de Organização','Bloco de Conectividade'],ans:0,meta:'Bloco de Processo › Pilar de Operações',exp:'A Integração Vertical pertence ao Pilar de Operações, que faz parte do Bloco de Processo.'},
+  {q:'Na dimensão de Automação do Chão de Fábrica, o que caracteriza a banda 3 (Total)?',opts:['Processos são parcialmente automatizados','Processos repetitivos de produção são totalmente automatizados, sem intervenção humana','Processos são reconfiguráveis por plug-and-play','Processos convergem com sistemas empresariais'],ans:1,meta:'Tecnologia › Automação › Chão de Fábrica',exp:'A banda 3 "Total" significa que processos repetitivos de produção são totalmente automatizados, sem intervenção humana direta — apenas para eventos não planejados.'},
+  {q:'Qual é a definição de "Integração Horizontal" no SIRI?',opts:['Integração de processos verticais na pirâmide de automação','Integração de processos empresariais em toda a organização e com partes interessadas na cadeia de valor','Integração de sistemas OT e TI no chão de fábrica','Integração do ciclo de vida do produto desde o design até o descarte'],ans:1,meta:'Processo › Cadeia de Suprimentos',exp:'A Integração Horizontal é sobre processos empresariais que cruzam a organização e seus parceiros externos na cadeia de valor.'},
+  {q:'No pilar de Inteligência, a banda "Preditivo" (4) significa que:',opts:['Os sistemas apenas identificam desvios','Os sistemas diagnosticam problemas mas não preveem','Os sistemas conseguem diagnosticar problemas e prever estados futuros de ativos','Os sistemas executam decisões de forma autônoma'],ans:2,meta:'Tecnologia › Inteligência',exp:'A banda 4 Preditivo significa que os sistemas OT/TI conseguem diagnosticar problemas E prever estados futuros dos ativos, notificando operadores proativamente.'},
+  {q:'A dimensão de "Competência de Liderança" pertence a qual pilar?',opts:['Pilar de Estrutura e Gestão','Pilar de Prontidão de Talentos','Pilar de Operações','Pilar de Automação'],ans:1,meta:'Organização › Prontidão de Talentos',exp:'A Competência de Liderança e a Aprendizagem e Desenvolvimento da Força de Trabalho compõem o Pilar de Prontidão de Talentos, no Bloco de Organização.'},
+  {q:'Quantas dimensões compõem o SIRI Assessment Matrix?',opts:['8','12','16','20'],ans:2,meta:'Estrutura Geral do SIRI',exp:'O SIRI possui 16 dimensões, organizadas em 8 pilares e 3 blocos construtivos (Processo, Tecnologia, Organização).'},
+  {q:'Na dimensão de Conectividade do Chão de Fábrica, o que distingue a banda 2 (Interoperável) da banda 1 (Conectado)?',opts:['Na banda 2, há segurança cibernética implementada','Na banda 2, os sistemas são interoperáveis entre múltiplos protocolos sem restrições significativas','Na banda 2, a comunicação ocorre em tempo real','Na banda 2, os sistemas são escaláveis'],ans:1,meta:'Tecnologia › Conectividade › Chão de Fábrica',exp:'A progressão da Conectividade vai: Nenhum → Conectado (links formais existem) → Interoperável (sem restrições significativas) → Interoperável e Seguro → Tempo Real → Escalável.'},
+  {q:'Qual banda da dimensão Estratégia e Governança descreve o momento em que a transformação é "expandida para mais de uma área funcional"?',opts:['Banda 2 – Desenvolvimento','Banda 3 – Implementação','Banda 4 – Escalonamento','Banda 5 – Adaptativo'],ans:2,meta:'Organização › Estrutura e Gestão › Estratégia e Governança',exp:'A banda 4 "Escalonamento" é quando a iniciativa de transformação é expandida além da primeira área funcional para incluir áreas secundárias.'},
+  {q:'No contexto da Automação Empresarial, a banda 5 "Convergido" significa:',opts:['Processos empresariais são totalmente automatizados','Processos flexíveis convergem com automação do chão de fábrica e de instalação para redes autônomas','Sistemas são reconfiguráveis rapidamente','Processos são automatizados com mínima intervenção humana'],ans:1,meta:'Tecnologia › Automação › Empresarial',exp:'A banda 5 "Convergido" nas três dimensões de Automação (Chão de Fábrica, Empresarial, Instalação) sempre representa a convergência com as outras plataformas de automação.'},
+  {q:'Qual é a progressão de bandas nas dimensões de Inteligência do SIRI?',opts:['Nenhum → Básico → Avançado → Total → Flexível → Convergido','Indefinido → Definido → Digital → Integrado → Automatizado → Inteligente','Nenhum → Computadorizado → Visível → Diagnóstico → Preditivo → Adaptativo','Nenhum → Conectado → Interoperável → Seguro → Tempo Real → Escalável'],ans:2,meta:'Tecnologia › Pilar de Inteligência',exp:'O Pilar de Inteligência usa as bandas: 0-Nenhum, 1-Computadorizado, 2-Visível, 3-Diagnóstico, 4-Preditivo, 5-Adaptativo. Note que são diferentes dos outros pilares!'},
+  {q:'A dimensão "Ciclo de Vida Integrado do Produto" abrange quais etapas?',opts:['Apenas design e produção','Design, engenharia, produção, uso pelo cliente, serviço e descarte','Apenas produção e logística','Planejamento, execução e controle'],ans:1,meta:'Processo › Ciclo de Vida do Produto',exp:'O Ciclo de Vida Integrado do Produto é abrangente: design e desenvolvimento, engenharia, produção, uso pelo cliente, serviço e descarte.'},
+  {q:'No Pilar de Conectividade, qual é a diferença entre as bandas 3 e 4?',opts:['Banda 3 adicionada escalabilidade, banda 4 adiciona segurança','Banda 3 é Interoperável e Seguro; Banda 4 adiciona capacidade de comunicação em Tempo Real','Banda 3 conecta os sistemas; Banda 4 torna-os interoperáveis','Não há diferença significativa'],ans:1,meta:'Tecnologia › Pilar de Conectividade',exp:'A progressão é: Interoperável (2) → Interoperável e Seguro (3) → Tempo Real com segurança (4) → Escalável (5). A segurança é pré-requisito para o Tempo Real.'},
+  {q:'Qual dimensão avalia a prontidão da organização em desenvolver e reter talentos para a Indústria 4.0?',opts:['Competência de Liderança','Estratégia e Governança','Aprendizagem e Desenvolvimento da Força de Trabalho','Colaboração Inter e Intraempresarial'],ans:2,meta:'Organização › Prontidão de Talentos',exp:'A dimensão de Aprendizagem e Desenvolvimento da Força de Trabalho avalia especificamente os sistemas de capacitação dos colaboradores.'},
+  {q:'Na dimensão Colaboração Inter e Intraempresarial, a banda 5 "Integrado" descreve:',opts:['Times apenas comunicam informações formalmente','Times trabalham em projetos pontuais juntos','Times se formam dinamicamente com metas, recursos e KPIs compartilhados','Times coordenam ajustes de responsabilidades'],ans:2,meta:'Organização › Estrutura e Gestão',exp:'A banda mais alta de Colaboração (5-Integrado) é quando times multifuncionais se formam com flexibilidade e agilidade, com riscos e recompensas predominantemente compartilhados.'},
+  {q:'Quantos pilares compõem o Bloco de Tecnologia?',opts:['2 pilares','3 pilares','4 pilares','5 pilares'],ans:1,meta:'Estrutura do Bloco de Tecnologia',exp:'O Bloco de Tecnologia possui 3 pilares: Automação (3 dimensões), Conectividade (3 dimensões) e Inteligência (3 dimensões) = 9 dimensões no total.'},
+  {q:'A "Pirâmide de Automação Industrial" mencionada na Integração Vertical distribui sistemas em quantos níveis?',opts:['3 níveis','4 níveis','5 níveis','6 níveis'],ans:2,meta:'Processo › Integração Vertical',exp:'A Pirâmide de Automação Industrial distribui sistemas em 5 níveis: campo, controle, produção, operações e nível de planejamento empresarial.'},
+  {q:'Na dimensão de Aprendizagem e Desenvolvimento da Força de Trabalho, a banda 5 "Prospectivo" significa:',opts:['Há um currículo formal de A&D com início e fim definidos','O currículo é alinhado com objetivos de RH','São feitos esforços ativos para identificar e incorporar práticas inovadoras para habilidades futuras','Os programas são customizados com base em feedback de partes interessadas'],ans:2,meta:'Organização › Prontidão de Talentos',exp:'A banda mais alta de A&D é "Prospectivo" – a organização ativamente incorpora metodologias e habilidades futuras nos programas existentes, olhando além do presente.'},
+  {q:'Qual é a principal diferença entre Automação do Chão de Fábrica e Automação Empresarial?',opts:['Não há diferença, são a mesma dimensão','Chão de Fábrica trata da produção física; Empresarial trata de processos administrativos (vendas, RH, compras)','Chão de Fábrica usa OT, Empresarial usa apenas IA','Chão de Fábrica é para grandes empresas; Empresarial para PMEs'],ans:1,meta:'Tecnologia › Pilar de Automação',exp:'A distinção é clara pelo LOCAL: Chão de Fábrica é onde a produção e gestão de bens acontece; Empresarial é onde o trabalho administrativo acontece.'},
+  {q:'Na dimensão Competência de Liderança, a banda 3 "Semidependente" significa:',opts:['A gestão desconhece as tecnologias mais recentes','A gestão depende de parceiros externos para desenvolver iniciativas de transformação','A gestão é independente para melhorar múltiplas áreas','A gestão adapta sua estrutura de forma autônoma'],ans:1,meta:'Organização › Prontidão de Talentos',exp:'A banda 3 "Semidependente" indica que a gestão ainda precisa de parceiros externos para aplicar as tendências mais recentes – consegue melhorar pelo menos uma área, mas com ajuda.'},
+  {q:'Qual é a progressão correta de bandas nas dimensões do Pilar de Processo?',opts:['Nenhum → Básico → Avançado → Total → Flexível → Convergido','Nenhum → Computadorizado → Visível → Diagnóstico → Preditivo → Adaptativo','Indefinido → Definido → Digital → Integrado → Automatizado → Inteligente','Informal → Estruturado → Contínuo → Integrado → Adaptativo → Prospectivo'],ans:2,meta:'Processo › Progressão de Bandas',exp:'As 3 dimensões do Bloco de Processo (Integração Vertical, Horizontal e Ciclo de Vida do Produto) usam a progressão: 0-Indefinido, 1-Definido, 2-Digital, 3-Integrado, 4-Automatizado, 5-Inteligente.'}
+];
+
+let qIdx=0, qScore=0, qAnswered=false, quizOrder=[];
+
+function restartQuiz() {
+  quizOrder = [...QUIZ_POOL].sort(()=>Math.random()-.5).slice(0,20);
+  qIdx=0; qScore=0; qAnswered=false;
+  document.getElementById('quiz-result').classList.remove('show');
+  document.getElementById('quiz-ui').style.display='';
+  renderQuestion();
+}
+
+function renderQuestion() {
+  const q = quizOrder[qIdx];
+  const total = quizOrder.length;
+  document.getElementById('qpf').style.width=((qIdx/total)*100)+'%';
+  document.getElementById('q-count').textContent=`${qIdx+1} / ${total}`;
+  document.getElementById('q-score').textContent=`${qScore} pts`;
+  document.getElementById('q-meta').textContent=q.meta;
+  document.getElementById('q-text').textContent=q.q;
+  const opts = document.getElementById('q-opts');
+  opts.innerHTML='';
+  const letters=['A','B','C','D'];
+  q.opts.forEach((o,i)=>{
+    const btn = document.createElement('button');
+    btn.className='quiz-opt';
+    btn.innerHTML=`<span class="opt-letter">${letters[i]}</span><span>${o}</span>`;
+    btn.onclick=()=>answer(i,q,btn);
+    opts.appendChild(btn);
+  });
+  document.getElementById('q-feedback').className='quiz-feedback';
+  document.getElementById('q-feedback').textContent='';
+  document.getElementById('btn-next').style.display='none';
+  qAnswered=false;
+}
+
+function answer(i, q, btn) {
+  if (qAnswered) return;
+  qAnswered=true;
+  const btns=document.querySelectorAll('.quiz-opt');
+  btns.forEach(b=>b.disabled=true);
+  const fb=document.getElementById('q-feedback');
+  if (i===q.ans) {
+    btn.classList.add('correct');
+    qScore+=5;
+    fb.className='quiz-feedback ok show';
+    fb.textContent='✓ Correto! '+q.exp;
+  } else {
+    btn.classList.add('wrong');
+    btns[q.ans].classList.add('correct');
+    fb.className='quiz-feedback fail show';
+    fb.textContent='✗ Incorreto. '+q.exp;
+  }
+  document.getElementById('q-score').textContent=`${qScore} pts`;
+  document.getElementById('btn-next').style.display='';
+}
+
+function nextQuestion() {
+  qIdx++;
+  if (qIdx>=quizOrder.length) {
+    showResult();
+  } else {
+    renderQuestion();
+  }
+}
+
+function showResult() {
+  document.getElementById('quiz-ui').style.display='none';
+  const r=document.getElementById('quiz-result');
+  r.classList.add('show');
+  const pct=Math.round((qScore/(quizOrder.length*5))*100);
+  document.getElementById('r-score').textContent=`${qScore} / ${quizOrder.length*5} pts`;
+  document.getElementById('r-label').textContent=`Você acertou ${pct}% das questões`;
+  const stars = pct>=90?'⭐⭐⭐':pct>=70?'⭐⭐':pct>=50?'⭐':'';
+  document.getElementById('r-stars').textContent=stars;
+}
+
+// ════════════════════════════════════════════
+// DICAS
+// ════════════════════════════════════════════
+const TIPS = [
+  {cls:'tip-process',label:'Dica – Bloco de Processo',text:'As 3 dimensões do Bloco de Processo compartilham a mesma progressão de bandas: Indefinido → Definido → Digital → Integrado → Automatizado → Inteligente.'},
+  {cls:'tip-tech',label:'Dica – Automação (Banda 5)',text:'A banda 5 "Convergido" nas 3 dimensões de Automação sempre significa convergência entre Chão de Fábrica + Empresarial + Instalação para formar redes autônomas.'},
+  {cls:'tip-tech',label:'Dica – Conectividade',text:'A progressão de Conectividade: Nenhum → Conectado → Interoperável → Interoperável e Seguro → Tempo Real → Escalável. Segurança precede Tempo Real!'},
+  {cls:'tip-tech',label:'Dica – Inteligência',text:'Inteligência usa nomenclatura ÚNICA: 0-Nenhum, 1-Computadorizado, 2-Visível, 3-Diagnóstico, 4-Preditivo, 5-Adaptativo. Não confunda com Automação!'},
+  {cls:'tip-org',label:'Dica – A&D da Força de Trabalho',text:'A&D vai de 0-Informal até 5-Prospectivo. A palavra-chave da banda 5 é "futuro" – a organização antecipa habilidades que ainda não existem.'},
+  {cls:'tip-org',label:'Dica – Estratégia e Governança',text:'E&G mede a maturidade da ESTRATÉGIA: 0-Nenhum → 1-Formalização → 2-Desenvolvimento → 3-Implementação → 4-Escalonamento → 5-Adaptativo.'},
+  {cls:'tip-process',label:'Dica – OT vs TI',text:'OT (Tecnologia Operacional) controla equipamentos físicos no chão de fábrica. TI (Tecnologia da Informação) gerencia dados e processos empresariais. Integração OT/TI é central para o SIRI!'},
+  {cls:'tip-tech',label:'Dica – 3 Pilares de Tecnologia',text:'Cada pilar de Tecnologia tem 3 dimensões paralelas: Shop Floor (Chão de Fábrica) + Enterprise (Empresarial) + Facility (Instalação). Total: 9 dimensões no Bloco de Tecnologia.'},
+  {cls:'tip-org',label:'Dica – Colaboração',text:'Colaboração vai de 0-Informal até 5-Integrado. Palavra-chave: 1-Comunicando, 2-Cooperando, 3-Coordenando, 4-Colaborando, 5-Integrado. Note a progressão crescente de comprometimento.'},
+  {cls:'tip-process',label:'Dica – Integração Vertical',text:'Vertical = integração dentro da fábrica (pirâmide de automação: campo→controle→produção→operações→planejamento). Horizontal = integração com parceiros externos na cadeia de valor.'},
+  {cls:'tip-org',label:'Dica – Competência de Liderança',text:'LC mede INDEPENDÊNCIA: 0-Não Familiar → 1-Limitado → 2-Informado → 3-Semidependente → 4-Independente → 5-Adaptativo. A gestão vai de ignorante a autossuficiente.'},
+  {cls:'tip-tech',label:'Dica – Pirâmide de Automação',text:'A Pirâmide de Automação Industrial tem 5 níveis: Campo (sensores/atuadores), Controle (PLCs/SCADA), Produção (MES), Operações (ERP departamental), Planejamento Empresarial (ERP corporativo).'}
+];
+
+function initTips() {
+  const grid = document.getElementById('tips-grid');
+  TIPS.forEach(t => {
+    const div = document.createElement('div');
+    div.className = `tip-card ${t.cls}`;
+    div.innerHTML = `<div class="tip-label">${t.label}</div><div class="tip-text">${t.text}</div>`;
+    grid.appendChild(div);
+  });
+}
+
+// ════════════════════════════════════════════
+// INIT
+// ════════════════════════════════════════════
+initOverview();
+initBlocksGrid();
+initDimList();
+initFlashcards();
+initTips();
+restartQuiz();
+</script>
+</body>
+</html>
