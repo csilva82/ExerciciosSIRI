@@ -1,1 +1,148 @@
 
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>75 Flashcards - Smart Industry Readiness Index</title>
+    <style>
+        :root {
+            --primary: #002d72; --secondary: #00a1e1; --bg: #f8f9fa; --text: #212529;
+        }
+        body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
+        .header { text-align: center; margin-bottom: 30px; }
+        .header h1 { color: var(--primary); margin: 0; }
+        .container { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; max-width: 1300px; width: 100%; }
+        .card { height: 220px; perspective: 1000px; cursor: pointer; }
+        .card-inner { position: relative; width: 100%; height: 100%; text-align: center; transition: transform 0.6s; transform-style: preserve-3d; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border-radius: 12px; }
+        .card.flipped .card-inner { transform: rotateY(180deg); }
+        .card-front, .card-back { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box; border-radius: 12px; }
+        .card-front { background: linear-gradient(135deg, var(--primary), var(--secondary)); color: white; }
+        .card-back { background: white; color: var(--text); transform: rotateY(180deg); border: 2px solid var(--primary); font-size: 0.9em; overflow-y: auto; }
+        .tag { position: absolute; top: 10px; left: 10px; font-size: 0.7em; background: rgba(255,255,255,0.2); padding: 2px 8px; border-radius: 4px; }
+        .title { font-weight: bold; font-size: 1.1em; margin-top: 10px; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>Mestre da Indústria 4.0 - SIRI</h1>
+        <p>75 Conceitos extraídos dos Manuais Oficiais</p>
+    </div>
+
+    <div class="container" id="flashcards"></div>
+
+    <script>
+        const cards = [
+            // BLOCOS DE CONSTRUÇÃO (3)
+            { cat: "Bloco", t: "Processo", d: "Foca na integração de processos nas Operações, Cadeia de Suprimentos e Ciclo de Vida do Produto." },
+            { cat: "Bloco", t: "Tecnologia", d: "Envolve Automação, Conectividade e Inteligência aplicadas ao chão de fábrica, empresa e instalações." },
+            { cat: "Bloco", t: "Organização", d: "Cobre a prontidão de talentos, estrutura organizacional e gestão estratégica." },
+
+            // PILARES (8)
+            { cat: "Pilar", t: "Operações", d: "Planejamento e execução de processos para produção de bens ao menor custo possível [1]." },
+            { cat: "Pilar", t: "Cadeia de Suprimentos", d: "Gestão do fluxo de materiais da origem ao consumo de forma digital e integrada [2]." },
+            { cat: "Pilar", t: "Ciclo de Vida do Produto", d: "Integra design, engenharia, fabricação e serviços de pós-venda em uma espinha dorsal de dados [3]." },
+            { cat: "Pilar", t: "Automação", d: "Aplicação de tecnologia para monitorar e executar a produção, evoluindo para sistemas flexíveis [4]." },
+            { cat: "Pilar", t: "Conectividade", d: "Estado de interconexão entre equipamentos e sistemas para troca de dados contínua [5]." },
+            { cat: "Pilar", t: "Inteligência", d: "Processamento e análise de dados para gerar insights acionáveis e decisões autônomas [6]." },
+            { cat: "Pilar", t: "Prontidão de Talentos", d: "Capacidade da força de trabalho de impulsionar e entregar iniciativas de Indústria 4.0 [7]." },
+            { cat: "Pilar", t: "Estrutura e Gestão", d: "Sistemas de governança e liderança que suportam a transformação digital e agilidade [8]." },
+
+            // DIMENSÕES (16)
+            { cat: "Dimensão 1", t: "Integração Vertical", d: "Integração de processos em todos os níveis da pirâmide de automação para um fio de dados conectado [9]." },
+            { cat: "Dimensão 2", t: "Integração Horizontal", d: "Integração de processos corporativos com fornecedores, parceiros e clientes na cadeia de valor [10]." },
+            { cat: "Dimensão 3", t: "Ciclo de Vida Integrado", d: "Integração de pessoas e sistemas do design ao descarte, criando uma rede estendida [11]." },
+            { cat: "Dimensão 4", t: "Automação - Chão de Fábrica", d: "Grau e flexibilidade da automação nos processos de produção repetitivos [12]." },
+            { cat: "Dimensão 5", t: "Automação - Empresa", d: "Uso de sistemas para automatizar tarefas administrativas como RH e compras [13]." },
+            { cat: "Dimensão 6", t: "Automação - Instalações", d: "Tecnologia aplicada a sistemas de prédio como HVAC, segurança e iluminação [14]." },
+            { cat: "Dimensão 7", t: "Conectividade - Chão de Fábrica", d: "Interconexão de ativos de produção para troca de dados contínua e segura [15]." },
+            { cat: "Dimensão 8", t: "Conectividade - Empresa", d: "Interconexão de sistemas de TI administrativos para interação fluida [16]." },
+            { cat: "Dimensão 9", t: "Conectividade - Instalações", d: "Interconexão de sistemas prediais para gestão centralizada de dados [17]." },
+            { cat: "Dimensão 10", t: "Inteligência - Chão de Fábrica", d: "Análise de dados de produção para diagnóstico, predição e adaptação autônoma [18]." },
+            { cat: "Dimensão 11", t: "Inteligência - Empresa", d: "Otimização de processos administrativos via análise de dados em larga escala [19]." },
+            { cat: "Dimensão 12", t: "Inteligência - Instalações", d: "Sistemas que predizem falhas em utilidades e ajustam consumo autonomamente [20]." },
+            { cat: "Dimensão 13", t: "L&D da Força de Trabalho", d: "Qualidade dos programas de treinamento para desenvolver competências digitais [21]." },
+            { cat: "Dimensão 14", t: "Competência de Liderança", d: "Prontidão da gestão para liderar a transformação com visão e conhecimento técnico [22]." },
+            { cat: "Dimensão 15", t: "Colaboração Inter/Intra Empresa", d: "Canais formais para equipes cruzadas e parceiros compartilharem metas e recursos [23]." },
+            { cat: "Dimensão 16", t: "Estratégia e Governança", d: "Design e execução de roteiros para traduzir a visão I4.0 em valor de negócio [24]." },
+
+            // CATEGORIAS DE CUSTO (10)
+            { cat: "Custo", t: "Mão de Obra (Labour)", d: "Soma de todos os salários, benefícios e impostos sobre a folha pagos pelo empregador [25]." },
+            { cat: "Custo", t: "Matérias-Primas", d: "Inclui materiais diretos incorporados ao produto e indiretos consumidos na produção [26]." },
+            { cat: "Custo", t: "Utilidades", d: "Custos de eletricidade, gás, água e esgoto necessários para operar a fábrica [27]." },
+            { cat: "Custo", t: "Manutenção e Reparo", d: "Despesas para manter ativos como equipamentos e infraestrutura em boas condições [25]." },
+            { cat: "Custo", t: "SG&A", d: "Despesas operacionais não ligadas diretamente à produção (vendas, marketing, jurídico) [27]." },
+            { cat: "Custo", t: "Depreciação", d: "Representa a porção dos ativos fixos consumida ao longo de um período financeiro [28]." },
+            { cat: "Custo", t: "Pós-Venda e Garantia", d: "Despesas esperadas para reparo ou substituição de bens vendidos [28]." },
+            { cat: "Custo", t: "P&D (R&D)", d: "Despesas com atividades de desenvolvimento de novos produtos ou melhoria de processos [26]." },
+            { cat: "Custo", t: "Aluguel e Leasing", d: "Custos associados ao uso de ativos que a empresa não possui (prédios, máquinas) [26]." },
+            { cat: "Custo", t: "Transporte e Distribuição", d: "Despesas de movimentação de bens de fornecedores e para clientes [27]." },
+
+            // CATEGORIAS DE KPI (14)
+            { cat: "KPI", t: "Eficiência de Ativos", d: "Mede o OEE, frequência de paradas não planejadas e vida útil dos equipamentos [29]." },
+            { cat: "KPI", t: "Eficiência da Força de Trabalho", d: "Avalia a produtividade do trabalho e eficácia do treinamento por funcionário [30]." },
+            { cat: "KPI", t: "Eficiência de Utilidades", d: "Mede consumo de energia/água e emissões por unidade produzida [31]." },
+            { cat: "KPI", t: "Eficiência de Inventário", d: "Foca na redução de capital imobilizado e otimização do espaço de estoque [32]." },
+            { cat: "KPI", t: "Eficiência de Materiais", d: "Mede desperdício e a capacidade de produzir mais com menos insumos brutos [33]." },
+            { cat: "KPI", t: "Qualidade do Processo", d: "Resiliência dos processos para manter especificações e minimizar desvios [34]." },
+            { cat: "KPI", t: "Qualidade do Produto", d: "Foco na redução de taxas de defeitos e falhas após a venda [34]." },
+            { cat: "KPI", t: "Segurança (Safety)", d: "Rastreia incidentes de saúde e segurança no ambiente de trabalho [35]." },
+            { cat: "KPI", t: "Segurança Cibernética (Security)", d: "Mede violações físicas ou digitais e a resiliência contra malware/ataques [36]." },
+            { cat: "KPI", t: "Planejamento e Agendamento", d: "Proficiência em lidar com volatilidade de demanda via visibilidade total [37]." },
+            { cat: "KPI", t: "Flexibilidade de Produção", d: "Capacidade de reconfigurar máquinas para múltiplos SKUs rapidamente [38]." },
+            { cat: "KPI", t: "Flexibilidade da Força de Trabalho", d: "Capacidade dos funcionários de realizar múltiplas funções em períodos de pico [39]." },
+            { cat: "KPI", t: "Time to Market", d: "Tempo necessário para conceber, desenvolver e lançar um novo produto no mercado [40]." },
+            { cat: "KPI", t: "Time to Delivery", d: "Tempo entre a iniciação do pedido e a entrega final ao cliente [41]." },
+
+            // GLOSSÁRIO E FRAMEWORKS (24)
+            { cat: "Framework", t: "LEAD - Passo 1: Aprender", d: "Construir uma linguagem comum e entender os conceitos da Indústria 4.0 [42]." },
+            { cat: "Framework", t: "LEAD - Passo 2: Avaliar", d: "Usar a Matriz SIRI para diagnosticar o estado de maturidade atual da fábrica [42]." },
+            { cat: "Framework", t: "LEAD - Passo 3: Arquitetar", d: "Desenvolver uma estratégia abrangente e roteiro de implementação [42]." },
+            { cat: "Framework", t: "LEAD - Passo 4: Entregar", d: "Executar iniciativas para gerar impacto financeiro e sustentar a transformação [42]." },
+            { cat: "Framework", t: "TIER - T (Today's State)", d: "Princípio de entender a maturidade atual da empresa antes de priorizar [43]." },
+            { cat: "Framework", t: "TIER - I (Impact to Bottom Line)", d: "Analisar quais melhorias trazem o maior retorno financeiro direto [44]." },
+            { cat: "Framework", t: "TIER - E (Essential Business Objectives)", d: "Alinhar investimentos aos objetivos estratégicos da organização [43]." },
+            { cat: "Framework", t: "TIER - R (References to Community)", d: "Aprender com benchmarks de outras empresas e melhores da categoria [43]." },
+            { cat: "Glossário", t: "Digital Twin (Gêmeo Digital)", d: "Réplica digital dinâmica de ativos físicos e sistemas que espelha e prevê desempenho [45]." },
+            { cat: "Glossário", t: "Interoperabilidade", d: "Capacidade de dois ou mais sistemas trocarem e usarem informações sem restrições [46]." },
+            { cat: "Glossário", t: "Cyber-Physical Systems (CPS)", d: "Sistemas que ligam objetos físicos com elementos digitais via redes abertas [47]." },
+            { cat: "Glossário", t: "IIoT", d: "Aplicação da Internet das Coisas em setores industriais como manufatura e óleo/gás [48]." },
+            { cat: "Glossário", t: "Nível 0 da Pirâmide", d: "Nível de campo onde sensores e atuadores interagem com o processo físico [49]." },
+            { cat: "Glossário", t: "Nível 4 da Pirâmide", d: "Nível de planejamento empresarial onde ERPs gerenciam ordens de produção [50]." },
+            { cat: "Glossário", t: "Digitalização", d: "Uso de tecnologias digitais para mudar modelos de negócio e gerar novas receitas [51]." },
+            { cat: "Glossário", t: "Big Data", d: "Dados com volume e velocidade que exigem novas tecnologias para extrair valor [52]." },
+            { cat: "Glossário", t: "Fábrica Inteligente", d: "Instalação onde a integração permite auto-organização e auto-otimização [53]." },
+            { cat: "Glossário", t: "Convergência IT/OT", d: "Integração de sistemas de TI (dados) com OT (controle de dispositivos físicos) [46]." },
+            { cat: "Conceito", t: "Banda 0: Indefinido", d: "Nível de maturidade onde processos não são explicitamente definidos ou são ad-hoc [54]." },
+            { cat: "Conceito", t: "Banda 1: Definido", d: "Processos definidos e executados por humanos com suporte de ferramentas analógicas (papel) [54]." },
+            { cat: "Conceito", t: "Banda 2: Digital", d: "Processos digitais executados por humanos; uso de ferramentas IT/OT em silos [55]." },
+            { cat: "Conceito", t: "Banda 3: Integrado", d: "Sistemas digitais são formalmente vinculados; silos são quebrados para troca de dados [55]." },
+            { cat: "Conceito", t: "Banda 4: Automatizado", d: "Troca de dados ocorre entre máquinas e sistemas com intervenção humana limitada [56]." },
+            { cat: "Conceito", t: "Banda 5: Inteligente", d: "Sistemas analisam dados e reagem autonomamente para otimizar processos [57]." }
+        ];
+
+        const container = document.getElementById('flashcards');
+
+        cards.forEach((item, index) => {
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.onclick = () => card.classList.toggle('flipped');
+            
+            card.innerHTML = `
+                <div class="card-inner">
+                    <div class="card-front">
+                        <span class="tag">${item.cat} (${index + 1}/75)</span>
+                        <div class="title">${item.t}</div>
+                    </div>
+                    <div class="card-back">
+                        <strong>DEFINIÇÃO:</strong><br>
+                        <p>${item.d}</p>
+                    </div>
+                </div>
+            `;
+            container.appendChild(card);
+        });
+    </script>
+</body>
+</html>
